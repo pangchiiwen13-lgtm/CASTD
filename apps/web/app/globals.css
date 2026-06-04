@@ -5,11 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Fonts */
-  --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
+  /* Fonts — Inter for body/UI, Syne for display headings */
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-syne);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-display);
+  --font-heading: var(--font-syne);
 
   /* Brand color aliases for Tailwind utilities */
   --color-ink: #0C0C0C;
@@ -104,18 +104,25 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-sans), 'Plus Jakarta Sans', system-ui, sans-serif;
-  }
 }
 
-/* Outside @layer so it wins over utilities — brand heading font */
+/* Brand CSS reset — outside @layer for highest precedence */
+body {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #0C0C0C;
+  font-size: 16px;
+  line-height: 1.6;
+  background-color: #ffffff;
+}
+
 h1, h2, h3 {
-  font-family: var(--font-display), 'Syne', system-ui, sans-serif !important;
+  font-family: var(--font-syne), Syne, system-ui, sans-serif !important;
   letter-spacing: -0.02em;
 }
 
 .font-display {
-  font-family: var(--font-display), 'Syne', system-ui, sans-serif !important;
+  font-family: var(--font-syne), Syne, system-ui, sans-serif !important;
 }

@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
-import { Syne, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Syne } from "next/font/google";
 import "./globals.css";
 
+// Body / UI font — Inter (designed for screen readability)
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+// Display / Headline font — Syne (H1–H3, wordmark only)
 const syne = Syne({
   subsets: ["latin"],
   weight: ["700", "800"],
-  variable: "--font-display",
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-sans",
+  variable: "--font-syne",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +26,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className={`${syne.variable} ${plusJakartaSans.variable} font-sans min-h-full flex flex-col bg-background text-foreground`}>
+      <body className={`${inter.variable} ${syne.variable} min-h-full flex flex-col bg-background text-foreground`}>
         {children}
       </body>
     </html>
