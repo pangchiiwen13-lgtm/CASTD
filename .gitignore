@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Env files — NEVER commit real credentials
+apps/api/.env
+apps/web/.env.local
+apps/web/.env*.local
+**/.env.local
+
+# Node
+node_modules/
+.pnpm-debug.log*
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Build
+dist/
+build/
+
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+uvicorn*.log
+
+# Test caches
+.pytest_cache/
+htmlcov/
+
+# TypeScript
+*.tsbuildinfo
