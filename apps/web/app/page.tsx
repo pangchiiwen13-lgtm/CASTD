@@ -26,11 +26,11 @@ export default function LandingPage() {
         </h1>
         <p className="text-[#7A7A7A] text-lg max-w-xl leading-relaxed">
           CASTD connects Singapore brands and marketing agencies with vetted beauty and lifestyle
-          talents — ready for your next campaign.
+          talents. Ready for your next campaign.
         </p>
         <div className="flex flex-wrap gap-4 mt-2 justify-center">
           <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "bg-[#FFD200] text-[#0C0C0C] hover:bg-[#FFD200]/90 font-semibold h-12 px-8")}>
-            Browse talent — it&apos;s free
+            Browse talent. It&apos;s free.
           </Link>
           <Link href="/catalog" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "h-12 px-8 border-[#EBEBEB]")}>
             View catalog
@@ -59,7 +59,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { step: "1", title: "Browse", desc: "Filter talents by content type, language, vibe, and more. All profiles are free to view." },
-              { step: "2", title: "Shortlist & Inquire", desc: "Save your favourites and submit a campaign brief — completely free, no commitment." },
+              { step: "2", title: "Shortlist & Inquire", desc: "Save your favourites and submit a campaign brief. Free, no commitment." },
               { step: "3", title: "Confirm & Go", desc: "Found the right talent? Confirm to secure the contact. Pay only at this step." },
             ].map((item) => (
               <div key={item.step} className="flex flex-col gap-3">

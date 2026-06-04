@@ -37,7 +37,7 @@ export default function SignupPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="text-2xl font-bold tracking-tight mb-1">CASTD</div>
-          <p className="text-muted-foreground text-sm">Create your brand account — free to start</p>
+          <p className="text-muted-foreground text-sm">Create your brand account. Free to start.</p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid gap-1">

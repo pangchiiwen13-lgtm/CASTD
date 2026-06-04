@@ -69,38 +69,110 @@ The palette is built on **high contrast and restraint**. Three core colors do al
 
 ### Typeface Pairings
 
-**Display / Headlines — [Syne](https://fonts.google.com/specimen/Syne)**
-- Weights: Bold (700), ExtraBold (800)
-- Use: Hero H1s, section titles, feature callouts
-- Character: Geometric, irregular letterforms — editorial energy without being styled. It feels like a casting billboard.
-- Google Fonts: `font-family: 'Syne', sans-serif`
+Two fonts. One for impact, one for reading. Do not introduce a third.
 
-**Body / UI — [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans)**
-- Weights: Regular (400), Medium (500), SemiBold (600)
-- Use: All body copy, UI labels, navigation, forms, cards
-- Character: Modern humanist sans. Readable at small sizes, personality at large sizes.
-- Google Fonts: `font-family: 'Plus Jakarta Sans', sans-serif`
+---
+
+**Display / Headlines — [Syne](https://fonts.google.com/specimen/Syne)**
+- Weights used: Bold (700), ExtraBold (800)
+- Role: Hero headings, section titles, feature callouts, the wordmark
+- Character: Geometric with subtly irregular letterforms — bold, editorial, billboard energy. Use only at 24px and above.
+- Google Fonts import: `font-family: 'Syne', sans-serif`
+- Tailwind class: `font-display`
+
+> ⚠️ **Do not use Syne for body copy, form labels, or any text below 24px.** Its geometric construction hurts readability at small sizes.
+
+---
+
+**Body / UI — [Inter](https://fonts.google.com/specimen/Inter)**
+- Weights used: Regular (400), Medium (500), SemiBold (600)
+- Role: All body copy, UI labels, navigation, buttons, forms, cards, data tables
+- Character: Designed specifically for screen readability. Excellent letter-spacing, open apertures, and optical size tuning across all weights. Used by Linear, Vercel, Stripe, and most high-quality SaaS products. Renders crisply on every OS and screen density.
+- Google Fonts import: `font-family: 'Inter', sans-serif`
+- Tailwind class: `font-sans`
+- Variable font: Use `Inter var` via `@fontsource/inter` for automatic optical sizing — include `font-optical-sizing: auto` in the CSS reset.
+
+> ✅ **Inter is the default for everything the user reads.** When in doubt, use Inter.
+
+---
 
 ### Type Scale
 
-| Role | Font | Size | Weight | Line Height |
-|------|------|------|--------|-------------|
-| Display XL | Syne | 72px / 4.5rem | 800 | 1.0 |
-| H1 | Syne | 48px / 3rem | 800 | 1.05 |
-| H2 | Syne | 36px / 2.25rem | 700 | 1.1 |
-| H3 | Syne | 24px / 1.5rem | 700 | 1.2 |
-| H4 | Plus Jakarta Sans | 20px / 1.25rem | 600 | 1.3 |
-| Body LG | Plus Jakarta Sans | 18px / 1.125rem | 400 | 1.6 |
-| Body | Plus Jakarta Sans | 16px / 1rem | 400 | 1.6 |
-| Body SM | Plus Jakarta Sans | 14px / 0.875rem | 400 | 1.5 |
-| Label | Plus Jakarta Sans | 12px / 0.75rem | 600 | 1.4 |
-| Caption | Plus Jakarta Sans | 11px / 0.6875rem | 500 | 1.4 |
+| Role | Font | Size | Weight | Line Height | Letter Spacing | Color |
+|------|------|------|--------|-------------|----------------|-------|
+| Display XL | Syne | 72px / 4.5rem | 800 | 1.0 | -0.02em | `#0C0C0C` or `#FFFFFF` |
+| H1 | Syne | 48px / 3rem | 800 | 1.05 | -0.02em | `#0C0C0C` or `#FFFFFF` |
+| H2 | Syne | 36px / 2.25rem | 700 | 1.1 | -0.01em | `#0C0C0C` |
+| H3 | Syne | 24px / 1.5rem | 700 | 1.2 | 0 | `#0C0C0C` |
+| H4 | Inter | 20px / 1.25rem | 600 | 1.3 | 0 | `#0C0C0C` |
+| Body LG | Inter | 18px / 1.125rem | 400 | 1.65 | 0 | `#0C0C0C` |
+| Body | Inter | 16px / 1rem | 400 | 1.6 | 0 | `#0C0C0C` |
+| Body SM | Inter | 14px / 0.875rem | 400 | 1.55 | 0 | `#2A2A2A` |
+| Label / Badge | Inter | 12px / 0.75rem | 600 | 1.4 | +0.04em | `#0C0C0C` |
+| Caption | Inter | 11px / 0.6875rem | 500 | 1.4 | +0.02em | `#7A7A7A` |
+
+> **Line height note:** Use `1.6` minimum for body text. Tight line heights (≤ 1.4) are reserved for large display type only. Cramped line height is the single most common cause of hard-to-read body text.
+
+---
+
+### Contrast Requirements (WCAG AA minimum — mandatory)
+
+| Text type | Min contrast ratio | Passing combos |
+|-----------|-------------------|----------------|
+| Body text (≥ 16px) | 4.5 : 1 | `#0C0C0C` on `#FFFFFF` ✅ (21:1) · `#0C0C0C` on `#F8F7F4` ✅ (19:1) |
+| Large text (≥ 24px bold) | 3 : 1 | `#0C0C0C` on `#FFD200` ✅ (11:1) |
+| Body on dark panels | 4.5 : 1 | `#FFFFFF` on `#0C0C0C` ✅ (21:1) |
+| Captions / secondary | 4.5 : 1 | `#7A7A7A` on `#FFFFFF` ✅ (4.6:1) |
+
+> ❌ **Never use `#7A7A7A` on `#F8F7F4`** — contrast drops to ~3.8:1, failing WCAG AA for body text.
+> ❌ **Never use light grey text (`#ABABAB` or lighter) on white** — common failure point.
+
+---
 
 ### Typography Rules
-1. **Headings are sentence case, never ALL CAPS** — except Labels and status badges.
-2. **Letter-spacing on display type** — apply `tracking-tight` (-0.02em) on H1+ to avoid Syne's letterforms reading loose at size.
-3. **Minimum body size is 14px** — talent profiles and inquiry forms must never drop below this.
-4. **Brand name is always CASTD** — all caps, no exceptions, no lowercase version.
+
+1. **Inter for everything below H3.** If it's smaller than 24px, it uses Inter — no exceptions.
+2. **Syne for display and branding only.** Headings H1–H3, the wordmark, and large callout numbers.
+3. **Headings are sentence case, never ALL CAPS** — except Labels (`font-size: 12px`) and status badges.
+4. **Negative tracking on display type.** Apply `letter-spacing: -0.02em` on H1+. Syne's letterforms read loose at large sizes without it.
+5. **Positive tracking on small labels.** Apply `letter-spacing: +0.04em` on Labels (12px) to improve legibility at small size.
+6. **Minimum rendered body size is 14px.** Talent profiles, inquiry forms, data tables — nothing smaller.
+7. **Brand name is always CASTD** — all caps, no exceptions, no lowercase version.
+8. **Do not set body text in medium (500) weight.** Use Regular (400) for body, SemiBold (600) for emphasis. Medium weight at body sizes creates visual muddiness.
+
+---
+
+### Google Fonts Import (copy into `<head>`)
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+```
+
+### NPM Alternative (recommended for Next.js — avoids layout shift)
+
+```bash
+npm install @next/font
+```
+
+```js
+// app/layout.tsx
+import { Inter, Syne } from 'next/font/google'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const syne = Syne({
+  subsets: ['latin'],
+  weight: ['700', '800'],
+  variable: '--font-syne',
+  display: 'swap',
+})
+```
 
 ---
 
@@ -194,7 +266,7 @@ This is the product. Every talent photo must:
 | Ghost | Transparent | `#0C0C0C` | Tertiary actions, nav links |
 | Outline | Transparent + border | `#0C0C0C` | Filters, toggles |
 
-Button sizing: `height: 44px` (mobile), `height: 40px` (desktop). Border radius: `6px`. Font: Plus Jakarta Sans SemiBold 15px.
+Button sizing: `height: 44px` (mobile), `height: 40px` (desktop). Border radius: `6px`. Font: Inter SemiBold 15px.
 
 ### Cards (Talent Cards)
 - White background, `1px #EBEBEB` border, `border-radius: 12px`
@@ -208,7 +280,7 @@ Button sizing: `height: 44px` (mobile), `height: 40px` (desktop). Border radius:
 
 ### Fit Score Badge
 - Background: `#FFD200`
-- Text: `#0C0C0C`, Plus Jakarta Sans SemiBold
+- Text: `#0C0C0C`, Inter SemiBold
 - Format: `94 Match` — score first, then label
 - Position: top-right corner of talent card, `border-radius: 6px`
 
@@ -216,7 +288,7 @@ Button sizing: `height: 44px` (mobile), `height: 40px` (desktop). Border radius:
 - Input height: 44px
 - Border: `1px solid #EBEBEB`, focus: `2px solid #FFD200`
 - Error state: `1px solid #EF4444` + helper text below
-- Label: Plus Jakarta Sans Medium 13px, `color: #2A2A2A`
+- Label: Inter Medium 13px, `color: #2A2A2A`
 
 ---
 
@@ -276,28 +348,71 @@ No bounces, no springs, no entrance animations on body copy. Animation is for st
 
 ```js
 // tailwind.config.js — CASTD design tokens
-colors: {
-  primary: '#FFD200',
-  ink: {
-    DEFAULT: '#0C0C0C',
-    80: '#2A2A2A',
-    50: '#7A7A7A',
-    10: '#EBEBEB',
+const { fontFamily } = require('tailwindcss/defaultTheme')
+
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#FFD200',
+        ink: {
+          DEFAULT: '#0C0C0C',
+          80: '#2A2A2A',
+          50: '#7A7A7A',
+          10: '#EBEBEB',
+        },
+        surface: '#F8F7F4',
+        'yellow-tint': '#FFF9DB',
+      },
+      fontFamily: {
+        // Inter — body, UI, all text below H3
+        sans: ['var(--font-inter)', 'Inter', ...fontFamily.sans],
+        // Syne — display headings, wordmark only
+        display: ['var(--font-syne)', 'Syne', ...fontFamily.sans],
+      },
+      fontSize: {
+        // Matches the CASTD type scale exactly
+        'display-xl': ['4.5rem',  { lineHeight: '1.0',  letterSpacing: '-0.02em', fontWeight: '800' }],
+        'h1':         ['3rem',    { lineHeight: '1.05', letterSpacing: '-0.02em', fontWeight: '800' }],
+        'h2':         ['2.25rem', { lineHeight: '1.1',  letterSpacing: '-0.01em', fontWeight: '700' }],
+        'h3':         ['1.5rem',  { lineHeight: '1.2',  letterSpacing: '0',       fontWeight: '700' }],
+        'h4':         ['1.25rem', { lineHeight: '1.3',  letterSpacing: '0',       fontWeight: '600' }],
+        'body-lg':    ['1.125rem',{ lineHeight: '1.65', letterSpacing: '0',       fontWeight: '400' }],
+        'body':       ['1rem',    { lineHeight: '1.6',  letterSpacing: '0',       fontWeight: '400' }],
+        'body-sm':    ['0.875rem',{ lineHeight: '1.55', letterSpacing: '0',       fontWeight: '400' }],
+        'label':      ['0.75rem', { lineHeight: '1.4',  letterSpacing: '0.04em',  fontWeight: '600' }],
+        'caption':    ['0.6875rem',{ lineHeight: '1.4', letterSpacing: '0.02em',  fontWeight: '500' }],
+      },
+      borderRadius: {
+        sm:      '4px',
+        DEFAULT: '6px',
+        md:      '8px',
+        lg:      '12px',
+        full:    '9999px',
+      },
+    },
   },
-  surface: '#F8F7F4',
-  'yellow-tint': '#FFF9DB',
-},
-fontFamily: {
-  display: ['Syne', 'sans-serif'],
-  sans: ['Plus Jakarta Sans', 'sans-serif'],
-},
-borderRadius: {
-  sm: '4px',
-  DEFAULT: '6px',
-  md: '8px',
-  lg: '12px',
-  full: '9999px',
-},
+}
+```
+
+### CSS Reset additions (add to `globals.css`)
+
+```css
+/* Ensure Inter renders with optical sizing on all platforms */
+body {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #0C0C0C;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-syne), Syne, sans-serif;
+  letter-spacing: -0.02em;
+}
 ```
 
 ---

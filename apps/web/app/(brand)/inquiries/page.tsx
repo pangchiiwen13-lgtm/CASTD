@@ -68,7 +68,7 @@ export default function InquiriesPage() {
                   <Button size="sm" className="mt-2 self-start" onClick={() => handleConfirm(inquiry.id)}>Confirm this talent →</Button>
                 )}
                 {inquiry.status === "confirmed" && (
-                  <p className="text-sm text-green-700 font-medium mt-1">Talent confirmed — we'll be in touch shortly.</p>
+                  <p className="text-sm text-green-700 font-medium mt-1">Talent confirmed. We'll be in touch shortly.</p>
                 )}
               </CardContent>
             </Card>

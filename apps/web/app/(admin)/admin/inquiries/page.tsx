@@ -70,7 +70,7 @@ export default function AdminInquiriesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Inquiries</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">All brand inquiries — update status to move them through the pipeline.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">All brand inquiries. Update status to move them through the pipeline.</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchAll}>Refresh</Button>
       </div>

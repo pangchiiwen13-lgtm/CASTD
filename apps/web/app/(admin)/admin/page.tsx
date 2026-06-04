@@ -37,10 +37,10 @@ export default function AdminDashboard() {
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Talents", value: stats?.talents.total, sub: `${stats?.talents.published ?? "—"} published` },
+          { label: "Talents", value: stats?.talents.total, sub: `${stats?.talents.published ?? 0} published` },
           { label: "Drafts", value: stats?.talents.draft, sub: "unpublished" },
           { label: "Brands", value: stats?.brands.total, sub: "signed up" },
-          { label: "Inquiries", value: stats?.inquiries.total, sub: `${stats?.inquiries.open ?? "—"} open` },
+          { label: "Inquiries", value: stats?.inquiries.total, sub: `${stats?.inquiries.open ?? 0} open` },
         ].map((s) => (
           <div key={s.label} className="border rounded-lg px-4 py-3">
             {stats ? (

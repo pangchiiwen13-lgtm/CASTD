@@ -40,7 +40,7 @@ export function InquiryDialog({ talent, onClose }: Props) {
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>Inquiry — {talent.name}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Inquiry: {talent.name}</DialogTitle></DialogHeader>
         <div className="flex flex-col gap-4 py-2">
           <div className="grid gap-1">
             <Label>Campaign name *</Label>
