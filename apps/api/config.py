@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     database_url: str
-    stack_secret_server_key: str  # Neon Auth / Stack Auth server key
+    stack_secret_server_key: str = ""  # Neon Auth — legacy, not actively used
     stripe_secret_key: str
     stripe_webhook_secret: str
     stripe_price_id_monthly: str  # $15/month price ID from Stripe
