@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from database import get_pool, close_pool
 from config import settings
+from auth import get_admin_user
 from routers import talents, brands, inquiries, shortlists, confirmations
 
 
@@ -36,8 +37,7 @@ async def health():
 
 
 @app.get("/admin/stats")
-async def admin_stats(_: dict = __import__("fastapi").Depends(__import__("auth").get_admin_user)):
-    from database import get_pool
+async def admin_stats(_: dict = Depends(get_admin_user)):
     pool = await get_pool()
     async with pool.acquire() as conn:
         talent_total = await conn.fetchval("SELECT COUNT(*) FROM talents")

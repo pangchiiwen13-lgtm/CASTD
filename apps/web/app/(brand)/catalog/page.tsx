@@ -20,9 +20,15 @@ export default function CatalogPage() {
   const [filters, setFilters] = useState<Filters>({ content_type: "", language: "", gender: "", sort_by: "name" });
   const [brandProfile, setBrandProfile] = useState<Brand | null | "loading">("loading");
 
+  // Redirect if not logged in; fetch shortlist + check brand profile once on login
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
-    if (session) { fetchTalents(); fetchShortlist(); checkBrandProfile(); }
+    if (session) { fetchShortlist(); checkBrandProfile(); }
+  }, [session, isPending]);
+
+  // Re-fetch talents whenever session or filters change
+  useEffect(() => {
+    if (session) fetchTalents();
   }, [session, isPending, filters]);
 
   async function getToken() {
