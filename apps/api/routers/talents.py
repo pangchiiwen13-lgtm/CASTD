@@ -16,6 +16,7 @@ async def list_talents(
     age_min: int | None = Query(None),
     age_max: int | None = Query(None),
     vibe: str | None = Query(None),
+    search: str | None = Query(None, description="Search by name or IG handle"),
     sort_by: str | None = Query(None, description="fit_score | name | followers"),
     user: dict = Depends(get_current_user),
 ):
@@ -47,6 +48,10 @@ async def list_talents(
     if vibe:
         conditions.append(f"${i} = ANY(t.vibe_tags)")
         params.append(vibe)
+        i += 1
+    if search:
+        conditions.append(f"(t.name ILIKE ${i} OR t.ig_handle ILIKE ${i} OR t.ig_username ILIKE ${i})")
+        params.append(f"%{search}%")
         i += 1
 
     where = " AND ".join(conditions)

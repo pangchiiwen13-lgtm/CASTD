@@ -17,7 +17,7 @@ export default function CatalogPage() {
   const [talents, setTalents] = useState<Talent[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<Filters>({ content_type: "", language: "", gender: "", sort_by: "name" });
+  const [filters, setFilters] = useState<Filters>({ content_type: "", language: "", gender: "", sort_by: "name", search: "" });
   const [brandProfile, setBrandProfile] = useState<Brand | null | "loading">("loading");
 
   // Redirect if not logged in; fetch shortlist + check brand profile once on login
@@ -54,6 +54,7 @@ export default function CatalogPage() {
       if (filters.language) params.language = filters.language;
       if (filters.gender) params.gender = filters.gender;
       if (filters.sort_by) params.sort_by = filters.sort_by;
+      if (filters.search) params.search = filters.search;
       setTalents(await api.getTalents(params, token));
     } finally { setLoading(false); }
   }

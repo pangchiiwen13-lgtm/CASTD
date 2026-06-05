@@ -1,13 +1,16 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export interface Filters {
   content_type: string;
   language: string;
   gender: string;
   sort_by: string;
+  search: string;
 }
 
 interface Props {
@@ -20,13 +23,54 @@ const LANGUAGES = ["English", "Mandarin", "Malay", "Tamil"];
 const GENDERS = ["Female", "Male", "Non-binary"];
 
 export function FilterPanel({ filters, onChange }: Props) {
+  // Local state for the search input so it reflects typing immediately
+  const [localSearch, setLocalSearch] = useState(filters.search);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync if parent clears the filter externally (e.g. Clear button)
+  useEffect(() => {
+    if (filters.search !== localSearch && filters.search === "") {
+      setLocalSearch("");
+    }
+  }, [filters.search]);
+
+  function handleSearch(val: string) {
+    setLocalSearch(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      onChange({ ...filters, search: val });
+    }, 350);
+  }
+
   const set = (key: keyof Filters) => (val: string | null) =>
     onChange({ ...filters, [key]: !val || val === "all" ? "" : val });
 
-  const hasFilters = Object.values(filters).some((v) => v && v !== "name");
+  const hasFilters =
+    filters.content_type ||
+    filters.language ||
+    filters.gender ||
+    (filters.sort_by && filters.sort_by !== "name") ||
+    filters.search ||
+    localSearch;
+
+  function handleClear() {
+    setLocalSearch("");
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    onChange({ content_type: "", language: "", gender: "", sort_by: "name", search: "" });
+  }
 
   return (
     <div className="flex flex-wrap gap-3 items-end">
+      <div className="flex flex-col gap-1">
+        <Label className="text-xs text-muted-foreground">Search</Label>
+        <Input
+          value={localSearch}
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Name or @handle"
+          className="w-44 h-8 text-sm"
+        />
+      </div>
+
       <div className="flex flex-col gap-1">
         <Label className="text-xs text-muted-foreground">Content type</Label>
         <Select value={filters.content_type || "all"} onValueChange={set("content_type")}>
@@ -73,12 +117,7 @@ export function FilterPanel({ filters, onChange }: Props) {
       </div>
 
       {hasFilters && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8"
-          onClick={() => onChange({ content_type: "", language: "", gender: "", sort_by: "name" })}
-        >
+        <Button variant="ghost" size="sm" className="h-8" onClick={handleClear}>
           Clear
         </Button>
       )}

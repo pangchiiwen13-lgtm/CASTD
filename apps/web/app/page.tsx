@@ -32,8 +32,8 @@ export default function LandingPage() {
           <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "bg-[#FFD200] text-[#0C0C0C] hover:bg-[#FFD200]/90 font-semibold h-12 px-8")}>
             Browse talent. It&apos;s free.
           </Link>
-          <Link href="/catalog" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "h-12 px-8 border-[#EBEBEB]")}>
-            View catalog
+          <Link href="/login" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "h-12 px-8 border-[#EBEBEB]")}>
+            Sign in
           </Link>
         </div>
 

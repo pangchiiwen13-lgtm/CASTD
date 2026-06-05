@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import { getSessionToken } from "@/lib/get-token";
-import { api, type Talent } from "@/lib/api";
+import { type Talent } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,8 @@ export default function AdminTalentsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Talent | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Talent | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -43,6 +45,18 @@ export default function AdminTalentsPage() {
     setTalents((list) =>
       list.map((t) => t.id === talent.id ? { ...t, is_published: !t.is_published } : t)
     );
+  }
+
+  async function deleteTalent(talent: Talent) {
+    setDeleting(true);
+    const token = getSessionToken() || "";
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/talents/${talent.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setTalents((list) => list.filter((t) => t.id !== talent.id));
+    setConfirmDelete(null);
+    setDeleting(false);
   }
 
   return (
@@ -78,6 +92,9 @@ export default function AdminTalentsPage() {
                 <Button size="sm" variant="ghost" onClick={() => togglePublish(t)}>
                   {t.is_published ? "Unpublish" : "Publish"}
                 </Button>
+                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setConfirmDelete(t)}>
+                  Delete
+                </Button>
               </div>
             </div>
           ))}
@@ -91,6 +108,26 @@ export default function AdminTalentsPage() {
           onSaved={() => { setShowForm(false); fetchAll(); }}
           getToken={() => Promise.resolve(getSessionToken() || "")}
         />
+      )}
+
+      {/* Delete confirmation */}
+      {confirmDelete && (
+        <Dialog open onOpenChange={() => setConfirmDelete(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Delete talent?</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground py-2">
+              This will permanently delete <span className="font-semibold text-foreground">{confirmDelete.name}</span> and cannot be undone.
+            </p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => deleteTalent(confirmDelete)} disabled={deleting}>
+                {deleting ? "Deleting..." : "Delete"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
@@ -113,6 +150,7 @@ function TalentForm({ initial, onClose, onSaved, getToken }: {
     ig_handle: initial?.ig_handle || "",
     tiktok_handle: initial?.tiktok_handle || "",
     ig_followers: initial?.ig_followers?.toString() || "0",
+    tiktok_followers: initial?.tiktok_followers?.toString() || "0",
     bio: initial?.bio || "",
     experience_summary: initial?.experience_summary || "",
     photo_urls: initial?.photo_urls?.join("\n") || "",
@@ -138,6 +176,7 @@ function TalentForm({ initial, onClose, onSaved, getToken }: {
         ig_handle: form.ig_handle || undefined,
         tiktok_handle: form.tiktok_handle || undefined,
         ig_followers: parseInt(form.ig_followers) || 0,
+        tiktok_followers: parseInt(form.tiktok_followers) || 0,
         bio: form.bio || undefined,
         experience_summary: form.experience_summary || undefined,
         photo_urls: form.photo_urls.split("\n").map((s) => s.trim()).filter(Boolean),
@@ -201,8 +240,16 @@ function TalentForm({ initial, onClose, onSaved, getToken }: {
             <Input value={form.ig_handle} onChange={set("ig_handle")} placeholder="@handle" />
           </div>
           <div className="grid gap-1">
+            <Label>TikTok handle</Label>
+            <Input value={form.tiktok_handle} onChange={set("tiktok_handle")} placeholder="@handle" />
+          </div>
+          <div className="grid gap-1">
             <Label>IG followers</Label>
             <Input type="number" value={form.ig_followers} onChange={set("ig_followers")} />
+          </div>
+          <div className="grid gap-1">
+            <Label>TikTok followers</Label>
+            <Input type="number" value={form.tiktok_followers} onChange={set("tiktok_followers")} />
           </div>
           <div className="grid gap-1 col-span-2">
             <Label>Bio</Label>
