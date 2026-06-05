@@ -27,12 +27,12 @@ async def create_brand(data: BrandCreate, user: dict = Depends(get_current_user)
             raise HTTPException(status_code=409, detail="Brand profile already exists")
         row = await conn.fetchrow(
             """
-            INSERT INTO brands (user_id, company_name, industry, brand_values,
+            INSERT INTO brands (user_id, email, company_name, industry, brand_values,
               aesthetic_tags, target_audience, campaign_type)
-            VALUES ($1,$2,$3,$4,$5,$6,$7)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
             RETURNING *
             """,
-            user["id"], data.company_name, data.industry,
+            user["id"], user.get("email", ""), data.company_name, data.industry,
             data.brand_values, data.aesthetic_tags,
             json.dumps(data.target_audience), data.campaign_type,
         )

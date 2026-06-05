@@ -16,6 +16,7 @@ class TalentBase(BaseModel):
     tiktok_handle: Optional[str] = None
     ig_followers: int = 0
     tiktok_followers: int = 0
+    email: Optional[str] = None
     bio: Optional[str] = None
     experience_summary: Optional[str] = None
     rate_card_text: Optional[str] = None
@@ -42,6 +43,7 @@ class TalentUpdate(BaseModel):
     tiktok_handle: Optional[str] = None
     ig_followers: Optional[int] = None
     tiktok_followers: Optional[int] = None
+    email: Optional[str] = None
     bio: Optional[str] = None
     experience_summary: Optional[str] = None
     rate_card_text: Optional[str] = None

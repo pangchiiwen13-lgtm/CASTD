@@ -8,9 +8,8 @@ class Settings(BaseSettings):
     stripe_webhook_secret: str
     stripe_price_id_monthly: str  # $15/month price ID from Stripe
     stripe_contact_fee_sgd: int = 9900  # SGD 99.00 in cents
-    deepseek_api_key: str
-    telegram_bot_token: str
-    telegram_owner_chat_id: str
+    deepseek_api_key: str = ""
+    resend_api_key: str = ""
     allowed_origins: str = "http://localhost:3000"
     admin_user_ids: str = ""  # comma-separated Stack Auth user IDs
 

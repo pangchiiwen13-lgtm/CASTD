@@ -48,6 +48,12 @@ export const api = {
   createInquiry: (data: Partial<Inquiry>, token: string) =>
     apiFetch<Inquiry>("/inquiries", { method: "POST", body: JSON.stringify(data), token }),
 
+  // Notifications
+  getNotifications: (token: string) => apiFetch<Notification[]>("/notifications", { token }),
+  getUnreadCount: (token: string) => apiFetch<{ count: number }>("/notifications/unread-count", { token }),
+  markAllRead: (token: string) => apiFetch<void>("/notifications/read-all", { method: "POST", token }),
+  markRead: (id: string, token: string) => apiFetch<void>(`/notifications/${id}/read`, { method: "PATCH", token }),
+
   // Confirmations
   createCheckout: (inquiryId: string, token: string) =>
     apiFetch<{ checkout_url?: string; confirmed?: boolean; subscription_used?: boolean }>(
@@ -70,6 +76,7 @@ export interface Talent {
   tiktok_handle?: string;
   ig_followers: number;
   tiktok_followers: number;
+  email?: string;
   bio?: string;
   experience_summary?: string;
   rate_card_text?: string;
@@ -99,6 +106,16 @@ export interface Brand {
   target_audience: Record<string, string>;
   campaign_type?: string;
   plan_tier: string;
+}
+
+export interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  link?: string;
+  is_read: boolean;
+  created_at: string;
 }
 
 export interface Inquiry {

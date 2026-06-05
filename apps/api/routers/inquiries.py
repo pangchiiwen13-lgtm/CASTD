@@ -1,9 +1,11 @@
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from uuid import UUID
 from database import get_pool
 from models.inquiry import Inquiry, InquiryCreate, InquiryStatusUpdate
 from auth import get_current_user, get_admin_user
-from services.notifications import notify_new_inquiry
+from routers.notifications import create_notification
+from services import email as email_svc
 
 router = APIRouter(prefix="/inquiries", tags=["inquiries"])
 
@@ -28,12 +30,15 @@ async def list_my_inquiries(user: dict = Depends(get_current_user)):
 async def create_inquiry(data: InquiryCreate, user: dict = Depends(get_current_user)):
     pool = await get_pool()
     async with pool.acquire() as conn:
-        brand = await conn.fetchrow("SELECT id FROM brands WHERE user_id = $1", user["id"])
+        brand = await conn.fetchrow(
+            "SELECT id, company_name FROM brands WHERE user_id = $1", user["id"]
+        )
         if not brand:
             raise HTTPException(status_code=404, detail="Complete your brand profile first")
 
         talent = await conn.fetchrow(
-            "SELECT id, name FROM talents WHERE id = $1 AND is_published = TRUE", data.talent_id
+            "SELECT id, name, email FROM talents WHERE id = $1 AND is_published = TRUE",
+            data.talent_id,
         )
         if not talent:
             raise HTTPException(status_code=404, detail="Talent not found")
@@ -50,7 +55,35 @@ async def create_inquiry(data: InquiryCreate, user: dict = Depends(get_current_u
         )
 
     inquiry = Inquiry(**dict(row))
-    await notify_new_inquiry(inquiry, user.get("name", ""), talent["name"])
+    brand_name = brand["company_name"]
+    talent_name = talent["name"]
+    brand_email = user.get("email", "")
+
+    # Fire notifications in background — never block the response
+    async def _notify():
+        # In-app: confirm to brand that inquiry was received
+        await create_notification(
+            user_id=user["id"],
+            type_="inquiry_submitted",
+            title=f"Inquiry sent to {talent_name}",
+            body=f'Your inquiry for "{data.campaign_name}" has been received. We\'ll review it shortly.',
+            link="/inquiries",
+        )
+        # Email brand confirmation
+        if brand_email:
+            await email_svc.email_brand_inquiry_received(brand_email, brand_name, talent_name, data.campaign_name)
+        # Email talent (if they have an email on file)
+        if talent["email"]:
+            await email_svc.email_talent_inquiry_received(
+                to=talent["email"],
+                talent_name=talent_name,
+                brand_name=brand_name,
+                campaign_name=data.campaign_name,
+                campaign_type=data.campaign_type or "",
+                brief_text=data.brief_text or "",
+            )
+
+    asyncio.create_task(_notify())
     return inquiry
 
 
@@ -68,12 +101,75 @@ async def update_inquiry_status(
     async with pool.acquire() as conn:
         row = await conn.fetchrow(
             "UPDATE inquiries SET status = $1 WHERE id = $2 RETURNING *",
-            data.status,
+            data.status, inquiry_id,
+        )
+        if not row:
+            raise HTTPException(status_code=404, detail="Inquiry not found")
+
+        # Fetch brand user_id + email + company name, and talent name + email
+        details = await conn.fetchrow(
+            """
+            SELECT b.user_id, b.email AS brand_email, b.company_name,
+                   t.name AS talent_name, t.email AS talent_email,
+                   i.campaign_name
+            FROM inquiries i
+            JOIN brands b ON b.id = i.brand_id
+            JOIN talents t ON t.id = i.talent_id
+            WHERE i.id = $1
+            """,
             inquiry_id,
         )
-    if not row:
-        raise HTTPException(status_code=404, detail="Inquiry not found")
-    return Inquiry(**dict(row))
+        brand_user_id = details["user_id"] if details else None
+        brand_email = details["brand_email"] if details else None
+        brand_name = details["company_name"] if details else ""
+        talent_name = details["talent_name"] if details else ""
+        talent_email = details["talent_email"] if details else None
+        campaign_name = details["campaign_name"] if details else ""
+
+    inquiry = Inquiry(**dict(row))
+
+    async def _notify():
+        if not brand_user_id:
+            return
+        status_titles = {
+            "reviewing": f"Your inquiry for {talent_name} is being reviewed",
+            "confirmed": f"Booking confirmed — {talent_name}",
+            "closed":    f"Your inquiry for {talent_name} has been closed",
+        }
+        status_bodies = {
+            "reviewing": f'We\'re reviewing your "{campaign_name}" inquiry. Hang tight.',
+            "confirmed": f'Great news! Your booking for "{campaign_name}" with {talent_name} is confirmed.',
+            "closed":    f'Your inquiry "{campaign_name}" has been closed.',
+        }
+        if data.status in status_titles:
+            await create_notification(
+                user_id=brand_user_id,
+                type_=f"inquiry_{data.status}",
+                title=status_titles[data.status],
+                body=status_bodies[data.status],
+                link="/inquiries",
+            )
+        # Email brand on status change
+        if brand_email and data.status in {"reviewing", "confirmed", "closed"}:
+            await email_svc.email_brand_status_changed(
+                to=brand_email,
+                brand_name=brand_name,
+                talent_name=talent_name,
+                campaign_name=campaign_name,
+                new_status=data.status,
+            )
+        # Email talent on confirmation
+        if data.status == "confirmed" and talent_email:
+            await email_svc.email_talent_confirmed(
+                to=talent_email,
+                talent_name=talent_name,
+                brand_name=brand_name,
+                campaign_name=campaign_name,
+                brief_text="",
+            )
+
+    asyncio.create_task(_notify())
+    return inquiry
 
 
 # Admin: all inquiries

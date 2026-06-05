@@ -7,6 +7,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const NAV = [
   { href: "/catalog", label: "Catalog" },
@@ -70,7 +71,9 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        {/* User menu */}
+        {/* Notification bell + user menu */}
+        <div className="flex items-center gap-2">
+        <NotificationBell />
         <div className="relative" ref={menuRef}>
           <button
             className="focus:outline-none"
@@ -127,6 +130,7 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
               </button>
             </div>
           )}
+        </div>
         </div>
       </nav>
       <main className="flex-1">{children}</main>

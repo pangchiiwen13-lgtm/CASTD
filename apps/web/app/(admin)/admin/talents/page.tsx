@@ -142,6 +142,7 @@ function TalentForm({ initial, onClose, onSaved, getToken }: {
   const [form, setForm] = useState({
     ig_username: initial?.ig_username || "",
     name: initial?.name || "",
+    email: initial?.email || "",
     age: initial?.age?.toString() || "",
     gender: initial?.gender || "",
     languages: initial?.languages?.join(", ") || "",
@@ -168,6 +169,7 @@ function TalentForm({ initial, onClose, onSaved, getToken }: {
       const body = {
         ig_username: form.ig_username,
         name: form.name,
+        email: form.email || undefined,
         age: form.age ? parseInt(form.age) : undefined,
         gender: form.gender || undefined,
         languages: form.languages.split(",").map((s) => s.trim()).filter(Boolean),
@@ -214,6 +216,10 @@ function TalentForm({ initial, onClose, onSaved, getToken }: {
           <div className="grid gap-1">
             <Label>Full name *</Label>
             <Input value={form.name} onChange={set("name")} placeholder="Name" />
+          </div>
+          <div className="grid gap-1 col-span-2">
+            <Label>Email <span className="text-muted-foreground font-normal">(for booking notifications)</span></Label>
+            <Input type="email" value={form.email} onChange={set("email")} placeholder="talent@email.com" />
           </div>
           <div className="grid gap-1">
             <Label>Age</Label>

@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from database import get_pool, close_pool
 from config import settings
 from auth import get_admin_user
-from routers import talents, brands, inquiries, shortlists, confirmations
+from routers import talents, brands, inquiries, shortlists, confirmations, notifications, admin_settings
 
 
 @asynccontextmanager
@@ -29,6 +29,8 @@ app.include_router(brands.router)
 app.include_router(inquiries.router)
 app.include_router(shortlists.router)
 app.include_router(confirmations.router)
+app.include_router(notifications.router)
+app.include_router(admin_settings.router)
 
 
 @app.get("/health")

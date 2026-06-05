@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/talents", label: "Talents" },
   { href: "/admin/inquiries", label: "Inquiries" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -35,7 +36,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 key={n.href}
                 href={n.href}
                 className={cn(
-                  buttonVariants({ variant: pathname === n.href ? "secondary" : "ghost", size: "sm" })
+                  buttonVariants({
+                    variant: (n.href === "/admin" ? pathname === "/admin" : pathname?.startsWith(n.href)) ? "secondary" : "ghost",
+                    size: "sm",
+                  })
                 )}
               >
                 {n.label}
