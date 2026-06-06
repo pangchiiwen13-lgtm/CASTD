@@ -87,6 +87,15 @@ export default function SuperstarOnboardingPage() {
   async function submit() {
     setLoading(true);
     setError("");
+    // Pull token from session object directly — this page has no portal layout
+    // so the localStorage cache may not be populated yet. Better Auth exposes the
+    // raw session token via session.session.token.
+    const token = (session as any)?.session?.token || getSessionToken() || "";
+    if (!token) {
+      setError("Session expired. Please sign in again.");
+      setLoading(false);
+      return;
+    }
     try {
       await api.registerSuperstar({
         name: form.name,
@@ -107,7 +116,7 @@ export default function SuperstarOnboardingPage() {
         remuneration_preference: form.remuneration_preference,
         min_rate_sgd: form.min_rate_sgd ? parseInt(form.min_rate_sgd) : undefined,
         email: session?.user?.email || undefined,
-      }, getSessionToken() || "");
+      }, token);
       router.push("/superstar/dashboard");
     } catch (e: any) {
       setError(e.message || "Something went wrong. Please try again.");
