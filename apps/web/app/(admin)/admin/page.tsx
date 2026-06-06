@@ -27,13 +27,17 @@ export default function AdminDashboard() {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/stats`, {
       headers: { Authorization: `Bearer ${getSessionToken()}` },
     })
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`Stats fetch failed: ${r.status}`);
+        return r.json();
+      })
       .then(setStats)
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, [session]);
 
   const hasPendingActions = stats && (
-    stats.superstars_pending_approval > 0 || stats.inquiries.open > 0
+    stats.superstars_pending_approval > 0 || (stats.inquiries?.open ?? 0) > 0
   );
 
   return (
@@ -68,9 +72,9 @@ export default function AdminDashboard() {
               sub="registered"
             />
             <StatCard
-              value={stats?.inquiries.total ?? 0}
+              value={stats?.inquiries?.total ?? 0}
               label="Inquiries"
-              sub={`${stats?.inquiries.open ?? 0} open · ${stats?.inquiries.confirmed ?? 0} confirmed`}
+              sub={`${stats?.inquiries?.open ?? 0} open · ${stats?.inquiries?.confirmed ?? 0} confirmed`}
             />
           </>
         )}
@@ -91,10 +95,10 @@ export default function AdminDashboard() {
                 cta="Review now"
               />
             )}
-            {stats && stats.inquiries.open > 0 && (
+            {stats && (stats.inquiries?.open ?? 0) > 0 && (
               <ActionItem
                 icon="📋"
-                message={`${stats.inquiries.open} open inquiry${stats.inquiries.open > 1 ? "ies" : "y"} need to be reviewed`}
+                message={`${stats.inquiries?.open} open inquiry${(stats.inquiries?.open ?? 0) > 1 ? "ies" : "y"} need to be reviewed`}
                 href="/admin/inquiries"
                 cta="View inquiries"
               />
@@ -122,7 +126,7 @@ export default function AdminDashboard() {
         <ManageCard
           title="Inquiries"
           icon="📋"
-          description={`${stats?.inquiries.total ?? "—"} total. Move inquiries through the pipeline.`}
+          description={`${stats?.inquiries?.total ?? "—"} total. Move inquiries through the pipeline.`}
           href="/admin/inquiries"
           cta="Manage Inquiries"
         />

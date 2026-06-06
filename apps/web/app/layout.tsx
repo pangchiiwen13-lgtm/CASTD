@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className={`${inter.variable} ${syne.variable} min-h-full flex flex-col bg-background text-foreground`}>
+      <body suppressHydrationWarning className={`${inter.variable} ${syne.variable} min-h-full flex flex-col bg-background text-foreground`}>
         {children}
       </body>
     </html>
