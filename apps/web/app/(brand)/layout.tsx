@@ -10,9 +10,11 @@ import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/NotificationBell";
 
 const NAV = [
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/catalog", label: "Catalog" },
   { href: "/shortlist", label: "Shortlist" },
   { href: "/inquiries", label: "Inquiries" },
+  { href: "/campaigns", label: "Campaigns" },
 ];
 
 export default function BrandLayout({ children }: { children: React.ReactNode }) {
@@ -100,27 +102,16 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
               >
                 Brand Profile
               </Link>
-              <Link
-                href="/catalog"
-                className="block px-4 py-2 text-sm hover:bg-muted transition-colors md:hidden"
-                onClick={() => setMenuOpen(false)}
-              >
-                Catalog
-              </Link>
-              <Link
-                href="/shortlist"
-                className="block px-4 py-2 text-sm hover:bg-muted transition-colors md:hidden"
-                onClick={() => setMenuOpen(false)}
-              >
-                Shortlist
-              </Link>
-              <Link
-                href="/inquiries"
-                className="block px-4 py-2 text-sm hover:bg-muted transition-colors md:hidden"
-                onClick={() => setMenuOpen(false)}
-              >
-                Inquiries
-              </Link>
+              {NAV.map(n => (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  className="block px-4 py-2 text-sm hover:bg-muted transition-colors md:hidden"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {n.label}
+                </Link>
+              ))}
               {/* Sign out */}
               <button
                 className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors border-t mt-1"

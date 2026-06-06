@@ -23,7 +23,7 @@ export default function SignupPage() {
     if (password.length < 8) { setError("Password must be at least 8 characters"); return; }
     setLoading(true);
     setError("");
-    const result = await signUp.email({ email, password, name, callbackURL: "/onboarding" });
+    const result = await signUp.email({ email, password, name, callbackURL: "/portal" });
     if (result.error) {
       setError(result.error.message || "Sign-up failed");
       setLoading(false);
@@ -35,7 +35,7 @@ export default function SignupPage() {
   async function handleGoogle() {
     setGoogleLoading(true);
     setError("");
-    await signIn.social({ provider: "google", callbackURL: "/onboarding" });
+    await signIn.social({ provider: "google", callbackURL: "/portal" });
   }
 
   return (
@@ -43,7 +43,7 @@ export default function SignupPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="text-2xl font-bold tracking-tight mb-1">CASTD</div>
-          <p className="text-muted-foreground text-sm">Create your brand account. Free to start.</p>
+          <p className="text-muted-foreground text-sm">Create your account. Free to start.</p>
         </div>
 
         {/* Google */}

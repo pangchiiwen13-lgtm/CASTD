@@ -21,19 +21,19 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const result = await signIn.email({ email, password, callbackURL: "/catalog" });
+    const result = await signIn.email({ email, password, callbackURL: "/portal" });
     if (result.error) {
       setError(result.error.message || "Invalid email or password");
       setLoading(false);
     } else {
-      router.push("/catalog");
+      router.push("/portal");
     }
   }
 
   async function handleGoogle() {
     setGoogleLoading(true);
     setError("");
-    await signIn.social({ provider: "google", callbackURL: "/catalog" });
+    await signIn.social({ provider: "google", callbackURL: "/portal" });
     // Google redirects away — no need to setGoogleLoading(false)
   }
 
@@ -42,7 +42,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="text-2xl font-bold tracking-tight mb-1">CASTD</div>
-          <p className="text-muted-foreground text-sm">Sign in to your brand account</p>
+          <p className="text-muted-foreground text-sm">Sign in to your account</p>
         </div>
 
         {/* Google */}

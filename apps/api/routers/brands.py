@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from uuid import UUID
 from database import get_pool
 from models.brand import Brand, BrandCreate, BrandUpdate
-from auth import get_current_user
+from auth import get_current_user, get_admin_user
 import json
 
 router = APIRouter(prefix="/brands", tags=["brands"])
@@ -72,6 +72,27 @@ async def update_brand(data: BrandUpdate, user: dict = Depends(get_current_user)
     asyncio.create_task(trigger_scoring_for_brand(str(row["id"])))
 
     return _row_to_brand(row)
+
+
+@router.get("/admin/all")
+async def admin_list_brands(_: dict = Depends(get_admin_user)):
+    """Admin-only: list all brand accounts with inquiry counts."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT
+              b.id, b.user_id, b.company_name, b.industry, b.campaign_type,
+              b.aesthetic_tags, b.plan_tier, b.email, b.created_at,
+              COUNT(i.id) AS inquiry_count,
+              COUNT(CASE WHEN i.status = 'confirmed' THEN 1 END) AS confirmed_count
+            FROM brands b
+            LEFT JOIN inquiries i ON i.brand_id = b.id
+            GROUP BY b.id
+            ORDER BY b.created_at DESC
+            """
+        )
+    return [dict(r) for r in rows]
 
 
 def _row_to_brand(row) -> Brand:

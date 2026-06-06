@@ -9,14 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { getSessionToken } from "@/lib/get-token";
+import { cn } from "@/lib/utils";
 
 const INDUSTRIES = ["Beauty", "Skincare", "Fashion", "Wellness", "Food & Beverage", "Lifestyle", "Tech", "Finance", "Other"];
 const CAMPAIGN_TYPES = ["Brand awareness", "Product launch", "Social media content", "Event coverage", "Tutorial", "Testimonial"];
 const AESTHETIC_OPTIONS = ["Clean & minimal", "Bold & vibrant", "Soft & feminine", "Natural & earthy", "Luxury", "Playful", "Edgy", "Professional"];
 
+type Role = "brand" | "superstar" | null;
+
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const { data: session } = useSession();
+  const [role, setRole] = useState<Role>(null);
+  // 0 = role selection, 1+ = brand steps
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState({ company_name: "", industry: "", campaign_type: "", aesthetic_tags: [] as string[], brand_values: [] as string[] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,13 +31,21 @@ export default function OnboardingPage() {
     setForm(f => ({ ...f, [list]: f[list].includes(tag) ? f[list].filter(t => t !== tag) : [...f[list], tag] }));
   }
 
+  function selectRole(r: Role) {
+    setRole(r);
+    if (r === "superstar") {
+      router.push("/onboarding/superstar");
+    } else {
+      setStep(1);
+    }
+  }
+
   async function finish() {
     if (!form.company_name.trim()) { setError("Company name required"); return; }
     setLoading(true);
     try {
       await api.createBrand(form, getSessionToken() || "");
     } catch (e: any) {
-      // 409 = brand already exists — just proceed to catalog
       if (!e.message?.includes("already exists")) {
         setError(e.message || "Something went wrong");
         setLoading(false);
@@ -41,17 +55,52 @@ export default function OnboardingPage() {
     router.push("/catalog");
   }
 
+  const totalBrandSteps = 2;
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-md">
         <div className="mb-8">
           <div className="text-2xl font-bold mb-1">CASTD</div>
-          <p className="text-muted-foreground text-sm">Tell us about your brand to get AI-matched talent recommendations.</p>
-          <div className="flex gap-1 mt-4">
-            {[1,2].map(s => <div key={s} className={`h-1 flex-1 rounded-full ${step >= s ? "bg-primary" : "bg-muted"}`} />)}
-          </div>
+          {step === 0 ? (
+            <p className="text-muted-foreground text-sm">How do you want to use CASTD?</p>
+          ) : (
+            <>
+              <p className="text-muted-foreground text-sm">Tell us about your brand to get AI-matched talent recommendations.</p>
+              <div className="flex gap-1 mt-4">
+                {Array.from({ length: totalBrandSteps }).map((_, i) => (
+                  <div key={i} className={`h-1 flex-1 rounded-full ${step > i ? "bg-primary" : "bg-muted"}`} />
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
+        {/* Step 0 — Role selection */}
+        {step === 0 && (
+          <div className="flex flex-col gap-4">
+            <RoleCard
+              title="I'm a Brand / Agency"
+              description="Discover and book on-screen video talent for your campaigns."
+              icon="🏢"
+              selected={role === "brand"}
+              onClick={() => selectRole("brand")}
+            />
+            <RoleCard
+              title="I'm a Superstar"
+              description="Showcase your talent and get booked for beauty and lifestyle campaigns."
+              icon="⭐"
+              selected={role === "superstar"}
+              onClick={() => selectRole("superstar")}
+            />
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Already have an account?{" "}
+              <button className="underline" onClick={() => router.push("/portal")}>Go to your portal</button>
+            </p>
+          </div>
+        )}
+
+        {/* Step 1 — Brand basics */}
         {step === 1 && (
           <div className="flex flex-col gap-5">
             <h2 className="text-lg font-semibold">Your brand</h2>
@@ -75,9 +124,11 @@ export default function OnboardingPage() {
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button onClick={() => { setError(""); setStep(2); }} disabled={!form.company_name.trim()}>Next →</Button>
+            <button className="text-sm text-muted-foreground underline text-center" onClick={() => setStep(0)}>← Back</button>
           </div>
         )}
 
+        {/* Step 2 — Aesthetic */}
         {step === 2 && (
           <div className="flex flex-col gap-5">
             <h2 className="text-lg font-semibold">Brand aesthetic</h2>
@@ -99,5 +150,27 @@ export default function OnboardingPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function RoleCard({ title, description, icon, selected, onClick }: {
+  title: string; description: string; icon: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "w-full text-left p-5 rounded-xl border-2 transition-all flex items-start gap-4",
+        selected
+          ? "border-primary bg-[#FFFBEB]"
+          : "border-[#EBEBEB] hover:border-primary/50 hover:bg-muted/50"
+      )}
+    >
+      <span className="text-3xl">{icon}</span>
+      <div>
+        <div className="font-semibold text-[15px]">{title}</div>
+        <div className="text-sm text-muted-foreground mt-0.5">{description}</div>
+      </div>
+    </button>
   );
 }

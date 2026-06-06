@@ -60,6 +60,20 @@ export const api = {
       `/confirmations/${inquiryId}/checkout`,
       { method: "POST", token }
     ),
+
+  // Superstar (talent self-serve)
+  checkRegistration: (token: string) =>
+    apiFetch<{ has_brand: boolean; has_superstar: boolean; superstar_status: string | null; superstar_published: boolean | null }>(
+      "/superstar/check", { token }
+    ),
+  getMySuperstarsProfile: (token: string) =>
+    apiFetch<Talent>("/superstar/me", { token }),
+  registerSuperstar: (data: Partial<SuperstarRegister>, token: string) =>
+    apiFetch<Talent>("/superstar/register", { method: "POST", body: JSON.stringify(data), token }),
+  updateMySuperstarsProfile: (data: Partial<SuperstarRegister>, token: string) =>
+    apiFetch<Talent>("/superstar/me", { method: "PATCH", body: JSON.stringify(data), token }),
+  getMyBookings: (token: string) =>
+    apiFetch<SuperstarBooking[]>("/superstar/bookings", { token }),
 };
 
 // Types
@@ -116,6 +130,41 @@ export interface Notification {
   link?: string;
   is_read: boolean;
   created_at: string;
+}
+
+export interface SuperstarRegister {
+  name: string;
+  age?: number;
+  gender?: string;
+  languages: string[];
+  content_types: string[];
+  vibe_tags: string[];
+  ig_handle?: string;
+  ig_followers: number;
+  tiktok_handle?: string;
+  tiktok_followers: number;
+  bio?: string;
+  experience_summary?: string;
+  rate_card_text?: string;
+  photo_urls: string[];
+  intro_video_url?: string;
+  email?: string;
+  remuneration_preference: string;
+  min_rate_sgd?: number;
+}
+
+export interface SuperstarBooking {
+  id: string;
+  brand_id: string;
+  talent_id: string;
+  campaign_name: string;
+  campaign_type?: string;
+  brief_text?: string;
+  budget_range?: string;
+  preferred_dates?: string;
+  status: string;
+  created_at: string;
+  brand_name: string;
 }
 
 export interface Inquiry {
