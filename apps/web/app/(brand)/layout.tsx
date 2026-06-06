@@ -1,6 +1,6 @@
 "use client";
 import { useSession, signOut } from "@/lib/auth-client";
-import { clearSessionToken } from "@/lib/get-token";
+import { clearSessionToken, setSessionToken } from "@/lib/get-token";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -28,6 +28,12 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (!isPending && !session) router.push("/login");
   }, [session, isPending, router]);
+
+  // Cache the session token so getSessionToken() can read it
+  useEffect(() => {
+    const token = (session as any)?.session?.token;
+    if (token) setSessionToken(token);
+  }, [session]);
 
   // Close on outside click
   useEffect(() => {

@@ -99,7 +99,7 @@ export default function BrandDashboardPage() {
               <div key={inq.id} className="flex items-center justify-between gap-4 bg-white rounded-lg px-4 py-3 border">
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{inq.campaign_name}</p>
-                  <p className="text-xs text-muted-foreground">Ready to confirm — move forward when you're ready</p>
+                  <p className="text-xs text-muted-foreground">Ready to confirm - move forward when you're ready</p>
                 </div>
                 <Link href="/inquiries">
                   <Button size="sm" className="shrink-0 h-8 text-xs bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]">

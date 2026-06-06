@@ -130,7 +130,7 @@ export default function SuperstarOnboardingPage() {
           <p className="text-xs text-muted-foreground mt-1">Step {step} of {TOTAL_STEPS}</p>
         </div>
 
-        {/* Step 1 — About you */}
+        {/* Step 1 - About you */}
         {step === 1 && (
           <div className="flex flex-col gap-5">
             <h2 className="text-lg font-semibold">About you</h2>
@@ -166,7 +166,7 @@ export default function SuperstarOnboardingPage() {
           </div>
         )}
 
-        {/* Step 2 — Content & Vibe */}
+        {/* Step 2 - Content & Vibe */}
         {step === 2 && (
           <div className="flex flex-col gap-5">
             <h2 className="text-lg font-semibold">Content & vibe</h2>
@@ -201,7 +201,7 @@ export default function SuperstarOnboardingPage() {
           </div>
         )}
 
-        {/* Step 3 — Social media */}
+        {/* Step 3 - Social media */}
         {step === 3 && (
           <div className="flex flex-col gap-5">
             <h2 className="text-lg font-semibold">Social media</h2>
@@ -232,7 +232,7 @@ export default function SuperstarOnboardingPage() {
           </div>
         )}
 
-        {/* Step 4 — Bio & Experience */}
+        {/* Step 4 - Bio & Experience */}
         {step === 4 && (
           <div className="flex flex-col gap-5">
             <h2 className="text-lg font-semibold">Bio & experience</h2>
@@ -255,7 +255,7 @@ export default function SuperstarOnboardingPage() {
               />
             </div>
             <div className="grid gap-1">
-              <Label>Portfolio photo URLs <span className="text-muted-foreground text-xs">(one per line, optional — add later in profile)</span></Label>
+              <Label>Portfolio photo URLs <span className="text-muted-foreground text-xs">(one per line, optional - add later in profile)</span></Label>
               <Textarea
                 value={form.photo_urls}
                 onChange={e => set("photo_urls", e.target.value)}
@@ -271,7 +271,7 @@ export default function SuperstarOnboardingPage() {
           </div>
         )}
 
-        {/* Step 5 — Rates & Preferences */}
+        {/* Step 5 - Rates & Preferences */}
         {step === 5 && (
           <div className="flex flex-col gap-5">
             <h2 className="text-lg font-semibold">Rates & preferences</h2>
@@ -289,7 +289,7 @@ export default function SuperstarOnboardingPage() {
             </div>
             {(form.remuneration_preference === "cash" || form.remuneration_preference === "both") && (
               <div className="grid gap-1">
-                <Label>Minimum rate (SGD) <span className="text-muted-foreground text-xs">— private, only shared with matched brands</span></Label>
+                <Label>Minimum rate (SGD) <span className="text-muted-foreground text-xs">- private, only shared with matched brands</span></Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">SGD</span>
                   <Input type="number" value={form.min_rate_sgd} onChange={e => set("min_rate_sgd", e.target.value)}
@@ -298,7 +298,7 @@ export default function SuperstarOnboardingPage() {
               </div>
             )}
             <div className="grid gap-1">
-              <Label>Rate card details <span className="text-muted-foreground text-xs">(optional — describe your packages)</span></Label>
+              <Label>Rate card details <span className="text-muted-foreground text-xs">(optional - describe your packages)</span></Label>
               <Textarea
                 value={form.rate_card_text}
                 onChange={e => set("rate_card_text", e.target.value)}

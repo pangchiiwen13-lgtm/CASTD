@@ -27,12 +27,22 @@ export default function AdminTalentsPage() {
 
   async function fetchAll() {
     const token = getSessionToken() || "";
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/talents/admin/all`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    setTalents(data);
-    setLoading(false);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/talents/admin/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        console.error("Failed to fetch talents:", res.status);
+        setLoading(false);
+        return;
+      }
+      const data = await res.json();
+      setTalents(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("fetchAll error:", e);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function togglePublish(talent: Talent) {

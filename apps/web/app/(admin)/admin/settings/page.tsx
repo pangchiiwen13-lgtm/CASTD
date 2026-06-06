@@ -59,7 +59,7 @@ export default function AdminSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Email — Resend</CardTitle>
+          <CardTitle>Email - Resend</CardTitle>
           <CardDescription>
             CASTD uses <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline">Resend</a> to send
             transactional emails to brands and talents. Free tier: 3,000 emails/month.
@@ -72,7 +72,7 @@ export default function AdminSettingsPage() {
             <span className="text-sm">
               {settings.resend_api_key?.configured
                 ? <>Configured <span className="text-muted-foreground font-mono text-xs ml-1">{settings.resend_api_key.masked}</span></>
-                : <span className="text-muted-foreground">Not configured — emails will be skipped</span>}
+                : <span className="text-muted-foreground">Not configured - emails will be skipped</span>}
             </span>
           </div>
 

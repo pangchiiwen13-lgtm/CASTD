@@ -26,7 +26,7 @@ export default function SuperstarProfilePage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
-  // Form state — mirrors editable fields
+  // Form state - mirrors editable fields
   const [form, setForm] = useState({
     name: "",
     age: "",
@@ -278,7 +278,7 @@ export default function SuperstarProfilePage() {
               </div>
             </Field>
             {(form.remuneration_preference === "cash" || form.remuneration_preference === "both") && (
-              <Field label="Minimum rate (SGD) — private">
+              <Field label="Minimum rate (SGD) - private">
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">SGD</span>
                   <Input type="number" value={form.min_rate_sgd} onChange={e => set("min_rate_sgd", e.target.value)}

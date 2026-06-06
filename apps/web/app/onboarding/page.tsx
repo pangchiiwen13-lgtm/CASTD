@@ -76,7 +76,7 @@ export default function OnboardingPage() {
           )}
         </div>
 
-        {/* Step 0 — Role selection */}
+        {/* Step 0 - Role selection */}
         {step === 0 && (
           <div className="flex flex-col gap-4">
             <RoleCard
@@ -100,7 +100,7 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 1 — Brand basics */}
+        {/* Step 1 - Brand basics */}
         {step === 1 && (
           <div className="flex flex-col gap-5">
             <h2 className="text-lg font-semibold">Your brand</h2>
@@ -128,7 +128,7 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 2 — Aesthetic */}
+        {/* Step 2 - Aesthetic */}
         {step === 2 && (
           <div className="flex flex-col gap-5">
             <h2 className="text-lg font-semibold">Brand aesthetic</h2>

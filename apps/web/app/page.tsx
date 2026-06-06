@@ -52,7 +52,7 @@ export default function LandingPage() {
         </div>
       </main>
 
-      {/* How it works — off-white panel */}
+      {/* How it works - off-white panel */}
       <section className="border-t border-[#EBEBEB] bg-[#F8F7F4] px-6 py-16">
         <div className="max-w-4xl mx-auto">
           <h2 className="font-display text-2xl font-bold text-center mb-10 text-[#0C0C0C]">How it works</h2>

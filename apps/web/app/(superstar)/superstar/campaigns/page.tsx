@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Superstar Campaigns feed — browse open brand campaigns and apply.
+ * Superstar Campaigns feed - browse open brand campaigns and apply.
  * The campaigns system (DB + API) is built in Priority 2.
  * This is a placeholder that shows the intended UI.
  */

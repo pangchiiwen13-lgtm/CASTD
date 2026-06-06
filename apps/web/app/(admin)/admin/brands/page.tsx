@@ -127,7 +127,7 @@ export default function AdminBrandsPage() {
                   <div className="grid sm:grid-cols-3 gap-4 text-sm">
                     <DetailItem label="Brand ID" value={brand.id} mono />
                     <DetailItem label="User ID" value={brand.user_id} mono />
-                    <DetailItem label="Campaign type" value={brand.campaign_type || "—"} />
+                    <DetailItem label="Campaign type" value={brand.campaign_type || "-"} />
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Aesthetic tags</p>
                       <div className="flex flex-wrap gap-1">

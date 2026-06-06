@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 /**
- * Brand Campaigns — create and manage campaign briefs.
+ * Brand Campaigns - create and manage campaign briefs.
  * Superstars can discover and apply to open campaigns.
  * Full bidirectional flow lands in Priority 2 (campaigns system build).
  */
@@ -30,7 +30,7 @@ export default function BrandCampaignsPage() {
             {
               step: "1",
               title: "Post your brief",
-              desc: "Describe your campaign — content type, deliverables, budget, and timeline.",
+              desc: "Describe your campaign - content type, deliverables, budget, and timeline.",
             },
             {
               step: "2",

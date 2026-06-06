@@ -34,7 +34,7 @@ export default function PortalPage() {
         }
       })
       .catch(() => {
-        // API down or no profile — send to onboarding
+        // API down or no profile - send to onboarding
         router.replace("/onboarding");
       });
   }, [session, isPending, router]);

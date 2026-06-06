@@ -112,21 +112,21 @@ export default function AdminDashboard() {
         <ManageCard
           title="Superstars"
           icon="⭐"
-          description={`${stats?.talents.published ?? "—"} live profiles. Add, edit, approve, or unpublish.`}
+          description={`${stats?.talents.published ?? "-"} live profiles. Add, edit, approve, or unpublish.`}
           href="/admin/talents"
           cta="Manage Superstars"
         />
         <ManageCard
           title="Brands"
           icon="🏢"
-          description={`${stats?.brands.total ?? "—"} registered brands. View profiles and activity.`}
+          description={`${stats?.brands.total ?? "-"} registered brands. View profiles and activity.`}
           href="/admin/brands"
           cta="View Brands"
         />
         <ManageCard
           title="Inquiries"
           icon="📋"
-          description={`${stats?.inquiries?.total ?? "—"} total. Move inquiries through the pipeline.`}
+          description={`${stats?.inquiries?.total ?? "-"} total. Move inquiries through the pipeline.`}
           href="/admin/inquiries"
           cta="Manage Inquiries"
         />
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
           <h2 className="font-semibold text-sm">Preview portals</h2>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          Enter either portal as an admin. A yellow bar will appear so you always know you're in preview mode — click it to switch or exit back here.
+          Enter either portal as an admin. A yellow bar will appear so you always know you're in preview mode - click it to switch or exit back here.
         </p>
         <div className="flex gap-3 flex-wrap">
           <Button

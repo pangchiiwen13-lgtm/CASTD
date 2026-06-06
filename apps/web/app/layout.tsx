@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Syne } from "next/font/google";
 import "./globals.css";
 
-// Body / UI font — Inter (designed for screen readability)
+// Body / UI font - Inter (designed for screen readability)
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
@@ -10,7 +10,7 @@ const inter = Inter({
   display: "swap",
 });
 
-// Display / Headline font — Syne (H1–H3, wordmark only)
+// Display / Headline font - Syne (H1–H3, wordmark only)
 const syne = Syne({
   subsets: ["latin"],
   weight: ["700", "800"],
@@ -19,7 +19,7 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "CASTD — Find Your On-Screen Talent",
+  title: "CASTD - Find Your On-Screen Talent",
   description: "Discover and book vetted beauty & lifestyle on-screen talent for your brand videos.",
 };
 

@@ -140,8 +140,8 @@ export default function SuperstarDashboardPage() {
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <StatCard label="Active bookings" value={activeBookings.length} />
-        <StatCard label="IG followers" value={profile.ig_followers?.toLocaleString() || "—"} />
-        <StatCard label="Star rating" value={profile.rating_count ? `${profile.rating_avg}★` : "—"} />
+        <StatCard label="IG followers" value={profile.ig_followers?.toLocaleString() || "-"} />
+        <StatCard label="Star rating" value={profile.rating_count ? `${profile.rating_avg}★` : "-"} />
       </div>
 
       {/* Two columns */}

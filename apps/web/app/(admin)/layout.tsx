@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "@/lib/auth-client";
-import { clearSessionToken } from "@/lib/get-token";
+import { clearSessionToken, setSessionToken } from "@/lib/get-token";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
@@ -23,6 +23,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (!isPending && !session) router.push("/login");
   }, [session, isPending, router]);
+
+  // Cache the session token so getSessionToken() can read it
+  // (Better Auth sets httpOnly cookies which JS can't read directly)
+  useEffect(() => {
+    const token = (session as any)?.session?.token;
+    if (token) setSessionToken(token);
+  }, [session]);
 
   if (isPending || !session) return null;
 

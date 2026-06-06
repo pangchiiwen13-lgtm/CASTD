@@ -34,7 +34,7 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setError("");
     await signIn.social({ provider: "google", callbackURL: "/portal" });
-    // Google redirects away — no need to setGoogleLoading(false)
+    // Google redirects away - no need to setGoogleLoading(false)
   }
 
   return (
