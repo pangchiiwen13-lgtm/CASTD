@@ -2,7 +2,9 @@
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { enterPreviewMode } from "@/components/AdminPreviewBanner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSessionToken } from "@/lib/get-token";
 import { cn } from "@/lib/utils";
@@ -16,6 +18,7 @@ interface Stats {
 
 export default function AdminDashboard() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -132,19 +135,31 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Portal preview links */}
-      <div className="mt-8 rounded-xl border p-5">
-        <h2 className="font-semibold text-sm mb-3">Preview portals</h2>
+      {/* Portal preview */}
+      <div className="mt-8 rounded-xl border-2 border-[#FFD200]/60 bg-[#FFFBEB] p-5">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-base">⚡</span>
+          <h2 className="font-semibold text-sm">Preview portals</h2>
+        </div>
         <p className="text-xs text-muted-foreground mb-4">
-          Navigate directly to the brand or superstar portal to see the experience as your users do.
+          Enter either portal as an admin. A yellow bar will appear so you always know you're in preview mode — click it to switch or exit back here.
         </p>
         <div className="flex gap-3 flex-wrap">
-          <Link href="/catalog" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-            🏢 Brand portal
-          </Link>
-          <Link href="/superstar/dashboard" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-            ⭐ Superstar portal
-          </Link>
+          <Button
+            className="bg-[#0C0C0C] text-[#FFD200] hover:bg-[#2A2A2A]"
+            size="sm"
+            onClick={() => { enterPreviewMode("brand"); router.push("/dashboard"); }}
+          >
+            🏢 Preview Brand Portal
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-[#0C0C0C] text-[#0C0C0C] hover:bg-[#0C0C0C] hover:text-[#FFD200]"
+            onClick={() => { enterPreviewMode("superstar"); router.push("/superstar/dashboard"); }}
+          >
+            ⭐ Preview Superstar Portal
+          </Button>
         </div>
       </div>
     </div>

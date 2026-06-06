@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/NotificationBell";
+import { AdminPreviewBanner } from "@/components/AdminPreviewBanner";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard" },
@@ -54,7 +55,9 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen flex flex-col">
-      <nav className="border-b px-6 py-3 flex items-center justify-between sticky top-0 bg-background z-10">
+      <nav className="sticky top-0 bg-background z-10">
+        <AdminPreviewBanner current="brand" />
+      <div className="border-b px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/catalog" className="text-lg font-bold tracking-tight">CASTD</Link>
           <div className="hidden md:flex gap-1">
@@ -123,6 +126,7 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
           )}
         </div>
         </div>
+      </div>
       </nav>
       <main className="flex-1">{children}</main>
     </div>

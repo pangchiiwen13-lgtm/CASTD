@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/NotificationBell";
+import { AdminPreviewBanner } from "@/components/AdminPreviewBanner";
 
 const NAV = [
   { href: "/superstar/dashboard", label: "Dashboard" },
@@ -57,7 +58,9 @@ export default function SuperstarLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen flex flex-col">
-      <nav className="border-b px-6 py-3 flex items-center justify-between sticky top-0 bg-background z-10">
+      <nav className="sticky top-0 bg-background z-10">
+        <AdminPreviewBanner current="superstar" />
+      <div className="border-b px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/superstar/dashboard" className="text-lg font-bold tracking-tight">
             CASTD <span className="text-xs font-normal text-muted-foreground ml-1">Superstar</span>
@@ -115,6 +118,7 @@ export default function SuperstarLayout({ children }: { children: React.ReactNod
             )}
           </div>
         </div>
+      </div>
       </nav>
       <main className="flex-1">{children}</main>
     </div>

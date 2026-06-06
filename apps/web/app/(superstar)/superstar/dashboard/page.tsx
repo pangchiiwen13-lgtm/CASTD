@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api, Talent, SuperstarBooking } from "@/lib/api";
 import { getSessionToken } from "@/lib/get-token";
+import { getPreviewMode } from "@/components/AdminPreviewBanner";
 import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -95,9 +96,13 @@ export default function SuperstarDashboardPage() {
         setBookings(b);
       })
       .catch((err) => {
-        // No profile yet → redirect to onboarding
+        // No profile yet → redirect to onboarding (unless admin is previewing)
         if (err.message?.includes("No superstar profile")) {
-          router.push("/onboarding/superstar");
+          if (getPreviewMode() === "superstar") {
+            // Admin preview: show empty state, don't redirect
+          } else {
+            router.push("/onboarding/superstar");
+          }
         }
       })
       .finally(() => setLoading(false));
