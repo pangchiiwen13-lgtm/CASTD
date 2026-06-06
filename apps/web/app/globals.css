@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Fonts — Inter for body/UI, Syne for display headings */
+  /* Fonts - Inter for body/UI, Syne for display headings */
   --font-sans: var(--font-inter);
   --font-display: var(--font-syne);
   --font-mono: var(--font-geist-mono);
@@ -89,7 +89,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.5rem;                       /* 8px base — brand says 6px default */
+  --radius: 0.5rem;                       /* 8px base - brand says 6px default */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.892 0.187 96.6);
@@ -106,7 +106,7 @@
   }
 }
 
-/* Brand CSS reset — outside @layer for highest precedence */
+/* Brand CSS reset - outside @layer for highest precedence */
 body {
   font-family: var(--font-inter), Inter, system-ui, sans-serif;
   font-optical-sizing: auto;

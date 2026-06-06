@@ -36,14 +36,14 @@ export function TalentCard({ talent, onShortlist, isSaved }: Props) {
           </div>
         )}
 
-        {/* Fit score badge — CASTD Yellow, brand format: "94 Match" */}
+        {/* Fit score badge - CASTD Yellow, brand format: "94 Match" */}
         {talent.fit_score !== undefined && talent.fit_score !== null && (
           <div className="absolute top-2 right-2 bg-[#FFD200] text-[#0C0C0C] text-xs px-2 py-0.5 rounded font-semibold">
             {talent.fit_score} Match
           </div>
         )}
 
-        {/* Shortlist star — appears on hover */}
+        {/* Shortlist star - appears on hover */}
         {onShortlist && (
           <button
             className={cn(

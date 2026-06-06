@@ -87,7 +87,7 @@ export default function SuperstarOnboardingPage() {
   async function submit() {
     setLoading(true);
     setError("");
-    // Pull token from session object directly — this page has no portal layout
+    // Pull token from session object directly - this page has no portal layout
     // so the localStorage cache may not be populated yet. Better Auth exposes the
     // raw session token via session.session.token.
     const token = (session as any)?.session?.token || getSessionToken() || "";

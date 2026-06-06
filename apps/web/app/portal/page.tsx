@@ -20,7 +20,7 @@ export default function PortalPage() {
     if (isPending) return;
     if (!session) { router.push("/login"); return; }
 
-    // Prefer session.session.token — portal has no layout to sync localStorage
+    // Prefer session.session.token - portal has no layout to sync localStorage
     const token = (session as any)?.session?.token || getSessionToken();
     if (!token) { router.push("/login"); return; }
 

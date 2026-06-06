@@ -118,7 +118,7 @@ export default function LandingPage() {
             style={{ animation: "fadeUp 0.9s 0.16s cubic-bezier(0.16,1,0.3,1) both" }}
           >
             Singapore's marketplace connecting beauty and lifestyle brands with
-            vetted on-screen talent — free to browse, pay only at confirmation.
+            vetted on-screen talent - free to browse, pay only at confirmation.
           </p>
 
           {/* CTAs */}
@@ -217,7 +217,7 @@ export default function LandingPage() {
               {
                 n: "01",
                 title: "Browse free",
-                desc: "Filter 27+ profiles by content type, language, vibe, and follower count. Every profile is visible — no paywalls, no credits.",
+                desc: "Filter 27+ profiles by content type, language, vibe, and follower count. Every profile is visible - no paywalls, no credits.",
               },
               {
                 n: "02",
@@ -278,7 +278,7 @@ export default function LandingPage() {
                   "Filter by language, vibe, content type",
                   "Submit unlimited free inquiries",
                   "AI-matched fit score per talent",
-                  "Confirm & secure — pay only here",
+                  "Confirm & secure - pay only here",
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-3 text-sm text-white/55">
                     <span className="mt-0.5 text-[#FFD200] shrink-0 text-[10px]">✦</span>
@@ -347,7 +347,7 @@ export default function LandingPage() {
             href="/signup"
             className="inline-flex items-center gap-2 px-10 py-4 rounded-full bg-[#0C0C0C] text-[#FFD200] font-semibold text-sm hover:bg-[#2A2A2A] transition-colors duration-200"
           >
-            Get started — it's free →
+            Get started - it's free →
           </Link>
         </div>
       </section>

@@ -6,7 +6,7 @@ const LS_KEY = "castd_session_token";
 /**
  * Read the Better Auth session token.
  * Better Auth sets the cookie as httpOnly (not readable by JS), so we also
- * cache it in localStorage via setSessionToken() — which is called by the
+ * cache it in localStorage via setSessionToken() - which is called by the
  * portal layouts whenever the session resolves.
  */
 export function getSessionToken(): string | null {

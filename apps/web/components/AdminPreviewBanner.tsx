@@ -46,14 +46,14 @@ export function AdminPreviewBanner({ current }: { current: PreviewMode }) {
 
   return (
     <div className="bg-[#FFD200] text-[#0C0C0C] px-4 py-1.5 flex items-center justify-between gap-4 text-xs font-semibold">
-      {/* Left — current context */}
+      {/* Left - current context */}
       <span className="flex items-center gap-1.5">
         ⚡ Admin Preview
         <span className="mx-1 opacity-40">·</span>
         {isBrand ? "🏢 Brand Portal" : "⭐ Superstar Portal"}
       </span>
 
-      {/* Right — controls */}
+      {/* Right - controls */}
       <div className="flex items-center gap-3">
         <span className="opacity-40 hidden sm:inline">Switch to:</span>
         <button
