@@ -114,7 +114,14 @@ export interface Talent {
   body_condition?: string;
   tc_signed: boolean;
   is_published: boolean;
+  user_id?: string;
+  profile_status?: string;
+  remuneration_preference?: string;
+  min_rate_sgd?: number;
+  rating_avg?: number;
+  rating_count?: number;
   created_at: string;
+  updated_at?: string;
   fit_score?: number;
 }
 

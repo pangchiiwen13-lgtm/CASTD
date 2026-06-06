@@ -39,7 +39,7 @@ async def add_to_shortlist(talent_id: UUID, user: dict = Depends(get_current_use
                 brand["id"], talent_id,
             )
         except Exception:
-            pass  # already saved — silently ignore
+            pass  # already saved - silently ignore
     return {"saved": True}
 
 

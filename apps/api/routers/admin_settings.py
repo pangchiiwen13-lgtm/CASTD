@@ -19,7 +19,7 @@ async def get_settings(_: dict = Depends(get_admin_user)):
     result = {k: "" for k in SETTINGS_KEYS}
     for row in rows:
         result[row["key"]] = row["value"]
-    # Mask sensitive values — show only whether configured + last 4 chars
+    # Mask sensitive values - show only whether configured + last 4 chars
     return {
         k: {"configured": bool(v), "masked": ("••••" + v[-4:]) if len(v) > 4 else ("••••" if v else "")}
         for k, v in result.items()

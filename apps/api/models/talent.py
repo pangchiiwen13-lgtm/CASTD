@@ -54,6 +54,7 @@ class TalentUpdate(BaseModel):
     body_condition: Optional[str] = None
     tc_signed: Optional[bool] = None
     is_published: Optional[bool] = None
+    profile_status: Optional[str] = None  # pending / approved / rejected
 
 
 class Talent(TalentBase):

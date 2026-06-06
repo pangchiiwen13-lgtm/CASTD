@@ -33,7 +33,7 @@ async def send_email(to: str, subject: str, html: str) -> bool:
         return False
     key = await _get_resend_key()
     if not key:
-        print(f"[email] No Resend API key configured — skipping email to {to}")
+        print(f"[email] No Resend API key configured - skipping email to {to}")
         return False
     try:
         async with httpx.AsyncClient(timeout=10) as client:
@@ -125,14 +125,14 @@ async def email_brand_inquiry_received(to: str, brand_name: str, talent_name: st
 
 async def email_brand_status_changed(to: str, brand_name: str, talent_name: str, campaign_name: str, new_status: str):
     status_copy = {
-        "reviewing": ("Under review", f"Good news — your inquiry for <strong>{talent_name}</strong> is now being reviewed. We're checking availability and getting things moving."),
+        "reviewing": ("Under review", f"Good news - your inquiry for <strong>{talent_name}</strong> is now being reviewed. We're checking availability and getting things moving."),
         "confirmed": ("Booking confirmed!", f"Your booking for <strong>{talent_name}</strong> has been confirmed. We'll be in touch shortly with next steps and contact details."),
         "closed":    ("Inquiry closed", f"Your inquiry for <strong>{talent_name}</strong> has been closed. Feel free to browse the catalog and send a new inquiry anytime."),
     }
     if new_status not in status_copy:
         return
     headline, copy_text = status_copy[new_status]
-    subject = f"{headline} — {talent_name}"
+    subject = f"{headline} - {talent_name}"
     body = (
         _h(headline) +
         _p(f"Hi {brand_name},") +
@@ -150,14 +150,14 @@ async def email_brand_status_changed(to: str, brand_name: str, talent_name: str,
 # --- Talent emails ---
 
 async def email_talent_inquiry_received(to: str, talent_name: str, brand_name: str, campaign_name: str, campaign_type: str, brief_text: str):
-    subject = f"A brand wants to work with you — {campaign_name}"
+    subject = f"A brand wants to work with you - {campaign_name}"
     brief_snippet = (brief_text or "")[:300]
     body = (
         _h("You have a new inquiry") +
         _p(f"Hi {talent_name}, <strong>{brand_name}</strong> is interested in working with you for a new campaign.") +
         f'<table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">'
         f'{_pill("Campaign", campaign_name)}'
-        f'{_pill("Type", campaign_type or "—")}'
+        f'{_pill("Type", campaign_type or "-")}'
         f'</table>' +
         (f'<div style="background:#F8F7F4;border-radius:8px;padding:16px;margin-bottom:24px;">'
          f'<p style="margin:0 0 4px;font-size:12px;color:#7A7A7A;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Brief</p>'
@@ -173,7 +173,7 @@ async def email_talent_confirmed(to: str, talent_name: str, brand_name: str, cam
     brief_snippet = (brief_text or "")[:400]
     body = (
         _h("You're booked!") +
-        _p(f"Hi {talent_name}, congratulations — <strong>{brand_name}</strong> has confirmed you for their campaign.") +
+        _p(f"Hi {talent_name}, congratulations - <strong>{brand_name}</strong> has confirmed you for their campaign.") +
         f'<table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">'
         f'{_pill("Campaign", campaign_name)}'
         f'{_pill("Brand", brand_name)}'

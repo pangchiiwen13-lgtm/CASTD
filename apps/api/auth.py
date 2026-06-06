@@ -1,7 +1,7 @@
 """
 Auth verification for CASTD FastAPI backend.
 Verifies Better Auth sessions by querying the session table directly in the
-shared Neon PostgreSQL database — no HTTP call to an external auth service needed.
+shared Neon PostgreSQL database - no HTTP call to an external auth service needed.
 
 Better Auth stores sessions in the `session` table with columns:
   token TEXT, userId TEXT, expiresAt TIMESTAMP

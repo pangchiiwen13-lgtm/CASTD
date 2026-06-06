@@ -35,7 +35,7 @@ async def create_checkout_session(inquiry_id: UUID, user: dict = Depends(get_cur
         if not inquiry:
             raise HTTPException(status_code=404, detail="Inquiry not found")
 
-        # Check active subscription — subscribers skip payment
+        # Check active subscription - subscribers skip payment
         sub = await conn.fetchrow(
             "SELECT id FROM subscriptions WHERE brand_id = $1 AND status = 'active'",
             brand["id"],
@@ -64,7 +64,7 @@ async def create_checkout_session(inquiry_id: UUID, user: dict = Depends(get_cur
                 "currency": "sgd",
                 "unit_amount": settings.stripe_contact_fee_sgd,
                 "product_data": {
-                    "name": f"CASTD — Talent Contact: {inquiry['talent_name']}",
+                    "name": f"CASTD - Talent Contact: {inquiry['talent_name']}",
                     "description": f"Campaign: {inquiry['campaign_name']}",
                 },
             },

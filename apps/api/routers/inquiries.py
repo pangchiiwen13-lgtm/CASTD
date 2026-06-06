@@ -59,7 +59,7 @@ async def create_inquiry(data: InquiryCreate, user: dict = Depends(get_current_u
     talent_name = talent["name"]
     brand_email = user.get("email", "")
 
-    # Fire notifications in background — never block the response
+    # Fire notifications in background - never block the response
     async def _notify():
         # In-app: confirm to brand that inquiry was received
         await create_notification(
@@ -133,7 +133,7 @@ async def update_inquiry_status(
             return
         status_titles = {
             "reviewing": f"Your inquiry for {talent_name} is being reviewed",
-            "confirmed": f"Booking confirmed — {talent_name}",
+            "confirmed": f"Booking confirmed - {talent_name}",
             "closed":    f"Your inquiry for {talent_name} has been closed",
         }
         status_bodies = {

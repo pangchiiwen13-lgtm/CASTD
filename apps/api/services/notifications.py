@@ -1,4 +1,4 @@
-# Telegram removed — notifications are handled via in-app panel and email only.
+# Telegram removed - notifications are handled via in-app panel and email only.
 # This file is kept as a stub so existing imports don't break.
 
 async def notify_new_inquiry(inquiry, brand_name: str, talent_name: str):

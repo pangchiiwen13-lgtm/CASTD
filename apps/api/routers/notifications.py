@@ -58,7 +58,7 @@ async def mark_read(notification_id: UUID, user: dict = Depends(get_current_user
 
 
 # ---------------------------------------------------------------------------
-# Internal helper — called from other routers, not exposed to clients
+# Internal helper - called from other routers, not exposed to clients
 # ---------------------------------------------------------------------------
 
 async def create_notification(user_id: str, type_: str, title: str, body: str, link: str | None = None):
