@@ -14,15 +14,20 @@ const STATUS_META: Record<string, { label: string; color: string; icon: string }
 };
 
 export default function BrandDashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
   const [brand, setBrand] = useState<Brand | null>(null);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [shortlistCount, setShortlistCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Wait for session to resolve before deciding what to do
+    if (isPending) return;
+    // If no session after resolving, stop loading (layout will redirect)
+    if (!session) { setLoading(false); return; }
+
     const token = getSessionToken();
-    if (!token) return;
+    if (!token) { setLoading(false); return; }
 
     Promise.all([
       api.getMyBrand(token).catch(() => null),
@@ -33,7 +38,7 @@ export default function BrandDashboardPage() {
       setInquiries(inqs);
       setShortlistCount(shortlist.length);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [session, isPending]);
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh]">

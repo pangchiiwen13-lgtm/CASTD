@@ -74,15 +74,17 @@ function ProfileCompleteness({ profile }: { profile: Talent }) {
 }
 
 export default function SuperstarDashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
   const router = useRouter();
   const [profile, setProfile] = useState<Talent | null>(null);
   const [bookings, setBookings] = useState<SuperstarBooking[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isPending) return;
+    if (!session) { setLoading(false); return; }
     const token = getSessionToken();
-    if (!token) return;
+    if (!token) { setLoading(false); return; }
 
     Promise.all([
       api.getMySuperstarsProfile(token),
@@ -99,7 +101,7 @@ export default function SuperstarDashboardPage() {
         }
       })
       .finally(() => setLoading(false));
-  }, [router]);
+  }, [session, isPending, router]);
 
   if (loading) {
     return (
