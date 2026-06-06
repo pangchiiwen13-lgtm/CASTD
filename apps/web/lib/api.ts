@@ -21,6 +21,13 @@ async function apiFetch<T>(
 }
 
 export const api = {
+  // Public (no auth)
+  getPublicStats: () =>
+    apiFetch<{ superstars: number; brands: number; completed_matches: number }>("/public/stats"),
+  getPublicReviews: () =>
+    apiFetch<PublicReview[]>("/ratings/public"),
+
+
   // Talents
   getTalents: (params: Record<string, string>, token: string) => {
     const qs = new URLSearchParams(params).toString();
@@ -74,6 +81,12 @@ export const api = {
     apiFetch<Talent>("/superstar/me", { method: "PATCH", body: JSON.stringify(data), token }),
   getMyBookings: (token: string) =>
     apiFetch<SuperstarBooking[]>("/superstar/bookings", { token }),
+
+  // Ratings
+  submitRating: (data: { inquiry_id: string; score: number; comment?: string }, token: string) =>
+    apiFetch<{ ok: boolean }>("/ratings", { method: "POST", body: JSON.stringify(data), token }),
+  checkRating: (inquiry_id: string, token: string) =>
+    apiFetch<{ has_rated: boolean; score?: number; comment?: string }>(`/ratings/check/${inquiry_id}`, { token }),
 };
 
 // Types
@@ -165,6 +178,14 @@ export interface SuperstarBooking {
   status: string;
   created_at: string;
   brand_name: string;
+}
+
+export interface PublicReview {
+  score: number;
+  comment: string;
+  ratee_type: "brand" | "superstar";
+  ratee_name: string;
+  created_at: string;
 }
 
 export interface Inquiry {

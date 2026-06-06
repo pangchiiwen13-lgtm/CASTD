@@ -6,6 +6,7 @@ import { api, type Inquiry } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSessionToken } from "@/lib/get-token";
+import { RatingModal } from "@/components/RatingModal";
 
 const STATUS_META: Record<string, {
   label: string; color: string; icon: string; description: string;
@@ -46,6 +47,8 @@ export default function InquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("All");
+  const [ratingTarget, setRatingTarget] = useState<Inquiry | null>(null);
+  const [ratedIds, setRatedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
@@ -54,6 +57,17 @@ export default function InquiriesPage() {
       .then(setInquiries)
       .finally(() => setLoading(false));
   }, [session, isPending]);
+
+  // When a closed inquiry card is loaded, check quietly if already rated
+  async function checkIfRated(inq: Inquiry) {
+    if (inq.status !== "closed") return;
+    const token = getSessionToken();
+    if (!token) return;
+    try {
+      const result = await api.checkRating(inq.id, token);
+      if (result.has_rated) setRatedIds(s => new Set(s).add(inq.id));
+    } catch (_) {}
+  }
 
   async function handleConfirm(inquiryId: string) {
     setConfirming(inquiryId);
@@ -174,6 +188,20 @@ export default function InquiriesPage() {
                       {confirming === inq.id ? "Processing…" : "Confirm talent →"}
                     </Button>
                   )}
+                  {inq.status === "closed" && (
+                    ratedIds.has(inq.id) ? (
+                      <span className="text-xs text-green-600 font-medium shrink-0">★ Rated</span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="shrink-0 h-8 text-xs"
+                        onClick={() => { checkIfRated(inq); setRatingTarget(inq); }}
+                      >
+                        Leave a review
+                      </Button>
+                    )
+                  )}
                 </div>
               </div>
             );
@@ -181,5 +209,17 @@ export default function InquiriesPage() {
         </div>
       )}
     </div>
+
+    {ratingTarget && (
+      <RatingModal
+        inquiryId={ratingTarget.id}
+        campaignName={ratingTarget.campaign_name}
+        onClose={() => setRatingTarget(null)}
+        onDone={() => {
+          setRatedIds(s => new Set(s).add(ratingTarget.id));
+          setRatingTarget(null);
+        }}
+      />
+    )}
   );
 }

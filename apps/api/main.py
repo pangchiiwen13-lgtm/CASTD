@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from database import get_pool, close_pool
 from config import settings
 from auth import get_admin_user
-from routers import talents, brands, inquiries, shortlists, confirmations, notifications, admin_settings, superstar
+from routers import talents, brands, inquiries, shortlists, confirmations, notifications, admin_settings, superstar, ratings
 
 
 @asynccontextmanager
@@ -32,11 +32,31 @@ app.include_router(confirmations.router)
 app.include_router(notifications.router)
 app.include_router(admin_settings.router)
 app.include_router(superstar.router)
+app.include_router(ratings.router)
 
 
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "castd-api"}
+
+
+@app.get("/public/stats")
+async def public_stats():
+    """Real-time platform metrics for the landing page. No auth required."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        superstars = await conn.fetchval(
+            "SELECT COUNT(*) FROM talents WHERE is_published = TRUE"
+        )
+        brands = await conn.fetchval("SELECT COUNT(*) FROM brands")
+        completed = await conn.fetchval(
+            "SELECT COUNT(*) FROM inquiries WHERE status IN ('confirmed', 'closed')"
+        )
+    return {
+        "superstars": int(superstars),
+        "brands": int(brands),
+        "completed_matches": int(completed),
+    }
 
 
 @app.get("/admin/stats")

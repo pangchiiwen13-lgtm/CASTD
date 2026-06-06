@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { api, type PublicReview } from "@/lib/api";
 
 const TICKER_ITEMS = [
   "Beauty", "Skincare", "Lifestyle", "Fashion",
@@ -20,16 +21,30 @@ function useScrollReveal() {
             obs.unobserve(e.target);
           }
         }),
-      { threshold: 0.1 }
+      { threshold: 0.08 }
     );
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
   }, []);
 }
 
+function Stars({ score }: { score: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <span key={n} className={n <= score ? "text-[#FFD200]" : "text-[#EBEBEB]"} style={{ fontSize: 14 }}>
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export default function LandingPage() {
   useScrollReveal();
   const [scrolled, setScrolled] = useState(false);
+  const [stats, setStats] = useState<{ superstars: number; brands: number; completed_matches: number } | null>(null);
+  const [reviews, setReviews] = useState<PublicReview[]>([]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 48);
@@ -37,10 +52,33 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    api.getPublicStats().then(setStats).catch(() => null);
+    api.getPublicReviews().then(setReviews).catch(() => null);
+  }, []);
+
+  const statCards = [
+    {
+      value: stats ? `${stats.superstars}+` : "...",
+      label: "Vetted Superstars",
+      sub: "beauty & lifestyle creators",
+    },
+    {
+      value: stats ? `${stats.brands}` : "...",
+      label: "Brands & Agencies",
+      sub: "registered on CASTD",
+    },
+    {
+      value: stats ? `${stats.completed_matches}` : "...",
+      label: "Completed Matches",
+      sub: "confirmed campaigns",
+    },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen bg-white overflow-x-hidden">
 
-      {/* ── NAV ─────────────────────────────────────────────────────────── */}
+      {/* NAV */}
       <nav
         className={cn(
           "fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 md:px-10 py-4 transition-all duration-300",
@@ -49,12 +87,10 @@ export default function LandingPage() {
             : "bg-transparent"
         )}
       >
-        <span
-          className={cn(
-            "font-display text-xl font-extrabold tracking-tight transition-colors duration-300",
-            scrolled ? "text-[#0C0C0C]" : "text-white"
-          )}
-        >
+        <span className={cn(
+          "font-display text-xl font-extrabold tracking-tight transition-colors duration-300",
+          scrolled ? "text-[#0C0C0C]" : "text-white"
+        )}>
           CASTD
         </span>
         <div className="flex items-center gap-2">
@@ -62,9 +98,7 @@ export default function LandingPage() {
             href="/login"
             className={cn(
               "text-sm font-medium px-4 py-2 rounded-full transition-colors duration-200",
-              scrolled
-                ? "text-[#0C0C0C] hover:bg-[#F8F7F4]"
-                : "text-white/70 hover:text-white"
+              scrolled ? "text-[#0C0C0C] hover:bg-[#F8F7F4]" : "text-white/70 hover:text-white"
             )}
           >
             Log in
@@ -78,10 +112,8 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── HERO ────────────────────────────────────────────────────────── */}
+      {/* HERO */}
       <section className="relative min-h-screen bg-[#0C0C0C] flex flex-col items-center justify-center px-6 text-center overflow-hidden">
-
-        {/* Grain texture */}
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.035]"
           style={{
@@ -89,11 +121,9 @@ export default function LandingPage() {
             backgroundSize: "200px",
           }}
         />
-        {/* Yellow ambient glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#FFD200] opacity-[0.05] rounded-full blur-[140px] pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl mx-auto">
-          {/* Eyebrow badge */}
           <div
             className="inline-flex items-center gap-2.5 mb-8 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-white/40 text-xs tracking-widest uppercase"
             style={{ animation: "fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both" }}
@@ -102,7 +132,6 @@ export default function LandingPage() {
             Beauty &amp; Lifestyle · Singapore
           </div>
 
-          {/* Headline */}
           <h1
             className="font-display text-6xl sm:text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-[0.92] mb-8"
             style={{ animation: "fadeUp 0.9s 0.08s cubic-bezier(0.16,1,0.3,1) both" }}
@@ -112,16 +141,14 @@ export default function LandingPage() {
             <span className="text-[#FFD200]">who you need.</span>
           </h1>
 
-          {/* Sub */}
           <p
             className="text-white/45 text-lg md:text-xl max-w-lg mx-auto leading-relaxed mb-10"
             style={{ animation: "fadeUp 0.9s 0.16s cubic-bezier(0.16,1,0.3,1) both" }}
           >
             Singapore's marketplace connecting beauty and lifestyle brands with
-            vetted on-screen talent - free to browse, pay only at confirmation.
+            vetted on-screen talent. Free to browse, pay only at confirmation.
           </p>
 
-          {/* CTAs */}
           <div
             className="flex flex-wrap gap-4 justify-center"
             style={{ animation: "fadeUp 0.9s 0.24s cubic-bezier(0.16,1,0.3,1) both" }}
@@ -141,7 +168,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Scroll cue */}
         <div
           className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
           style={{ animation: "fadeIn 1.2s 1.2s both" }}
@@ -151,7 +177,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── MARQUEE TICKER ──────────────────────────────────────────────── */}
+      {/* MARQUEE TICKER */}
       <div className="bg-[#FFD200] py-3.5 overflow-hidden select-none border-y border-[#0C0C0C]/8">
         <div
           className="flex whitespace-nowrap"
@@ -173,18 +199,22 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* ── STATS ───────────────────────────────────────────────────────── */}
+      {/* LIVE STATS */}
       <section className="bg-white px-6 py-24">
         <div className="max-w-5xl mx-auto">
+          <div className="mb-10 reveal" data-reveal="true">
+            <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">
+              Live platform metrics
+            </span>
+            <h2 className="font-display text-3xl md:text-4xl font-extrabold text-[#0C0C0C] mt-3 tracking-tight">
+              Growing every week.
+            </h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#EBEBEB] border border-[#EBEBEB]">
-            {[
-              { value: "27+", label: "Vetted Superstars", sub: "beauty & lifestyle creators" },
-              { value: "SGD 0", label: "Cost to browse", sub: "pay only when you confirm" },
-              { value: "100%", label: "Singapore-focused", sub: "brands, agencies, creators" },
-            ].map((s, i) => (
+            {statCards.map((s, i) => (
               <div
                 key={i}
-                className="reveal bg-white px-10 py-12 group hover:bg-[#F8F7F4] transition-colors duration-300"
+                className="reveal bg-white px-10 py-12 hover:bg-[#F8F7F4] transition-colors duration-300"
                 data-reveal="true"
                 style={{ transitionDelay: `${i * 0.1}s` }}
               >
@@ -199,46 +229,32 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ────────────────────────────────────────────────── */}
+      {/* HOW IT WORKS */}
       <section className="bg-[#F8F7F4] border-y border-[#EBEBEB] px-6 py-24">
         <div className="max-w-5xl mx-auto">
-
           <div className="mb-16 reveal" data-reveal="true">
-            <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">
-              Process
-            </span>
+            <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">Process</span>
             <h2 className="font-display text-4xl md:text-5xl font-extrabold text-[#0C0C0C] mt-4 leading-[0.95] tracking-tight">
               Three steps.<br />Zero guesswork.
             </h2>
           </div>
-
           <div className="grid md:grid-cols-3 gap-12 md:gap-8">
             {[
               {
-                n: "01",
-                title: "Browse free",
-                desc: "Filter 27+ profiles by content type, language, vibe, and follower count. Every profile is visible - no paywalls, no credits.",
+                n: "01", title: "Browse free",
+                desc: "Filter 27+ profiles by content type, language, vibe, and follower count. Every profile is visible. No paywalls, no credits.",
               },
               {
-                n: "02",
-                title: "Shortlist & inquire",
+                n: "02", title: "Shortlist & inquire",
                 desc: "Save your picks to a casting board. Submit a campaign brief with dates, deliverables, and budget. Still completely free.",
               },
               {
-                n: "03",
-                title: "Confirm & go",
+                n: "03", title: "Confirm & go",
                 desc: "Found the right fit? Confirm the talent and pay the one-time contact fee. Platform handles everything after.",
               },
             ].map((s, i) => (
-              <div
-                key={i}
-                className="reveal"
-                data-reveal="true"
-                style={{ transitionDelay: `${0.1 + i * 0.12}s` }}
-              >
-                <div className="font-display text-7xl font-extrabold text-[#E0E0E0] leading-none mb-6 select-none">
-                  {s.n}
-                </div>
+              <div key={i} className="reveal" data-reveal="true" style={{ transitionDelay: `${0.1 + i * 0.12}s` }}>
+                <div className="font-display text-7xl font-extrabold text-[#E0E0E0] leading-none mb-6 select-none">{s.n}</div>
                 <div className="font-display text-xl font-bold text-[#0C0C0C] mb-3">{s.title}</div>
                 <div className="text-[#7A7A7A] text-sm leading-relaxed">{s.desc}</div>
               </div>
@@ -247,25 +263,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FOR BRANDS / FOR SUPERSTARS ─────────────────────────────────── */}
+      {/* FOR BRANDS / FOR SUPERSTARS */}
       <section className="bg-white px-6 py-24">
         <div className="max-w-5xl mx-auto">
           <div className="mb-16 reveal" data-reveal="true">
-            <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">
-              Who it's for
-            </span>
+            <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">Who it's for</span>
             <h2 className="font-display text-4xl md:text-5xl font-extrabold text-[#0C0C0C] mt-4 leading-[0.95] tracking-tight">
               One platform.<br />Both sides.
             </h2>
           </div>
-
           <div className="grid md:grid-cols-2 gap-4">
-
-            {/* Brands */}
-            <div
-              className="reveal bg-[#0C0C0C] rounded-2xl p-10 flex flex-col"
-              data-reveal="true"
-            >
+            <div className="reveal bg-[#0C0C0C] rounded-2xl p-10 flex flex-col" data-reveal="true">
               <span className="inline-block text-[#FFD200] text-[10px] tracking-[0.2em] uppercase font-semibold mb-8">
                 For Brands &amp; Agencies
               </span>
@@ -274,32 +282,23 @@ export default function LandingPage() {
               </h3>
               <ul className="space-y-4 mb-10 flex-1">
                 {[
-                  "Search 27+ vetted creator profiles",
+                  "Search vetted creator profiles",
                   "Filter by language, vibe, content type",
                   "Submit unlimited free inquiries",
                   "AI-matched fit score per talent",
-                  "Confirm & secure - pay only here",
+                  "Confirm and secure. Pay only here.",
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-3 text-sm text-white/55">
-                    <span className="mt-0.5 text-[#FFD200] shrink-0 text-[10px]">✦</span>
-                    {f}
+                    <span className="mt-0.5 text-[#FFD200] shrink-0 text-[10px]">✦</span>{f}
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/signup"
-                className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#FFD200] text-[#0C0C0C] font-semibold text-sm hover:bg-white transition-colors"
-              >
+              <Link href="/signup" className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#FFD200] text-[#0C0C0C] font-semibold text-sm hover:bg-white transition-colors">
                 Browse catalog →
               </Link>
             </div>
 
-            {/* Superstars */}
-            <div
-              className="reveal bg-[#F8F7F4] border border-[#EBEBEB] rounded-2xl p-10 flex flex-col"
-              data-reveal="true"
-              style={{ transitionDelay: "0.12s" }}
-            >
+            <div className="reveal bg-[#F8F7F4] border border-[#EBEBEB] rounded-2xl p-10 flex flex-col" data-reveal="true" style={{ transitionDelay: "0.12s" }}>
               <span className="inline-block text-[#7A7A7A] text-[10px] tracking-[0.2em] uppercase font-semibold mb-8">
                 For Superstars
               </span>
@@ -315,15 +314,11 @@ export default function LandingPage() {
                   "Build your collab portfolio",
                 ].map((f) => (
                   <li key={f} className="flex items-start gap-3 text-sm text-[#7A7A7A]">
-                    <span className="mt-0.5 text-[#0C0C0C] shrink-0 text-[10px]">✦</span>
-                    {f}
+                    <span className="mt-0.5 text-[#0C0C0C] shrink-0 text-[10px]">✦</span>{f}
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/signup"
-                className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0C0C0C] text-white font-semibold text-sm hover:bg-[#2A2A2A] transition-colors"
-              >
+              <Link href="/signup" className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0C0C0C] text-white font-semibold text-sm hover:bg-[#2A2A2A] transition-colors">
                 Join as Superstar →
               </Link>
             </div>
@@ -331,12 +326,57 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FINAL CTA ───────────────────────────────────────────────────── */}
+      {/* REVIEWS */}
+      <section className="bg-[#0C0C0C] px-6 py-24">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-16 reveal" data-reveal="true">
+            <span className="text-[10px] text-[#FFD200]/60 tracking-[0.2em] uppercase font-semibold">Reviews</span>
+            <h2 className="font-display text-4xl md:text-5xl font-extrabold text-white mt-4 leading-[0.95] tracking-tight">
+              What they're saying.
+            </h2>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className="reveal border border-white/8 rounded-2xl p-12 text-center" data-reveal="true">
+              <div className="flex justify-center gap-1 mb-4">
+                {[1,2,3,4,5].map(n => (
+                  <span key={n} className="text-[#FFD200]" style={{ fontSize: 24 }}>★</span>
+                ))}
+              </div>
+              <p className="text-white/40 text-sm max-w-sm mx-auto">
+                Reviews from real campaigns will appear here as brands and Superstars complete their first collaborations.
+              </p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-4">
+              {reviews.map((r, i) => (
+                <div
+                  key={i}
+                  className="reveal border border-white/8 rounded-2xl p-6 flex flex-col gap-4 hover:border-white/16 transition-colors"
+                  data-reveal="true"
+                  style={{ transitionDelay: `${i * 0.07}s` }}
+                >
+                  <Stars score={r.score} />
+                  <p className="text-white/70 text-sm leading-relaxed flex-1">"{r.comment}"</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white text-xs font-semibold">{r.ratee_name}</p>
+                      <p className="text-white/30 text-xs capitalize">{r.ratee_type}</p>
+                    </div>
+                    <span className="text-white/20 text-xs">
+                      {new Date(r.created_at).toLocaleDateString("en-SG", { month: "short", year: "numeric" })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
       <section className="bg-[#FFD200] px-6 py-28">
-        <div
-          className="max-w-3xl mx-auto text-center reveal"
-          data-reveal="true"
-        >
+        <div className="max-w-3xl mx-auto text-center reveal" data-reveal="true">
           <h2 className="font-display text-5xl md:text-6xl font-extrabold text-[#0C0C0C] tracking-tight leading-[0.93] mb-6">
             Your next campaign<br />starts here.
           </h2>
@@ -352,7 +392,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FOOTER ──────────────────────────────────────────────────────── */}
+      {/* FOOTER */}
       <footer className="bg-[#0C0C0C] px-6 md:px-10 py-10 flex flex-col sm:flex-row items-center justify-between gap-6">
         <span className="font-display text-lg font-extrabold text-white tracking-tight">CASTD</span>
         <div className="flex gap-8 text-sm text-white/25">

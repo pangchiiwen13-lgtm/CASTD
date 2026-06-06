@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api, SuperstarBooking } from "@/lib/api";
 import { getSessionToken } from "@/lib/get-token";
+import { RatingModal } from "@/components/RatingModal";
 
 const STATUS_META: Record<string, { label: string; color: string; icon: string; description: string }> = {
   open:      { label: "Submitted",  color: "bg-blue-50 text-blue-700 border-blue-200",      icon: "📋", description: "Your booking has been submitted and is awaiting review." },
@@ -17,12 +18,24 @@ export default function SuperstarBookingsPage() {
   const [bookings, setBookings] = useState<SuperstarBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("All");
+  const [ratingTarget, setRatingTarget] = useState<SuperstarBooking | null>(null);
+  const [ratedIds, setRatedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const token = getSessionToken();
     if (!token) return;
     api.getMyBookings(token)
-      .then(setBookings)
+      .then(async (data) => {
+        setBookings(data);
+        // Pre-check which closed bookings are already rated
+        const closed = data.filter(b => b.status === "closed");
+        await Promise.all(closed.map(async (b) => {
+          try {
+            const r = await api.checkRating(b.id, token);
+            if (r.has_rated) setRatedIds(s => new Set(s).add(b.id));
+          } catch (_) {}
+        }));
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -97,13 +110,37 @@ export default function SuperstarBookingsPage() {
                 </div>
 
                 {/* Status description */}
-                <div className={`mt-4 text-xs px-3 py-2 rounded-lg border ${meta.color}`}>
-                  {meta.description}
+                <div className={`mt-4 text-xs px-3 py-2 rounded-lg border flex items-center justify-between gap-4 ${meta.color}`}>
+                  <span>{meta.description}</span>
+                  {b.status === "closed" && (
+                    ratedIds.has(b.id) ? (
+                      <span className="text-green-600 font-medium shrink-0">★ Rated</span>
+                    ) : (
+                      <button
+                        className="shrink-0 text-xs font-semibold underline underline-offset-2 hover:opacity-70 transition-opacity"
+                        onClick={() => setRatingTarget(b)}
+                      >
+                        Rate this brand
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {ratingTarget && (
+        <RatingModal
+          inquiryId={ratingTarget.id}
+          campaignName={ratingTarget.campaign_name}
+          onClose={() => setRatingTarget(null)}
+          onDone={() => {
+            setRatedIds(s => new Set(s).add(ratingTarget.id));
+            setRatingTarget(null);
+          }}
+        />
       )}
     </div>
   );
