@@ -94,6 +94,7 @@ export default function InquiriesPage() {
   const activeCount = inquiries.filter(i => ["open", "reviewing"].includes(i.status)).length;
 
   return (
+    <>
     <div className="max-w-3xl mx-auto px-6 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Inquiries</h1>
@@ -210,16 +211,17 @@ export default function InquiriesPage() {
       )}
     </div>
 
-    {ratingTarget && (
-      <RatingModal
-        inquiryId={ratingTarget.id}
-        campaignName={ratingTarget.campaign_name}
-        onClose={() => setRatingTarget(null)}
-        onDone={() => {
-          setRatedIds(s => new Set(s).add(ratingTarget.id));
-          setRatingTarget(null);
-        }}
-      />
-    )}
+      {ratingTarget && (
+        <RatingModal
+          inquiryId={ratingTarget.id}
+          campaignName={ratingTarget.campaign_name}
+          onClose={() => setRatingTarget(null)}
+          onDone={() => {
+            setRatedIds(s => new Set(s).add(ratingTarget.id));
+            setRatingTarget(null);
+          }}
+        />
+      )}
+    </>
   );
 }
