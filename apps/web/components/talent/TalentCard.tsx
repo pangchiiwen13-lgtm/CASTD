@@ -64,7 +64,7 @@ export function TalentCard({ talent, onShortlist, isSaved }: Props) {
             )}
             aria-label={isSaved ? "Remove from shortlist" : "Save to shortlist"}
           >
-            {isSaved ? "★" : "☆"}
+            <span className={`w-3 h-3 inline-block transition-all ${isSaved ? "bg-[#0C0C0C]" : "bg-white/40"}`} style={{ clipPath: "polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)" }} />
           </button>
         )}
 

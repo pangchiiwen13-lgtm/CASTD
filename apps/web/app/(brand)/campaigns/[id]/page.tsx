@@ -85,7 +85,7 @@ export default function BrandCampaignDetailPage() {
       </Link>
 
       {/* Header card */}
-      <div className="rounded-2xl border p-6 mb-6">
+      <div className="rounded-2xl bg-white border border-[#F0EDEA] shadow-sm p-6 mb-6">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-full overflow-hidden bg-[#0C0C0C] shrink-0 flex items-center justify-center">
             {photo
@@ -155,7 +155,7 @@ export default function BrandCampaignDetailPage() {
 
         {campaign.status === "completed" && (
           <div className="mt-5 pt-5 border-t flex items-center gap-2 text-green-600">
-            <span className="text-lg">✓</span>
+            <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">ok</span>
             <span className="text-sm font-medium">Delivery confirmed on {fmtDate(campaign.brand_confirmed_at)}</span>
           </div>
         )}

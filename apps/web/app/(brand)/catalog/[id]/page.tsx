@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { InquiryDialog } from "@/components/talent/InquiryDialog";
 import { AvailabilityCalendar } from "@/components/calendar/AvailabilityCalendar";
 import { getSessionToken } from "@/lib/get-token";
+import type { AvailabilityRule } from "@/lib/api";
 import Link from "next/link";
 
 function fmtNum(n: number) {
@@ -37,6 +38,7 @@ export default function TalentProfilePage() {
   const [showInquiry, setShowInquiry] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
+  const [availabilityRules, setAvailabilityRules] = useState<AvailabilityRule[]>([]);
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
@@ -48,7 +50,9 @@ export default function TalentProfilePage() {
         const t = await api.getTalent(id, token);
         setTalent(t);
         // Load availability calendar
-        api.getBlockedDates(id, token).then(r => setBlockedDates(r.blocked_dates)).catch(() => null);
+        api.getCalendar(id, token)
+          .then(r => { setBlockedDates(r.blocked_dates); setAvailabilityRules(r.availability_rules); })
+          .catch(() => null);
       }
       finally { setLoading(false); }
     })();
@@ -260,6 +264,7 @@ export default function TalentProfilePage() {
                 <AvailabilityCalendar
                   talentId={talent.id}
                   blockedDates={blockedDates}
+                  availabilityRules={availabilityRules}
                   editable={false}
                 />
               </div>

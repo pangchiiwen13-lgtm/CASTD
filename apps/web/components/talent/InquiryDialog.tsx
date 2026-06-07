@@ -65,14 +65,12 @@ export function InquiryDialog({ talent, onClose }: Props) {
             <div className="grid grid-cols-2 gap-2">
               <RemunerationCard
                 active={!isCash}
-                icon="🎁"
                 title="Product / Service"
                 desc="Gifting, barter, collab"
                 onClick={() => setForm(f => ({ ...f, remuneration_type: "product" }))}
               />
               <RemunerationCard
                 active={isCash}
-                icon="💵"
                 title="Cash Budget"
                 desc="Paid engagement"
                 onClick={() => setForm(f => ({ ...f, remuneration_type: "cash" }))}
@@ -143,8 +141,8 @@ export function InquiryDialog({ talent, onClose }: Props) {
   );
 }
 
-function RemunerationCard({ active, icon, title, desc, onClick }: {
-  active: boolean; icon: string; title: string; desc: string; onClick: () => void;
+function RemunerationCard({ active, title, desc, onClick }: {
+  active: boolean; title: string; desc: string; onClick: () => void;
 }) {
   return (
     <button
@@ -154,10 +152,15 @@ function RemunerationCard({ active, icon, title, desc, onClick }: {
         "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 text-center transition-all",
         active
           ? "border-[#FFD200] bg-[#FFFBEB]"
-          : "border-[#EBEBEB] hover:border-[#FFD200]/50"
+          : "border-[#EBEBEB] hover:border-[#FFD200]/50",
       )}
     >
-      <span className="text-xl">{icon}</span>
+      <div className={cn(
+        "w-7 h-7 rounded-lg flex items-center justify-center mb-0.5 transition-colors",
+        active ? "bg-[#FFD200]" : "bg-[#F5F3F0]",
+      )}>
+        <span className={cn("w-2.5 h-2.5 rounded-full inline-block", active ? "bg-[#0C0C0C]" : "bg-[#CCCCCC]")} />
+      </div>
       <div>
         <div className="text-xs font-semibold text-[#0C0C0C]">{title}</div>
         <div className="text-[10px] text-muted-foreground mt-0.5">{desc}</div>

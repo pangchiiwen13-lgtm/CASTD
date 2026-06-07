@@ -95,8 +95,12 @@ export const api = {
     apiFetch<ChatMessage>(`/messages/${campaignId}`, { method: "POST", body: JSON.stringify({ body }), token }),
 
   // Calendar
-  getBlockedDates: (talentId: string, token: string) =>
-    apiFetch<{ talent_id: string; blocked_dates: string[] }>(`/calendar/${talentId}`, { token }),
+  getCalendar: (talentId: string, token: string) =>
+    apiFetch<{ talent_id: string; blocked_dates: string[]; availability_rules: AvailabilityRule[] }>(`/calendar/${talentId}`, { token }),
+  setSchedule: (talentId: string, rules: AvailabilityRule[], token: string) =>
+    apiFetch<{ ok: boolean; rules_saved: number }>(`/calendar/${talentId}/schedule`, {
+      method: "PUT", body: JSON.stringify({ rules }), token,
+    }),
   toggleBlockedDate: (talentId: string, date: string, token: string) =>
     apiFetch<{ action: string; date: string }>(`/calendar/${talentId}/toggle`, {
       method: "POST", body: JSON.stringify({ date }), token,
@@ -236,6 +240,12 @@ export interface Inquiry {
   created_at: string;
 }
 
+
+export interface AvailabilityRule {
+  day_of_week: number;  // 0=Sun, 1=Mon ... 6=Sat
+  start_time: string;   // "HH:MM"
+  end_time: string;     // "HH:MM"
+}
 
 export interface ChatMessage {
   id: string;

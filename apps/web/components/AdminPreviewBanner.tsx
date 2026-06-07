@@ -48,9 +48,10 @@ export function AdminPreviewBanner({ current }: { current: PreviewMode }) {
     <div className="bg-[#FFD200] text-[#0C0C0C] px-4 py-1.5 flex items-center justify-between gap-4 text-xs font-semibold">
       {/* Left - current context */}
       <span className="flex items-center gap-1.5">
-        ⚡ Admin Preview
+        <span className="w-1.5 h-1.5 rounded-full bg-[#0C0C0C]/40 inline-block animate-pulse" />
+        Admin Preview
         <span className="mx-1 opacity-40">·</span>
-        {isBrand ? "🏢 Brand Portal" : "⭐ Superstar Portal"}
+        {isBrand ? "Brand Portal" : "Superstar Portal"}
       </span>
 
       {/* Right - controls */}
@@ -60,7 +61,7 @@ export function AdminPreviewBanner({ current }: { current: PreviewMode }) {
           onClick={() => switchTo(isBrand ? "superstar" : "brand")}
           className="flex items-center gap-1 bg-[#0C0C0C] text-[#FFD200] px-2.5 py-0.5 rounded-full hover:bg-[#2A2A2A] transition-colors"
         >
-          {isBrand ? "⭐ Superstar" : "🏢 Brand"}
+          {isBrand ? "Superstar" : "Brand"}
         </button>
         <span className="opacity-30">|</span>
         <button

@@ -79,13 +79,13 @@ export default function CatalogPage() {
     <div className="max-w-7xl mx-auto px-6 py-8">
       {/* Brand profile prompt */}
       {showProfileBanner && (
-        <div className="mb-6 flex items-center justify-between gap-4 rounded-lg border border-dashed px-4 py-3 bg-muted/40">
+        <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-dashed border-[#FFD200]/60 px-4 py-3 bg-white shadow-sm">
           <div>
             <p className="text-sm font-medium">Set up your brand profile for AI-matched talent scores</p>
             <p className="text-xs text-muted-foreground mt-0.5">Tell us about your brand and we&apos;ll rank talents by how well they fit your campaigns.</p>
           </div>
-          <Link href="/settings" className={cn(buttonVariants({ size: "sm" }), "shrink-0")}>
-            Set up →
+          <Link href="/settings" className={cn(buttonVariants({ size: "sm" }), "shrink-0 rounded-full bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]")}>
+            Set up
           </Link>
         </div>
       )}

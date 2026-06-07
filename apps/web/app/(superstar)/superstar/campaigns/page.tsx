@@ -75,7 +75,9 @@ export default function SuperstarCampaignsPage() {
         <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
       ) : campaigns.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-[#EBEBEB] py-16 px-8 text-center">
-          <p className="text-4xl mb-4">🎬</p>
+            <div className="w-12 h-12 rounded-2xl bg-[#F5F3F0] mx-auto mb-4 flex items-center justify-center">
+            <div className="w-5 h-5 rounded-full border-2 border-[#CCCCCC]" />
+          </div>
           <h2 className="text-lg font-semibold mb-2">No campaigns yet</h2>
           <p className="text-muted-foreground text-sm max-w-sm mx-auto">
             Campaigns appear here when a brand confirms a booking with you. Make sure your profile is published and looking great!
@@ -187,7 +189,7 @@ function CampaignCard({ campaign: c, children }: { campaign: Campaign; children?
   const st = STATUS_LABELS[c.status] || { label: c.status, color: "bg-gray-100 text-gray-600" };
 
   return (
-    <div className="rounded-xl border px-5 py-4 hover:bg-muted/30 transition-colors">
+    <div className="rounded-2xl bg-white border border-[#F0EDEA] px-5 py-4 hover:shadow-md transition-shadow shadow-sm">
       <div className="flex items-start gap-4">
         <div className="w-10 h-10 rounded-full bg-[#0C0C0C] shrink-0 flex items-center justify-center">
           <span className="text-[#FFD200] font-bold text-xs">{c.company_name?.slice(0,2).toUpperCase()}</span>

@@ -69,7 +69,7 @@ export default function OnboardingPage() {
   const totalBrandSteps = 2;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-16">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-[#FFF8EC]">
       <div className="w-full max-w-md">
         <div className="mb-8">
           <div className="text-2xl font-bold mb-1">CASTD</div>
@@ -93,14 +93,12 @@ export default function OnboardingPage() {
             <RoleCard
               title="I'm a Brand / Agency"
               description="Discover and book on-screen video talent for your campaigns."
-              icon="🏢"
               selected={role === "brand"}
               onClick={() => selectRole("brand")}
             />
             <RoleCard
               title="I'm a Superstar"
               description="Showcase your talent and get booked for beauty and lifestyle campaigns."
-              icon="⭐"
               selected={role === "superstar"}
               onClick={() => selectRole("superstar")}
             />
@@ -177,23 +175,28 @@ export default function OnboardingPage() {
   );
 }
 
-function RoleCard({ title, description, icon, selected, onClick }: {
-  title: string; description: string; icon: string; selected: boolean; onClick: () => void;
+function RoleCard({ title, description, selected, onClick }: {
+  title: string; description: string; selected: boolean; onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        "w-full text-left p-5 rounded-xl border-2 transition-all flex items-start gap-4",
+        "w-full text-left p-5 rounded-2xl border-2 transition-all flex items-center gap-4",
         selected
-          ? "border-primary bg-[#FFFBEB]"
-          : "border-[#EBEBEB] hover:border-primary/50 hover:bg-muted/50"
+          ? "border-[#FFD200] bg-white shadow-md"
+          : "border-[#E8E4E0] bg-white hover:border-[#FFD200]/60 hover:shadow-sm",
       )}
     >
-      <span className="text-3xl">{icon}</span>
+      <div className={cn(
+        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+        selected ? "bg-[#FFD200]" : "bg-[#F5F3F0]",
+      )}>
+        <span className={cn("w-4 h-4 rounded-full inline-block", selected ? "bg-[#0C0C0C]" : "bg-[#CCCCCC]")} />
+      </div>
       <div>
-        <div className="font-semibold text-[15px]">{title}</div>
-        <div className="text-sm text-muted-foreground mt-0.5">{description}</div>
+        <div className="font-semibold text-[15px] text-[#1A1A1A]">{title}</div>
+        <div className="text-sm text-[#9A9A9A] mt-0.5">{description}</div>
       </div>
     </button>
   );

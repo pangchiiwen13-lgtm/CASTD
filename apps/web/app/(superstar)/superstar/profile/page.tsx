@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { api, Talent } from "@/lib/api";
+import { api, Talent, type AvailabilityRule } from "@/lib/api";
 import { AvailabilityCalendar } from "@/components/calendar/AvailabilityCalendar";
 import { getSessionToken } from "@/lib/get-token";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ export default function SuperstarProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [calendarData, setCalendarData] = useState<{ blocked_dates: string[]; availability_rules: AvailabilityRule[] }>({ blocked_dates: [], availability_rules: [] });
 
   // Form state - mirrors editable fields
   const [form, setForm] = useState({
@@ -56,6 +57,10 @@ export default function SuperstarProfilePage() {
     api.getMySuperstarsProfile(token)
       .then(p => {
         setProfile(p);
+        // Load calendar data for this talent
+        api.getCalendar(p.id, token)
+          .then(c => setCalendarData(c))
+          .catch(() => null);
         setForm({
           name: p.name || "",
           age: p.age?.toString() || "",
@@ -135,14 +140,13 @@ export default function SuperstarProfilePage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold">My Profile</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {profile.is_published
-              ? "✅ Your profile is live"
-              : "⏳ Pending admin approval"}
+          <p className="text-sm text-[#9A9A9A] mt-1 flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full inline-block ${profile.is_published ? "bg-green-500" : "bg-amber-400"}`} />
+            {profile.is_published ? "Your profile is live" : "Pending admin approval"}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {saved && <span className="text-sm text-green-600 font-medium">Saved ✓</span>}
+          {saved && <span className="text-sm text-green-600 font-medium flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> Saved</span>}
           <Button onClick={handleSave} disabled={saving} className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]">
             {saving ? "Saving…" : "Save changes"}
           </Button>
@@ -324,7 +328,8 @@ export default function SuperstarProfilePage() {
             </p>
             <AvailabilityCalendar
               talentId={profile.id}
-              blockedDates={[]}
+              blockedDates={calendarData.blocked_dates}
+              availabilityRules={calendarData.availability_rules}
               editable={true}
               token={getSessionToken() || ""}
             />
@@ -335,7 +340,7 @@ export default function SuperstarProfilePage() {
       {/* Save button at bottom */}
       <div className="mt-10 flex items-center justify-between pt-6 border-t">
         {error && <p className="text-sm text-destructive">{error}</p>}
-        {saved && <span className="text-sm text-green-600 font-medium">Changes saved ✓</span>}
+        {saved && <span className="text-sm text-green-600 font-medium flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> Changes saved</span>}
         <Button onClick={handleSave} disabled={saving} className="ml-auto bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]">
           {saving ? "Saving…" : "Save changes"}
         </Button>

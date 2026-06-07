@@ -50,11 +50,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#FFF8EC]">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="text-2xl font-bold tracking-tight mb-1">CASTD</div>
-          <p className="text-muted-foreground text-sm">Sign in to your account</p>
+          <div className="text-2xl font-bold tracking-tight mb-1 text-[#1A1A1A]">CASTD</div>
+          <p className="text-[#9A9A9A] text-sm">Sign in to your account</p>
         </div>
 
         {/* Portal selection - required */}
@@ -62,14 +62,12 @@ export default function LoginPage() {
           <p className="text-sm font-medium text-[#0C0C0C] mb-3 text-center">I am signing in as a...</p>
           <div className="grid grid-cols-2 gap-3">
             <PortalCard
-              icon="⭐"
               title="Superstar"
               desc="Talent portal"
               selected={portal === "superstar"}
               onClick={() => { setPortal("superstar"); setError(""); }}
             />
             <PortalCard
-              icon="🏢"
               title="Brand"
               desc="Brand portal"
               selected={portal === "brand"}
@@ -123,25 +121,28 @@ export default function LoginPage() {
   );
 }
 
-function PortalCard({ icon, title, desc, selected, onClick }: {
-  icon: string; title: string; desc: string; selected: boolean; onClick: () => void;
+function PortalCard({ title, desc, selected, onClick }: {
+  title: string; desc: string; selected: boolean; onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "w-full text-left p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 text-center",
+        "w-full text-left p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 text-center items-center",
         selected
-          ? "border-[#FFD200] bg-[#FFFBEB]"
-          : "border-[#EBEBEB] hover:border-[#FFD200]/50"
+          ? "border-[#FFD200] bg-white shadow-md"
+          : "border-[#E8E4E0] bg-white hover:border-[#FFD200]/60 hover:shadow-sm",
       )}
     >
-      <span className="text-2xl">{icon}</span>
-      <div>
-        <div className="font-semibold text-sm text-[#0C0C0C]">{title}</div>
-        <div className="text-[11px] text-muted-foreground mt-0.5">{desc}</div>
+      <div className={cn(
+        "w-8 h-8 rounded-xl mb-1 flex items-center justify-center transition-colors",
+        selected ? "bg-[#FFD200]" : "bg-[#F5F3F0]",
+      )}>
+        <span className={cn("w-3 h-3 rounded-full inline-block", selected ? "bg-[#0C0C0C]" : "bg-[#CCCCCC]")} />
       </div>
+      <div className="font-semibold text-sm text-[#1A1A1A]">{title}</div>
+      <div className="text-[11px] text-[#9A9A9A]">{desc}</div>
     </button>
   );
 }

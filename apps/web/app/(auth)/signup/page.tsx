@@ -52,7 +52,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#FFF8EC]">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="text-2xl font-bold tracking-tight mb-1">CASTD</div>
@@ -64,14 +64,12 @@ export default function SignupPage() {
           <p className="text-sm font-medium text-[#0C0C0C] mb-3 text-center">I want to join as a...</p>
           <div className="grid grid-cols-2 gap-3">
             <RoleCard
-              icon="⭐"
               title="Superstar"
               desc="Get discovered and booked"
               selected={role === "superstar"}
               onClick={() => { setRole("superstar"); setError(""); }}
             />
             <RoleCard
-              icon="🏢"
               title="Brand / Agency"
               desc="Find and book talent"
               selected={role === "brand"}
@@ -129,25 +127,28 @@ export default function SignupPage() {
   );
 }
 
-function RoleCard({ icon, title, desc, selected, onClick }: {
-  icon: string; title: string; desc: string; selected: boolean; onClick: () => void;
+function RoleCard({ title, desc, selected, onClick }: {
+  title: string; desc: string; selected: boolean; onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "w-full text-left p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
+        "w-full text-left p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 text-center",
         selected
-          ? "border-[#FFD200] bg-[#FFFBEB]"
-          : "border-[#EBEBEB] hover:border-[#FFD200]/50"
+          ? "border-[#FFD200] bg-white shadow-md"
+          : "border-[#E8E4E0] bg-white hover:border-[#FFD200]/60 hover:shadow-sm",
       )}
     >
-      <span className="text-2xl">{icon}</span>
-      <div>
-        <div className="font-semibold text-sm text-[#0C0C0C]">{title}</div>
-        <div className="text-[11px] text-muted-foreground mt-0.5">{desc}</div>
+      <div className={cn(
+        "w-8 h-8 rounded-xl mb-1 flex items-center justify-center transition-colors",
+        selected ? "bg-[#FFD200]" : "bg-[#F5F3F0]",
+      )}>
+        <span className={cn("w-3 h-3 rounded-full inline-block", selected ? "bg-[#0C0C0C]" : "bg-[#CCCCCC]")} />
       </div>
+      <div className="font-semibold text-sm text-[#1A1A1A]">{title}</div>
+      <div className="text-[11px] text-[#9A9A9A] mt-0.5">{desc}</div>
     </button>
   );
 }
