@@ -18,32 +18,28 @@ const TICKER_ITEMS = [
 const STEPS = [
   {
     num: "01",
-    icon: "🔍",
     title: "Browse free",
     body: "Search 27+ vetted creator profiles. Filter by content type, language, vibe, and audience size. No paywall, no credits.",
     tags: ["Beauty Tutorial", "Lifestyle", "UGC", "GRWM"],
   },
   {
     num: "02",
-    icon: "❤️",
-    title: "Shortlist & inquire",
+    title: "Shortlist and inquire",
     body: "Save picks to your casting board. Submit a campaign brief with dates, deliverables, and budget - still completely free.",
     tags: ["Product launch", "Social media ad", "Brand video"],
   },
   {
     num: "03",
-    icon: "✅",
-    title: "Confirm & go",
+    title: "Confirm and go",
     body: "Found the perfect fit? Confirm the Superstar. Our team handles everything after - campaign coordination included.",
     tags: ["Managed process", "14-day delivery", "Chat included"],
   },
 ];
 
 const TALENT_BUBBLES = [
-  { initials: "AM", bg: "#FFD200", text: "#1A1A1A", label: "Beauty" },
-  { initials: "JW", bg: "#1A1A1A", text: "#FFD200", label: "Lifestyle" },
-  { initials: "TL", bg: "#F0E8D8", text: "#1A1A1A", label: "Fashion" },
-  { initials: "SN", bg: "#FFD200", text: "#1A1A1A", label: "Skincare" },
+  { initials: "AM", bg: "#FFD200", text: "#1A1A1A" },
+  { initials: "JW", bg: "#1A1A1A", text: "#FFD200" },
+  { initials: "TL", bg: "#F0E8D8", text: "#1A1A1A" },
 ];
 
 function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
@@ -59,11 +55,15 @@ function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string
   return <span ref={ref}>{display}{suffix}</span>;
 }
 
-function Stars({ score }: { score: number }) {
+function StarRating({ score }: { score: number }) {
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} style={{ fontSize: 14, color: n <= score ? "#FFD200" : "#E8E0D0" }}>★</span>
+        <div
+          key={n}
+          className="w-3 h-3 rounded-sm"
+          style={{ backgroundColor: n <= score ? "#FFD200" : "#E8E0D0" }}
+        />
       ))}
     </div>
   );
@@ -86,12 +86,11 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#FFF8EC] overflow-x-hidden">
 
-      {/* ── NAV ───────────────────────────────────────────────── */}
+      {/* NAV */}
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#F0E8D8]">
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
-          <Link href="/" className="font-display text-xl font-black tracking-tight text-[#1A1A1A] flex items-center gap-1.5">
+          <Link href="/" className="font-display text-xl font-black tracking-tight text-[#1A1A1A]">
             CASTD
-            <span className="text-[#FFD200] text-sm">✦</span>
           </Link>
           <div className="flex items-center gap-2">
             <Link href="/login"
@@ -106,7 +105,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ── HERO ──────────────────────────────────────────────── */}
+      {/* HERO */}
       <section className="bg-[#FFF8EC] min-h-[92vh] flex items-center px-6 md:px-10 py-20 md:py-10">
         <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
 
@@ -116,7 +115,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
-              className="inline-flex items-center gap-2 bg-white border border-[#F0E8D8] rounded-full px-4 py-2 mb-8 shadow-sm"
+              className="inline-flex items-center gap-2.5 bg-white border border-[#F0E8D8] rounded-full px-4 py-2 mb-8 shadow-sm"
             >
               <span className="w-2 h-2 bg-[#FFD200] rounded-full animate-pulse shrink-0" />
               <span className="text-xs font-semibold text-[#6B6B6B]">Singapore's beauty talent marketplace</span>
@@ -130,15 +129,12 @@ export default function LandingPage() {
             >
               Cast your
               <br />
-              <span
-                className="relative inline-block"
-                style={{
-                  backgroundImage: "linear-gradient(135deg, #FFD200 0%, #FFA800 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
+              <span style={{
+                backgroundImage: "linear-gradient(135deg, #FFD200 0%, #FFA800 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
                 perfect
               </span>
               <br />
@@ -161,12 +157,12 @@ export default function LandingPage() {
               transition={{ duration: 0.75, delay: 0.18 }}
               className="flex flex-wrap gap-3 mb-10"
             >
-              <Link href="/signup?intent=brand"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#FFD200] text-[#1A1A1A] font-bold text-sm hover:bg-[#FFC000] transition-colors shadow-md shadow-[#FFD200]/30">
+              <Link href="/signup"
+                className="inline-flex items-center px-7 py-3.5 rounded-full bg-[#FFD200] text-[#1A1A1A] font-bold text-sm hover:bg-[#FFC000] transition-colors shadow-md shadow-[#FFD200]/30">
                 I'm a Brand
               </Link>
-              <Link href="/signup?intent=superstar"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#1A1A1A] text-white font-bold text-sm hover:bg-[#333] transition-colors">
+              <Link href="/signup"
+                className="inline-flex items-center px-7 py-3.5 rounded-full bg-[#1A1A1A] text-white font-bold text-sm hover:bg-[#333] transition-colors">
                 I'm a Superstar
               </Link>
             </motion.div>
@@ -184,8 +180,9 @@ export default function LandingPage() {
                 "Pay at confirmation",
               ].map((chip) => (
                 <span key={chip}
-                  className="bg-white border border-[#F0E8D8] rounded-full px-4 py-1.5 text-xs font-semibold text-[#6B6B6B] flex items-center gap-1.5 shadow-sm">
-                  <span className="text-[#FFD200] text-[8px]">✦</span>{chip}
+                  className="bg-white border border-[#F0E8D8] rounded-full px-4 py-1.5 text-xs font-semibold text-[#6B6B6B] flex items-center gap-2 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFD200] shrink-0" />
+                  {chip}
                 </span>
               ))}
             </motion.div>
@@ -198,17 +195,15 @@ export default function LandingPage() {
             transition={{ duration: 0.9, delay: 0.1 }}
             className="order-1 md:order-2 relative"
           >
-            {/* Main photo */}
             <div className="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-[#1A1A1A]/15 aspect-[4/5]">
               <img src={IMG_HERO} alt="Singapore lifestyle talent creators" className="w-full h-full object-cover" />
-              {/* Warm gradient overlay at bottom */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/30 via-transparent to-transparent" />
             </div>
 
             {/* Floating stat card */}
             <div className="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-xl px-5 py-4 flex items-center gap-4 border border-[#F0E8D8]">
               <div className="flex -space-x-2.5">
-                {TALENT_BUBBLES.slice(0, 3).map((b) => (
+                {TALENT_BUBBLES.map((b) => (
                   <div key={b.initials}
                     className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold border-2 border-white"
                     style={{ backgroundColor: b.bg, color: b.text }}>
@@ -230,13 +225,12 @@ export default function LandingPage() {
               <p className="text-[10px] text-[#1A1A1A]/60">Content creators</p>
             </div>
 
-            {/* Decorative circle */}
             <div className="absolute -z-10 -bottom-8 -right-8 w-40 h-40 rounded-full bg-[#FFD200]/20 blur-2xl" />
           </motion.div>
         </div>
       </section>
 
-      {/* ── MARQUEE TICKER ─────────────────────────────────────── */}
+      {/* MARQUEE TICKER */}
       <div className="bg-[#FFD200] py-3.5 overflow-hidden select-none border-y border-[#1A1A1A]/8">
         <div className="flex whitespace-nowrap" style={{ animation: "marqueeLeft 28s linear infinite" }}>
           {[0, 1].map((copy) => (
@@ -245,7 +239,7 @@ export default function LandingPage() {
                 <span key={`${copy}-${i}`}
                   className="inline-flex items-center gap-5 px-8 font-display font-black text-[#1A1A1A] text-sm uppercase tracking-widest">
                   {item}
-                  <span className="text-[#1A1A1A]/25 text-[10px]">✦</span>
+                  <span className="w-1 h-1 rounded-full bg-[#1A1A1A]/30 inline-block" />
                 </span>
               ))}
             </div>
@@ -253,7 +247,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* ── STATS ──────────────────────────────────────────────── */}
+      {/* STATS */}
       <section className="bg-white px-6 py-24">
         <div className="max-w-5xl mx-auto">
           <motion.div
@@ -269,9 +263,9 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { value: stats?.superstars ?? 0, suffix: "+", label: "Vetted Superstars", sub: "beauty and lifestyle creators", icon: "⭐" },
-              { value: stats?.brands ?? 0, suffix: "", label: "Brands and Agencies", sub: "registered on CASTD", icon: "🏢" },
-              { value: stats?.completed_matches ?? 0, suffix: "", label: "Completed Matches", sub: "confirmed campaigns", icon: "✅" },
+              { value: stats?.superstars ?? 0, suffix: "+", label: "Vetted Superstars", sub: "beauty and lifestyle creators" },
+              { value: stats?.brands ?? 0, suffix: "", label: "Brands and Agencies", sub: "registered on CASTD" },
+              { value: stats?.completed_matches ?? 0, suffix: "", label: "Completed Matches", sub: "confirmed campaigns" },
             ].map((s, i) => (
               <motion.div
                 key={i}
@@ -279,7 +273,7 @@ export default function LandingPage() {
                 variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.55, delay: i * 0.1 } } }}
                 className="bg-[#FFF8EC] rounded-3xl p-8 hover:shadow-md transition-shadow duration-300 border border-[#F0E8D8]"
               >
-                <span className="text-3xl mb-4 block">{s.icon}</span>
+                <div className="w-8 h-1 rounded-full bg-[#FFD200] mb-6" />
                 <div className="font-display text-5xl font-black text-[#1A1A1A] tracking-tight mb-3">
                   {stats ? <AnimatedNumber value={s.value} suffix={s.suffix} /> : "..."}
                 </div>
@@ -291,7 +285,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ───────────────────────────────────────── */}
+      {/* HOW IT WORKS */}
       <section className="bg-[#FFF8EC] px-6 py-24">
         <div className="max-w-5xl mx-auto">
           <motion.div
@@ -315,9 +309,11 @@ export default function LandingPage() {
                 variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.55, delay: i * 0.1 } } }}
                 className="bg-white rounded-3xl p-8 border border-[#F0E8D8] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col"
               >
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-3xl">{step.icon}</span>
-                  <span className="font-display text-5xl font-black text-[#1A1A1A]/8 leading-none">{step.num}</span>
+                <div className="flex items-center justify-between mb-8">
+                  <div className="w-10 h-10 rounded-full bg-[#FFD200] flex items-center justify-center">
+                    <span className="font-black text-[#1A1A1A] text-sm">{step.num}</span>
+                  </div>
+                  <span className="font-display text-5xl font-black text-[#1A1A1A]/6 leading-none select-none">{step.num}</span>
                 </div>
                 <h3 className="font-display text-xl font-black text-[#1A1A1A] mb-3">{step.title}</h3>
                 <p className="text-sm text-[#6B6B6B] leading-relaxed flex-1 mb-6">{step.body}</p>
@@ -342,14 +338,14 @@ export default function LandingPage() {
               <p className="text-white/50 text-sm mt-1">Pay only when you've confirmed the perfect Superstar.</p>
             </div>
             <Link href="/signup"
-              className="shrink-0 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#FFD200] text-[#1A1A1A] font-bold text-sm hover:bg-[#FFC000] transition-colors">
+              className="shrink-0 inline-flex items-center px-7 py-3.5 rounded-full bg-[#FFD200] text-[#1A1A1A] font-bold text-sm hover:bg-[#FFC000] transition-colors">
               Get started free
             </Link>
           </motion.div>
         </div>
       </section>
 
-      {/* ── WHO IT'S FOR - Bumble Date/BFF style ──────────────── */}
+      {/* WHO IT'S FOR */}
       <section className="bg-white px-6 py-24">
         <div className="max-w-5xl mx-auto">
           <motion.div
@@ -370,19 +366,17 @@ export default function LandingPage() {
             <motion.div
               initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
               variants={{ hidden: { opacity: 0, x: -24 }, show: { opacity: 1, x: 0, transition: { duration: 0.6 } } }}
-              className="rounded-3xl overflow-hidden relative bg-[#1A1A1A] min-h-[520px] flex flex-col"
+              className="rounded-3xl overflow-hidden bg-[#1A1A1A] min-h-[520px] flex flex-col"
             >
-              {/* Photo */}
               <div className="h-56 overflow-hidden relative">
                 <img src={IMG_BRAND} alt="Brand team" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#1A1A1A]" />
               </div>
-
-              {/* Content */}
               <div className="p-8 flex flex-col flex-1">
-                <span className="inline-flex items-center gap-2 text-[#FFD200] text-xs font-black uppercase tracking-[0.2em] mb-5">
-                  <span className="text-[#FFD200]">🏢</span> CASTD Brand
-                </span>
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#FFD200]" />
+                  <span className="text-[#FFD200] text-xs font-black uppercase tracking-[0.2em]">CASTD Brand</span>
+                </div>
                 <h3 className="font-display text-2xl font-black text-white mb-5 leading-tight">
                   Find the right talent.
                   <br />Faster.
@@ -396,12 +390,12 @@ export default function LandingPage() {
                     "Chat directly after confirmation",
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-white/60">
-                      <span className="text-[#FFD200] text-[10px] mt-1 shrink-0">✦</span>{f}
+                      <span className="w-1 h-1 rounded-full bg-[#FFD200] mt-2 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
                 <Link href="/signup"
-                  className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#FFD200] text-[#1A1A1A] font-bold text-sm hover:bg-[#FFC000] transition-colors">
+                  className="self-start inline-flex items-center px-6 py-3 rounded-full bg-[#FFD200] text-[#1A1A1A] font-bold text-sm hover:bg-[#FFC000] transition-colors">
                   Browse the catalog
                 </Link>
               </div>
@@ -413,16 +407,14 @@ export default function LandingPage() {
               variants={{ hidden: { opacity: 0, x: 24 }, show: { opacity: 1, x: 0, transition: { duration: 0.6, delay: 0.1 } } }}
               className="rounded-3xl overflow-hidden bg-[#FFF8EC] border border-[#F0E8D8] min-h-[520px] flex flex-col"
             >
-              {/* Photo */}
               <div className="h-56 overflow-hidden">
                 <img src={IMG_TALENT} alt="Superstar talent creator" className="w-full h-full object-cover object-top" />
               </div>
-
-              {/* Content */}
               <div className="p-8 flex flex-col flex-1">
-                <span className="inline-flex items-center gap-2 text-[#1A1A1A] text-xs font-black uppercase tracking-[0.2em] mb-5">
-                  <span>⭐</span> CASTD Superstar
-                </span>
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A]" />
+                  <span className="text-[#1A1A1A] text-xs font-black uppercase tracking-[0.2em]">CASTD Superstar</span>
+                </div>
                 <h3 className="font-display text-2xl font-black text-[#1A1A1A] mb-5 leading-tight">
                   Get discovered.
                   <br />Get booked.
@@ -436,12 +428,12 @@ export default function LandingPage() {
                     "Build your collab portfolio",
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm text-[#6B6B6B]">
-                      <span className="text-[#1A1A1A] text-[10px] mt-1 shrink-0">✦</span>{f}
+                      <span className="w-1 h-1 rounded-full bg-[#1A1A1A] mt-2 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
                 <Link href="/signup"
-                  className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#1A1A1A] text-white font-bold text-sm hover:bg-[#333] transition-colors">
+                  className="self-start inline-flex items-center px-6 py-3 rounded-full bg-[#1A1A1A] text-white font-bold text-sm hover:bg-[#333] transition-colors">
                   Join as Superstar
                 </Link>
               </div>
@@ -450,7 +442,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── REVIEWS ────────────────────────────────────────────── */}
+      {/* REVIEWS */}
       <section className="bg-[#FFF8EC] px-6 py-24">
         <div className="max-w-5xl mx-auto">
           <motion.div
@@ -470,9 +462,9 @@ export default function LandingPage() {
               variants={fadeUp}
               className="bg-white border border-[#F0E8D8] rounded-3xl p-14 text-center"
             >
-              <div className="flex justify-center gap-1 mb-4">
+              <div className="flex justify-center gap-1.5 mb-5">
                 {[1, 2, 3, 4, 5].map(n => (
-                  <span key={n} className="text-[#FFD200]" style={{ fontSize: 28 }}>★</span>
+                  <div key={n} className="w-4 h-4 rounded-sm bg-[#FFD200]" />
                 ))}
               </div>
               <p className="font-bold text-[#1A1A1A] mb-2">Real reviews coming soon</p>
@@ -489,7 +481,7 @@ export default function LandingPage() {
                   variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.07 } } }}
                   className="bg-white rounded-3xl p-6 border border-[#F0E8D8] flex flex-col gap-4 hover:shadow-md transition-shadow"
                 >
-                  <Stars score={r.score} />
+                  <StarRating score={r.score} />
                   <p className="text-[#1A1A1A] text-sm leading-relaxed flex-1">"{r.comment}"</p>
                   <div className="flex items-center justify-between">
                     <div>
@@ -507,14 +499,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FINAL CTA ──────────────────────────────────────────── */}
+      {/* FINAL CTA */}
       <section className="bg-[#FFD200] px-6 py-28">
         <motion.div
           initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
           variants={fadeUp}
           className="max-w-3xl mx-auto text-center"
         >
-          {/* Decorative dots */}
           <div className="flex justify-center gap-2 mb-8">
             {[1, 2, 3].map(n => (
               <div key={n} className="w-2 h-2 rounded-full bg-[#1A1A1A]/20" />
@@ -530,23 +521,21 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/signup"
-              className="inline-flex items-center gap-2 px-10 py-4 rounded-full bg-[#1A1A1A] text-[#FFD200] font-bold text-sm hover:bg-[#333] transition-colors">
+              className="inline-flex items-center px-10 py-4 rounded-full bg-[#1A1A1A] text-[#FFD200] font-bold text-sm hover:bg-[#333] transition-colors">
               Get started - it's free
             </Link>
             <Link href="/login"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-[#1A1A1A]/20 text-[#1A1A1A]/70 font-bold text-sm hover:border-[#1A1A1A]/40 hover:text-[#1A1A1A] transition-colors">
+              className="inline-flex items-center px-8 py-4 rounded-full border-2 border-[#1A1A1A]/20 text-[#1A1A1A]/70 font-bold text-sm hover:border-[#1A1A1A]/40 hover:text-[#1A1A1A] transition-colors">
               Log in
             </Link>
           </div>
         </motion.div>
       </section>
 
-      {/* ── FOOTER ─────────────────────────────────────────────── */}
+      {/* FOOTER */}
       <footer className="bg-[#1A1A1A] px-6 md:px-10 py-12">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <span className="font-display text-xl font-black text-white tracking-tight flex items-center gap-1.5">
-            CASTD <span className="text-[#FFD200] text-sm">✦</span>
-          </span>
+          <span className="font-display text-xl font-black text-white tracking-tight">CASTD</span>
           <div className="flex gap-8 text-sm text-white/30">
             <Link href="/login" className="hover:text-white/70 transition-colors">Log in</Link>
             <Link href="/signup" className="hover:text-white/70 transition-colors">Sign up</Link>
