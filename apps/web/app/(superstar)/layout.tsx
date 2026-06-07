@@ -11,9 +11,11 @@ import { AdminPreviewBanner } from "@/components/AdminPreviewBanner";
 
 const NAV = [
   { href: "/superstar/dashboard", label: "Dashboard" },
-  { href: "/superstar/profile", label: "My Profile" },
+  { href: "/superstar/offers",    label: "Offers" },
+  { href: "/superstar/discover",  label: "Discover" },
   { href: "/superstar/campaigns", label: "Campaigns" },
-  { href: "/superstar/bookings", label: "Bookings" },
+  { href: "/superstar/profile",   label: "My Profile" },
+  { href: "/superstar/bookings",  label: "Bookings" },
 ];
 
 export default function SuperstarLayout({ children }: { children: React.ReactNode }) {

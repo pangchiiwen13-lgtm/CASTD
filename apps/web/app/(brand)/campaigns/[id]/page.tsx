@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { api, type BrandProject, type Campaign } from "@/lib/api";
+import { api, type BrandProject, type Campaign, type Inquiry } from "@/lib/api";
 import { getSessionToken } from "@/lib/get-token";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,7 +29,7 @@ function AutoReleaseCountdown({ dateStr }: { dateStr: string }) {
   return <span className="text-xs text-amber-600 font-medium">Auto-confirms in {days} day{days !== 1 ? "s" : ""}</span>;
 }
 
-type ProjectWithHires = BrandProject & { hires: Campaign[] };
+type ProjectWithHires = BrandProject & { hires: Campaign[]; applications: Inquiry[] };
 
 export default function BrandProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -37,9 +37,11 @@ export default function BrandProjectDetailPage() {
   const router = useRouter();
   const [project, setProject] = useState<ProjectWithHires | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"hires" | "history">("hires");
+  const [tab, setTab] = useState<"hires" | "history" | "applications">("hires");
   const [openChat, setOpenChat] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [respondingApp, setRespondingApp] = useState<string | null>(null);
+  const [togglingOpen, setTogglingOpen] = useState(false);
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
@@ -62,6 +64,29 @@ export default function BrandProjectDetailPage() {
       } : prev);
     } catch { /* ignore */ }
     setConfirming(null);
+  }
+
+  async function handleRespondApp(inquiryId: string, action: "accept" | "decline") {
+    setRespondingApp(inquiryId);
+    try {
+      const token = getSessionToken() || "";
+      await api.respondToInquiry(inquiryId, action, token);
+      // Refresh project to get updated hires/applications
+      const updated = await api.getProject(id, token);
+      setProject(updated as ProjectWithHires);
+    } catch { /* ignore */ }
+    setRespondingApp(null);
+  }
+
+  async function handleToggleOpen() {
+    if (!project) return;
+    setTogglingOpen(true);
+    try {
+      const token = getSessionToken() || "";
+      await api.toggleProjectOpen(project.id, token);
+      setProject(prev => prev ? { ...prev, is_open: !prev.is_open } : prev);
+    } catch { /* ignore */ }
+    setTogglingOpen(false);
   }
 
   if (loading) return (
@@ -99,11 +124,25 @@ export default function BrandProjectDetailPage() {
               {project.budget_range && <span>Budget: {project.budget_range}</span>}
             </div>
           </div>
-          <Link href="/catalog">
-            <Button size="sm" className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00] shrink-0">
-              + Add Superstar
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={handleToggleOpen}
+              disabled={togglingOpen}
+              className={cn(
+                "text-xs px-3 py-1.5 rounded-full border font-medium transition-all",
+                project.is_open
+                  ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                  : "border-[#E0DDD9] text-[#6A6A6A] hover:border-[#0C0C0C] hover:text-[#1A1A1A]",
+              )}
+            >
+              {project.is_open ? "Open for applications" : "Closed"}
+            </button>
+            <Link href="/catalog">
+              <Button size="sm" className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]">
+                + Add Superstar
+              </Button>
+            </Link>
+          </div>
         </div>
         {(project.brief_text || project.deliverables) && (
           <div className="mt-4 pt-4 border-t border-[#F0EDEA] space-y-2">
@@ -125,6 +164,9 @@ export default function BrandProjectDetailPage() {
       <div className="flex gap-1 mb-5 bg-white border border-[#F0EDEA] p-1 rounded-xl shadow-sm w-fit">
         <TabBtn active={tab === "hires"} onClick={() => { setTab("hires"); setOpenChat(null); }} count={activeHires.length}>
           Active Hires
+        </TabBtn>
+        <TabBtn active={tab === "applications"} onClick={() => { setTab("applications"); setOpenChat(null); }} count={(project.applications || []).filter(a => a.status === "pending").length}>
+          Applications
         </TabBtn>
         <TabBtn active={tab === "history"} onClick={() => { setTab("history"); setOpenChat(null); }} count={hireHistory.length}>
           Hire History
@@ -184,6 +226,43 @@ export default function BrandProjectDetailPage() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* APPLICATIONS TAB */}
+      {tab === "applications" && (
+        <div>
+          {!project.is_open && (project.applications || []).length === 0 && (
+            <div className="rounded-2xl bg-white border border-[#F0EDEA] py-12 px-8 text-center shadow-sm">
+              <p className="text-sm text-[#9A9A9A] mb-3">This campaign is not open for applications.</p>
+              <button
+                onClick={handleToggleOpen}
+                disabled={togglingOpen}
+                className="text-sm text-[#FFD200] font-semibold hover:underline"
+              >
+                Open it to receive Superstar applications
+              </button>
+            </div>
+          )}
+          {(project.applications || []).length > 0 && (
+            <div className="space-y-3">
+              {(project.applications || []).map(app => (
+                <ApplicationCard
+                  key={app.id}
+                  application={app}
+                  responding={respondingApp === app.id}
+                  onAccept={() => handleRespondApp(app.id, "accept")}
+                  onDecline={() => handleRespondApp(app.id, "decline")}
+                />
+              ))}
+            </div>
+          )}
+          {project.is_open && (project.applications || []).length === 0 && (
+            <div className="rounded-2xl bg-white border border-[#F0EDEA] py-12 px-8 text-center shadow-sm">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse mx-auto mb-3" />
+              <p className="text-sm text-[#9A9A9A]">Open for applications - Superstars can now discover and apply to this campaign.</p>
             </div>
           )}
         </div>
@@ -304,6 +383,73 @@ function HireCard({ hire, onConfirm, confirming, showChat, chatOpen, onToggleCha
           >
             {chatOpen ? "Close chat" : "Open chat"}
           </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ApplicationCard({ application: app, responding, onAccept, onDecline }: {
+  application: Inquiry;
+  responding?: boolean;
+  onAccept?: () => void;
+  onDecline?: () => void;
+}) {
+  const isPending = app.status === "pending";
+  const photo = app.photo_urls?.[0];
+  const STATUS: Record<string, string> = {
+    pending:   "bg-amber-100 text-amber-700",
+    accepted:  "bg-green-100 text-green-700",
+    declined:  "bg-[#F5F3F0] text-[#9A9A9A]",
+    cancelled: "bg-[#F5F3F0] text-[#9A9A9A]",
+  };
+  const LABEL: Record<string, string> = {
+    pending: "Applied", accepted: "Accepted", declined: "Declined", cancelled: "Withdrawn"
+  };
+
+  return (
+    <div className={`rounded-2xl bg-white shadow-sm overflow-hidden ${isPending ? "border-2 border-amber-200" : "border border-[#F0EDEA]"}`}>
+      <div className="px-5 py-4">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-[#0C0C0C] shrink-0 flex items-center justify-center">
+            {photo
+              ? <img src={photo} alt="" className="w-full h-full object-cover" />
+              : <span className="text-[#FFD200] font-bold text-xs">{app.talent_name?.slice(0, 2).toUpperCase()}</span>
+            }
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+              <span className="font-semibold text-sm text-[#1A1A1A]">{app.talent_name}</span>
+              {app.ig_handle && <span className="text-xs text-[#9A9A9A]">@{app.ig_handle}</span>}
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${STATUS[app.status] || ""}`}>
+                {LABEL[app.status] || app.status}
+              </span>
+            </div>
+            {app.brief_text && (
+              <p className="text-xs text-[#6A6A6A] leading-relaxed line-clamp-3 mt-1">{app.brief_text}</p>
+            )}
+          </div>
+        </div>
+        {isPending && onAccept && onDecline && (
+          <div className="flex gap-2 mt-3">
+            <Button
+              size="sm"
+              className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00] rounded-full flex-1"
+              disabled={responding}
+              onClick={onAccept}
+            >
+              {responding ? "Accepting..." : "Accept"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-full flex-1 border-[#E0DDD9] text-[#6A6A6A]"
+              disabled={responding}
+              onClick={onDecline}
+            >
+              Decline
+            </Button>
+          </div>
         )}
       </div>
     </div>

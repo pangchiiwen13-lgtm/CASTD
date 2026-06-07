@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 const STATUS_META: Record<string, { label: string; color: string; dot: string }> = {
-  open:      { label: "Submitted",  color: "bg-blue-50 text-blue-700 border-blue-200",        dot: "bg-blue-400"   },
-  reviewing: { label: "Reviewing",  color: "bg-amber-50 text-amber-700 border-amber-200",     dot: "bg-amber-400"  },
-  confirmed: { label: "Confirmed",  color: "bg-green-50 text-green-700 border-green-200",     dot: "bg-green-500"  },
-  closed:    { label: "Closed",     color: "bg-[#F5F3F0] text-[#9A9A9A] border-[#E8E4E0]",   dot: "bg-[#CCCCCC]"  },
+  pending:   { label: "Awaiting response", color: "bg-amber-50 text-amber-700 border-amber-200",  dot: "bg-amber-400"  },
+  accepted:  { label: "Accepted",          color: "bg-green-50 text-green-700 border-green-200",  dot: "bg-green-500"  },
+  declined:  { label: "Declined",          color: "bg-[#F5F3F0] text-[#9A9A9A] border-[#E8E4E0]", dot: "bg-[#CCCCCC]" },
+  cancelled: { label: "Cancelled",         color: "bg-[#F5F3F0] text-[#9A9A9A] border-[#E8E4E0]", dot: "bg-[#CCCCCC]" },
 };
 
 export default function BrandDashboardPage() {
@@ -42,10 +42,10 @@ export default function BrandDashboardPage() {
     </div>
   );
 
-  const activeInquiries   = inquiries.filter(i => ["open", "reviewing"].includes(i.status));
-  const confirmedInquiries = inquiries.filter(i => i.status === "confirmed");
-  const pendingConfirm    = inquiries.filter(i => i.status === "reviewing");
-  const recentInquiries   = inquiries.slice(0, 5);
+  const activeInquiries    = inquiries.filter(i => i.status === "pending");
+  const confirmedInquiries = inquiries.filter(i => i.status === "accepted");
+  const pendingConfirm     = inquiries.filter(i => i.status === "pending");
+  const recentInquiries    = inquiries.slice(0, 5);
   const companyName = brand?.company_name || session?.user?.name || "there";
 
   return (

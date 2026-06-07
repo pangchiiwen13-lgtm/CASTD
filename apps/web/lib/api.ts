@@ -50,10 +50,15 @@ export const api = {
   removeShortlist: (talentId: string, token: string) =>
     apiFetch<void>(`/shortlists/${talentId}`, { method: "DELETE", token }),
 
-  // Inquiries
+  // Inquiries (direct - no admin approval)
   getInquiries: (token: string) => apiFetch<Inquiry[]>("/inquiries", { token }),
+  getReceivedInquiries: (token: string) => apiFetch<Inquiry[]>("/inquiries/received", { token }),
   createInquiry: (data: Partial<Inquiry>, token: string) =>
     apiFetch<Inquiry>("/inquiries", { method: "POST", body: JSON.stringify(data), token }),
+  respondToInquiry: (id: string, action: "accept" | "decline", token: string) =>
+    apiFetch<Inquiry>(`/inquiries/${id}/respond`, { method: "POST", body: JSON.stringify({ action }), token }),
+  applyToProject: (projectId: string, note: string | undefined, token: string) =>
+    apiFetch<Inquiry>(`/inquiries/apply/${projectId}`, { method: "POST", body: JSON.stringify({ note }), token }),
 
   // Notifications
   getNotifications: (token: string) => apiFetch<Notification[]>("/notifications", { token }),
@@ -117,10 +122,13 @@ export const api = {
 
   // Brand Projects (campaign containers)
   getBrandProjects: (token: string) => apiFetch<BrandProject[]>("/projects/brand", { token }),
+  getOpenProjects: (token: string) => apiFetch<(BrandProject & { company_name: string })[]>("/projects/open", { token }),
   createProject: (data: Partial<BrandProject>, token: string) =>
     apiFetch<BrandProject>("/projects", { method: "POST", body: JSON.stringify(data), token }),
   getProject: (id: string, token: string) =>
-    apiFetch<BrandProject & { hires: Campaign[] }>(`/projects/${id}`, { token }),
+    apiFetch<BrandProject & { hires: Campaign[]; applications: Inquiry[] }>(`/projects/${id}`, { token }),
+  toggleProjectOpen: (id: string, token: string) =>
+    apiFetch<BrandProject>(`/projects/${id}/toggle-open`, { method: "PATCH", token }),
 };
 
 // Types
@@ -244,8 +252,16 @@ export interface Inquiry {
   remuneration_type?: "product" | "cash" | "cash_hourly";
   product_description?: string;
   project_id?: string;
-  status: string;
+  direction?: "brand_to_superstar" | "superstar_to_brand";
+  status: "pending" | "accepted" | "declined" | "cancelled";
+  initiator_user_id?: string;
+  responded_at?: string;
   created_at: string;
+  // Joined fields (from list endpoints)
+  talent_name?: string;
+  ig_handle?: string;
+  photo_urls?: string[];
+  company_name?: string;
 }
 
 
@@ -274,6 +290,7 @@ export interface BrandProject {
   shoot_date?: string;
   budget_range?: string;
   status: "active" | "archived";
+  is_open: boolean;
   created_at: string;
   updated_at: string;
   // Aggregated counts (from list endpoint)
