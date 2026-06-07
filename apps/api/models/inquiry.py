@@ -13,6 +13,7 @@ class InquiryCreate(BaseModel):
     preferred_dates: Optional[str] = None
     remuneration_type: Optional[str] = "product"   # "product" | "cash"
     product_description: Optional[str] = None
+    project_id: Optional[UUID] = None
 
 
 class InquiryStatusUpdate(BaseModel):

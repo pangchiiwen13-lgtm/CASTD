@@ -114,6 +114,13 @@ export const api = {
     apiFetch<Campaign>(`/campaigns/${id}/deliver`, { method: "PATCH", body: JSON.stringify(data), token }),
   confirmDelivery: (id: string, token: string) =>
     apiFetch<Campaign>(`/campaigns/${id}/confirm`, { method: "PATCH", token }),
+
+  // Brand Projects (campaign containers)
+  getBrandProjects: (token: string) => apiFetch<BrandProject[]>("/projects/brand", { token }),
+  createProject: (data: Partial<BrandProject>, token: string) =>
+    apiFetch<BrandProject>("/projects", { method: "POST", body: JSON.stringify(data), token }),
+  getProject: (id: string, token: string) =>
+    apiFetch<BrandProject & { hires: Campaign[] }>(`/projects/${id}`, { token }),
 };
 
 // Types
@@ -236,6 +243,7 @@ export interface Inquiry {
   preferred_dates?: string;
   remuneration_type?: "product" | "cash";
   product_description?: string;
+  project_id?: string;
   status: string;
   created_at: string;
 }
@@ -254,6 +262,24 @@ export interface ChatMessage {
   sender_type: "brand" | "superstar";
   body: string;
   created_at: string;
+}
+
+export interface BrandProject {
+  id: string;
+  brand_id: string;
+  name: string;
+  campaign_type?: string;
+  brief_text?: string;
+  deliverables?: string;
+  shoot_date?: string;
+  budget_range?: string;
+  status: "active" | "archived";
+  created_at: string;
+  updated_at: string;
+  // Aggregated counts (from list endpoint)
+  active_hires?: number;
+  done_hires?: number;
+  total_hires?: number;
 }
 
 export interface Campaign {

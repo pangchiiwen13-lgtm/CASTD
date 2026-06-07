@@ -43,11 +43,15 @@ async def get_calendar(talent_id: UUID, _: dict = Depends(get_current_user)):
             "SELECT blocked_date FROM talent_blocks WHERE talent_id = $1 ORDER BY blocked_date",
             str(talent_id),
         )
-        rule_rows = await conn.fetch(
-            "SELECT day_of_week, start_time, end_time FROM talent_availability "
-            "WHERE talent_id = $1 ORDER BY day_of_week",
-            str(talent_id),
-        )
+        # talent_availability table may not exist yet (migration 012 pending)
+        try:
+            rule_rows = await conn.fetch(
+                "SELECT day_of_week, start_time, end_time FROM talent_availability "
+                "WHERE talent_id = $1 ORDER BY day_of_week",
+                str(talent_id),
+            )
+        except Exception:
+            rule_rows = []
     return CalendarResponse(
         talent_id=str(talent_id),
         blocked_dates=[str(r["blocked_date"]) for r in blocked_rows],

@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { api, type Talent } from "@/lib/api";
+import { api, type Talent, type BrandProject } from "@/lib/api";
 import { getSessionToken } from "@/lib/get-token";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,8 @@ interface Props { talent: Talent; onClose: () => void; }
 
 export function InquiryDialog({ talent, onClose }: Props) {
   const router = useRouter();
+  const [projects, setProjects] = useState<BrandProject[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("new");
   const [form, setForm] = useState({
     campaign_name: "",
     campaign_type: "",
@@ -32,6 +34,30 @@ export function InquiryDialog({ talent, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Load the brand's existing campaigns for the picker
+  useEffect(() => {
+    const token = getSessionToken();
+    if (!token) return;
+    api.getBrandProjects(token)
+      .then(p => setProjects(p.filter(proj => proj.status === "active")))
+      .catch(() => null);
+  }, []);
+
+  // When a project is selected, pre-fill campaign name + type from it
+  useEffect(() => {
+    if (selectedProjectId === "new") return;
+    const p = projects.find(x => x.id === selectedProjectId);
+    if (!p) return;
+    setForm(f => ({
+      ...f,
+      campaign_name: p.name,
+      campaign_type: p.campaign_type || f.campaign_type,
+      brief_text: f.brief_text || p.brief_text || "",
+      preferred_dates: f.preferred_dates || p.shoot_date || "",
+      budget_range: f.budget_range || p.budget_range || "",
+    }));
+  }, [selectedProjectId, projects]);
+
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
 
@@ -43,7 +69,11 @@ export function InquiryDialog({ talent, onClose }: Props) {
     setLoading(true); setError("");
     try {
       const token = getSessionToken() || "";
-      await api.createInquiry({ talent_id: talent.id, ...form }, token);
+      await api.createInquiry({
+        talent_id: talent.id,
+        ...form,
+        project_id: selectedProjectId !== "new" ? selectedProjectId : undefined,
+      }, token);
       onClose();
       router.push("/inquiries");
     } catch (e: any) {
@@ -56,10 +86,31 @@ export function InquiryDialog({ talent, onClose }: Props) {
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Inquiry: {talent.name}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Hire: {talent.name}</DialogTitle></DialogHeader>
         <div className="flex flex-col gap-4 py-2">
 
-          {/* Remuneration type - required first choice */}
+          {/* Campaign picker */}
+          {projects.length > 0 && (
+            <div className="grid gap-2">
+              <Label>Link to campaign</Label>
+              <Select value={selectedProjectId} onValueChange={v => v && setSelectedProjectId(v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select campaign" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">One-off inquiry (no campaign)</SelectItem>
+                  {projects.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedProjectId !== "new" && (
+                <p className="text-xs text-[#9A9A9A]">This hire will be tracked under the selected campaign.</p>
+              )}
+            </div>
+          )}
+
+          {/* Remuneration type */}
           <div className="grid gap-2">
             <Label>How will you compensate this Superstar? *</Label>
             <div className="grid grid-cols-2 gap-2">
@@ -85,7 +136,7 @@ export function InquiryDialog({ talent, onClose }: Props) {
               <Textarea
                 value={form.product_description}
                 onChange={set("product_description")}
-                placeholder="e.g. Full-size skincare set (worth SGD 120), 1-year supply of supplements, brand ambassador gift bundle..."
+                placeholder="e.g. Full-size skincare set (worth SGD 120), 1-year supply of supplements..."
                 rows={3}
               />
             </div>

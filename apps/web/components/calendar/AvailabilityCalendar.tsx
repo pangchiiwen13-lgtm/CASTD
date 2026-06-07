@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { AvailabilityRule } from "@/lib/api";
@@ -72,6 +72,17 @@ export function AvailabilityCalendar({
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
   const [blocked, setBlocked] = useState<Set<string>>(new Set(blockedDates));
+
+  // Sync state when props load asynchronously (async API fetch after mount)
+  useEffect(() => {
+    setBlocked(new Set(blockedDates));
+  }, [blockedDates]);
+
+  useEffect(() => {
+    const arr: (AvailabilityRule | null)[] = Array(7).fill(null);
+    availabilityRules.forEach(r => { arr[r.day_of_week] = r; });
+    setRules(arr);
+  }, [availabilityRules]);
   const [toggling, setToggling] = useState<string | null>(null);
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
