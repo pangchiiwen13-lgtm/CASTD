@@ -21,7 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: session, isPending } = useSession();
 
   useEffect(() => {
-    if (!isPending && !session) router.push("/admin/login");
+    if (!isPending && !session) router.push("/login");
   }, [session, isPending, router]);
 
   // Cache the session token so getSessionToken() can read it
