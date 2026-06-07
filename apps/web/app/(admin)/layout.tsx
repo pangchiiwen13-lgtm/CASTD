@@ -21,7 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: session, isPending } = useSession();
 
   useEffect(() => {
-    if (!isPending && !session) router.push("/login");
+    if (!isPending && !session) router.push("/admin/login");
   }, [session, isPending, router]);
 
   // Cache the session token so getSessionToken() can read it
@@ -57,7 +57,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         <button
           className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-          onClick={() => { clearSessionToken(); signOut().then(() => router.push("/")); }}
+          onClick={async () => {
+            clearSessionToken();
+            await fetch("/api/admin-auth", { method: "DELETE" });
+            signOut().then(() => router.push("/admin/login"));
+          }}
         >
           Sign out
         </button>
