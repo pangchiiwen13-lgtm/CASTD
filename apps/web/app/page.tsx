@@ -2,12 +2,74 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView, useMotionValue, useSpring } from "framer-motion";
-import { api, type PublicReview } from "@/lib/api";
+import { api } from "@/lib/api";
+import { TestimonialsColumn } from "@/components/ui/testimonials-columns-1";
 
 // AI-generated images (Higgsfield)
 const IMG_HERO = "https://d8j0ntlcm91z4.cloudfront.net/user_32n2a4gtmOz5g8tXtyqO6QX7OgX/hf_20260607_095342_91b706fa-8370-486e-a09e-0cc26b00b2c1.png";
 const IMG_TALENT = "https://d8j0ntlcm91z4.cloudfront.net/user_32n2a4gtmOz5g8tXtyqO6QX7OgX/hf_20260607_095344_2be01a69-1522-4ac3-acb3-1fed6bd7d278.png";
 const IMG_BRAND = "https://d8j0ntlcm91z4.cloudfront.net/user_32n2a4gtmOz5g8tXtyqO6QX7OgX/hf_20260607_095346_0d5d8219-6fe6-42fc-915d-a560158532a6.png";
+
+const ALL_TESTIMONIALS = [
+  {
+    text: "Found our campaign Superstar in under a day. The AI matching was spot on - exactly the aesthetic we needed for our skincare launch.",
+    image: "https://randomuser.me/api/portraits/women/44.jpg",
+    name: "Priya Tan",
+    role: "Marketing Manager, Glow Lab",
+  },
+  {
+    text: "As a creator, CASTD finally gave me a platform where brands come to me. Got booked for 3 campaigns in my first month.",
+    image: "https://randomuser.me/api/portraits/women/65.jpg",
+    name: "Siti Rahayu",
+    role: "Beauty Creator, 42K followers",
+  },
+  {
+    text: "We've tried other talent platforms but nothing came close. The vetting process means every Superstar is actually professional.",
+    image: "https://randomuser.me/api/portraits/men/32.jpg",
+    name: "Daniel Lim",
+    role: "Brand Director, Epoch Beauty",
+  },
+  {
+    text: "Managing campaigns used to be a mess of DMs and spreadsheets. CASTD keeps everything in one place.",
+    image: "https://randomuser.me/api/portraits/women/26.jpg",
+    name: "Cheryl Wong",
+    role: "Lifestyle Creator, 18K followers",
+  },
+  {
+    text: "The campaign criteria feature is genius. Set our target audience once and the AI surfaces Superstars who actually fit our brand.",
+    image: "https://randomuser.me/api/portraits/women/55.jpg",
+    name: "Amanda Koh",
+    role: "Head of Digital, Hera Beauty",
+  },
+  {
+    text: "Transparent pricing, no surprise fees. Confirmed our first Superstar within 48 hours of listing our campaign.",
+    image: "https://randomuser.me/api/portraits/men/41.jpg",
+    name: "Marcus Ng",
+    role: "Founder, Freshlab SG",
+  },
+  {
+    text: "CASTD understood that creators need structure too. The booking management and chat make every collab smooth.",
+    image: "https://randomuser.me/api/portraits/women/68.jpg",
+    name: "Nurul Aisyah",
+    role: "Lifestyle Creator, 29K followers",
+  },
+  {
+    text: "We now source all our UGC through CASTD. The quality of Superstars is consistently high and the fit scores are genuinely useful.",
+    image: "https://randomuser.me/api/portraits/women/22.jpg",
+    name: "Rachel Chua",
+    role: "Social Media Lead, Lumiere Co.",
+  },
+  {
+    text: "Went from zero brand deals to four confirmed campaigns in my second month. CASTD is the best move I made for my creator career.",
+    image: "https://randomuser.me/api/portraits/women/33.jpg",
+    name: "Jasmine Toh",
+    role: "Skincare Creator, 55K followers",
+  },
+];
+
+const COL1 = ALL_TESTIMONIALS.slice(0, 3);
+const COL2 = ALL_TESTIMONIALS.slice(3, 6);
+const COL3 = ALL_TESTIMONIALS.slice(6, 9);
 
 const TICKER_ITEMS = [
   "Beauty", "Skincare", "Lifestyle", "Fashion",
@@ -55,19 +117,6 @@ function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string
   return <span ref={ref}>{display}{suffix}</span>;
 }
 
-function StarRating({ score }: { score: number }) {
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <div
-          key={n}
-          className="w-3 h-3 rounded-sm"
-          style={{ backgroundColor: n <= score ? "#FFD200" : "#E8E0D0" }}
-        />
-      ))}
-    </div>
-  );
-}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -76,11 +125,9 @@ const fadeUp = {
 
 export default function LandingPage() {
   const [stats, setStats] = useState<{ superstars: number; brands: number; completed_matches: number } | null>(null);
-  const [reviews, setReviews] = useState<PublicReview[]>([]);
 
   useEffect(() => {
     api.getPublicStats().then(setStats).catch(() => null);
-    api.getPublicReviews().then(setReviews).catch(() => null);
   }, []);
 
   return (
@@ -442,60 +489,29 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* REVIEWS */}
-      <section className="bg-[#FFF8EC] px-6 py-24">
-        <div className="max-w-5xl mx-auto">
+      {/* TESTIMONIALS */}
+      <section className="bg-white py-24 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6">
           <motion.div
             initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
             variants={fadeUp}
-            className="text-center mb-16"
+            className="text-center mb-14"
           >
-            <p className="text-xs font-bold text-[#FFD200] uppercase tracking-[0.25em] mb-3">Reviews</p>
+            <div className="inline-flex items-center border border-[#F0E8D8] rounded-full px-4 py-1.5 mb-5">
+              <span className="text-xs font-semibold text-[#6B6B6B]">Testimonials</span>
+            </div>
             <h2 className="font-display text-4xl md:text-5xl font-black text-[#1A1A1A] tracking-tight">
               What they're saying.
             </h2>
+            <p className="text-[#6B6B6B] mt-4 max-w-md mx-auto">
+              Brands and Superstars across Singapore trust CASTD to make every collaboration count.
+            </p>
           </motion.div>
-
-          {reviews.length === 0 ? (
-            <motion.div
-              initial="hidden" whileInView="show" viewport={{ once: true }}
-              variants={fadeUp}
-              className="bg-white border border-[#F0E8D8] rounded-3xl p-14 text-center"
-            >
-              <div className="flex justify-center gap-1.5 mb-5">
-                {[1, 2, 3, 4, 5].map(n => (
-                  <div key={n} className="w-4 h-4 rounded-sm bg-[#FFD200]" />
-                ))}
-              </div>
-              <p className="font-bold text-[#1A1A1A] mb-2">Real reviews coming soon</p>
-              <p className="text-[#6B6B6B] text-sm max-w-sm mx-auto">
-                Reviews from real campaigns will appear here as brands and Superstars complete their first collaborations.
-              </p>
-            </motion.div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-4">
-              {reviews.map((r, i) => (
-                <motion.div
-                  key={i}
-                  initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
-                  variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.07 } } }}
-                  className="bg-white rounded-3xl p-6 border border-[#F0E8D8] flex flex-col gap-4 hover:shadow-md transition-shadow"
-                >
-                  <StarRating score={r.score} />
-                  <p className="text-[#1A1A1A] text-sm leading-relaxed flex-1">"{r.comment}"</p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-[#1A1A1A] text-xs font-bold">{r.ratee_name}</p>
-                      <p className="text-[#6B6B6B] text-xs capitalize">{r.ratee_type}</p>
-                    </div>
-                    <span className="text-[#6B6B6B] text-xs">
-                      {new Date(r.created_at).toLocaleDateString("en-SG", { month: "short", year: "numeric" })}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
+        </div>
+        <div className="flex justify-center gap-5 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)] max-h-[720px] overflow-hidden px-6">
+          <TestimonialsColumn testimonials={COL1} duration={18} />
+          <TestimonialsColumn testimonials={COL2} className="hidden md:block" duration={23} />
+          <TestimonialsColumn testimonials={COL3} className="hidden lg:block" duration={20} />
         </div>
       </section>
 

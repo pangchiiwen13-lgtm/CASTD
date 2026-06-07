@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChatPanel, type CampaignMeta } from "@/components/chat/ChatPanel";
+import { TestimonialPromptDialog, hasGivenTestimonial } from "@/components/TestimonialPromptDialog";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -85,6 +86,7 @@ export default function BrandProjectDetailPage() {
   const [respondingApp, setRespondingApp] = useState<string | null>(null);
   const [togglingOpen, setTogglingOpen] = useState(false);
   const [showEditCriteria, setShowEditCriteria] = useState(false);
+  const [testimonialCampaign, setTestimonialCampaign] = useState<{ inquiryId: string; name: string } | null>(null);
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
@@ -100,11 +102,19 @@ export default function BrandProjectDetailPage() {
   async function handleConfirm(campaignId: string) {
     setConfirming(campaignId);
     try {
-      const updated = await api.confirmDelivery(campaignId, getSessionToken() || "");
+      const token = getSessionToken() || "";
+      const updated = await api.confirmDelivery(campaignId, token);
       setProject(prev => prev ? {
         ...prev,
         hires: prev.hires.map(h => h.id === campaignId ? { ...h, ...updated } : h),
       } : prev);
+      // Prompt for testimonial after 3rd completed campaign
+      if (!hasGivenTestimonial()) {
+        const { count } = await api.getCompletedCount(token).catch(() => ({ count: 0 }));
+        if (count >= 3 && updated.inquiry_id) {
+          setTestimonialCampaign({ inquiryId: updated.inquiry_id, name: updated.campaign_name });
+        }
+      }
     } catch { /* ignore */ }
     setConfirming(null);
   }
@@ -381,6 +391,14 @@ export default function BrandProjectDetailPage() {
             </div>
           )}
         </div>
+      )}
+
+      {testimonialCampaign && (
+        <TestimonialPromptDialog
+          inquiryId={testimonialCampaign.inquiryId}
+          campaignName={testimonialCampaign.name}
+          onClose={() => setTestimonialCampaign(null)}
+        />
       )}
 
       {showEditCriteria && project && (

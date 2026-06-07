@@ -69,6 +69,30 @@ async def list_superstar_campaigns(user: dict = Depends(get_current_user)):
     return [_row_to_dict(r) for r in rows]
 
 
+# ─── Completed campaign count (for testimonial prompt trigger) ────────────────
+
+@router.get("/completed-count", response_model=dict)
+async def get_completed_count(user: dict = Depends(get_current_user)):
+    """Return how many campaigns this user has completed (as brand or superstar)."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        brand = await conn.fetchrow("SELECT id FROM brands WHERE user_id = $1", user["id"])
+        if brand:
+            row = await conn.fetchrow(
+                "SELECT COUNT(*) AS n FROM campaigns WHERE brand_id = $1 AND status = 'completed'",
+                brand["id"],
+            )
+            return {"count": row["n"]}
+        talent = await conn.fetchrow("SELECT id FROM talents WHERE user_id = $1", user["id"])
+        if talent:
+            row = await conn.fetchrow(
+                "SELECT COUNT(*) AS n FROM campaigns WHERE talent_id = $1 AND status = 'completed'",
+                talent["id"],
+            )
+            return {"count": row["n"]}
+    return {"count": 0}
+
+
 # ─── Single campaign ──────────────────────────────────────────────────────────
 
 @router.get("/{campaign_id}", response_model=dict)

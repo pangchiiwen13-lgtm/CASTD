@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ChatPanel, type CampaignMeta } from "@/components/chat/ChatPanel";
+import { TestimonialPromptDialog, hasGivenTestimonial } from "@/components/TestimonialPromptDialog";
 import Link from "next/link";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -33,13 +34,23 @@ export default function SuperstarCampaignDetailPage() {
   const [deliverUrls, setDeliverUrls] = useState("");
   const [deliverNote, setDeliverNote] = useState("");
   const [delivering, setDelivering] = useState(false);
+  const [testimonialCampaign, setTestimonialCampaign] = useState<{ inquiryId: string; name: string } | null>(null);
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
     if (session && id) {
       const token = getSessionToken() || "";
       api.getCampaign(id, token)
-        .then(setCampaign)
+        .then(async (c) => {
+          setCampaign(c);
+          // Prompt for testimonial when viewing a completed campaign (3rd+)
+          if (c.status === "completed" && c.inquiry_id && !hasGivenTestimonial()) {
+            const { count } = await api.getCompletedCount(token).catch(() => ({ count: 0 }));
+            if (count >= 3) {
+              setTestimonialCampaign({ inquiryId: c.inquiry_id, name: c.campaign_name });
+            }
+          }
+        })
         .catch(() => null)
         .finally(() => setLoading(false));
     }
@@ -177,6 +188,14 @@ export default function SuperstarCampaignDetailPage() {
           } as CampaignMeta}
         />
       </div>
+
+      {testimonialCampaign && (
+        <TestimonialPromptDialog
+          inquiryId={testimonialCampaign.inquiryId}
+          campaignName={testimonialCampaign.name}
+          onClose={() => setTestimonialCampaign(null)}
+        />
+      )}
 
       {/* Deliver dialog */}
       <Dialog open={showDeliver} onOpenChange={() => setShowDeliver(false)}>

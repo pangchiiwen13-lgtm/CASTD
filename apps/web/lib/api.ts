@@ -112,6 +112,7 @@ export const api = {
     }),
 
   // Campaigns
+  getCompletedCount: (token: string) => apiFetch<{ count: number }>("/campaigns/completed-count", { token }),
   getBrandCampaigns: (token: string) => apiFetch<Campaign[]>("/campaigns/brand", { token }),
   getSuperstarCampaigns: (token: string) => apiFetch<Campaign[]>("/campaigns/superstar", { token }),
   getCampaign: (id: string, token: string) => apiFetch<Campaign>(`/campaigns/${id}`, { token }),
