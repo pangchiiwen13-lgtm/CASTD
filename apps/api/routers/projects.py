@@ -3,10 +3,11 @@ Brand Projects (campaign containers).
 A project is created by a brand to represent a campaign.
 Superstars are hired into the project via inquiries -> campaigns.
 """
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from uuid import UUID
 from database import get_pool
-from models.project import ProjectCreate
+from models.project import ProjectCreate, ProjectUpdate
 from auth import get_current_user
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -47,14 +48,55 @@ async def create_project(data: ProjectCreate, user: dict = Depends(get_current_u
             raise HTTPException(status_code=400, detail="Complete your brand profile first")
         row = await conn.fetchrow(
             """
-            INSERT INTO brand_projects
-              (brand_id, name, campaign_type, brief_text, deliverables, shoot_date, budget_range)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO brand_projects (
+              brand_id, name, campaign_type, brief_text, deliverables, shoot_date, budget_range,
+              target_content_types, target_languages, target_gender,
+              target_age_min, target_age_max, target_vibe_tags, target_min_followers
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
             RETURNING *
             """,
             brand["id"], data.name, data.campaign_type, data.brief_text,
             data.deliverables, data.shoot_date, data.budget_range,
+            data.target_content_types or [], data.target_languages or [],
+            data.target_gender, data.target_age_min, data.target_age_max,
+            data.target_vibe_tags or [], data.target_min_followers,
         )
+    project_id = str(row["id"])
+    from services.ai_scoring import trigger_scoring_for_campaign
+    asyncio.create_task(trigger_scoring_for_campaign(project_id))
+    return dict(row)
+
+
+@router.patch("/{project_id}", response_model=dict)
+async def update_project(project_id: UUID, data: ProjectUpdate, user: dict = Depends(get_current_user)):
+    """Update a campaign project (including talent criteria)."""
+    pool = await get_pool()
+    updates = {k: v for k, v in data.model_dump(exclude_none=True).items()}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    async with pool.acquire() as conn:
+        brand = await conn.fetchrow("SELECT id FROM brands WHERE user_id = $1", user["id"])
+        if not brand:
+            raise HTTPException(status_code=400, detail="Brand profile not found")
+        existing = await conn.fetchrow(
+            "SELECT id FROM brand_projects WHERE id = $1 AND brand_id = $2",
+            str(project_id), brand["id"],
+        )
+        if not existing:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        set_parts = [f"{k} = ${i + 2}" for i, k in enumerate(updates)]
+        set_parts.append("updated_at = NOW()")
+        set_clause = ", ".join(set_parts)
+        values = [str(project_id)] + list(updates.values())
+        row = await conn.fetchrow(
+            f"UPDATE brand_projects SET {set_clause} WHERE id = $1 RETURNING *",
+            *values,
+        )
+
+    from services.ai_scoring import trigger_scoring_for_campaign
+    asyncio.create_task(trigger_scoring_for_campaign(str(project_id)))
     return dict(row)
 
 
@@ -131,18 +173,17 @@ async def get_project(project_id: UUID, user: dict = Depends(get_current_user)):
             str(project_id),
         )
 
-    # Also fetch pending superstar applications for this project
-    applications = await conn.fetch(
-        """
-        SELECT i.*, t.name AS talent_name, t.ig_handle, t.photo_urls,
-               t.bio, t.content_types, t.ig_followers
-        FROM inquiries i
-        JOIN talents t ON t.id = i.talent_id
-        WHERE i.project_id = $1 AND i.direction = 'superstar_to_brand'
-        ORDER BY i.created_at DESC
-        """,
-        str(project_id),
-    )
+        applications = await conn.fetch(
+            """
+            SELECT i.*, t.name AS talent_name, t.ig_handle, t.photo_urls,
+                   t.bio, t.content_types, t.ig_followers
+            FROM inquiries i
+            JOIN talents t ON t.id = i.talent_id
+            WHERE i.project_id = $1 AND i.direction = 'superstar_to_brand'
+            ORDER BY i.created_at DESC
+            """,
+            str(project_id),
+        )
 
     p["hires"] = []
     for h in hires:

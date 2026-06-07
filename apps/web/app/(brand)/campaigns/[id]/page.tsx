@@ -5,10 +5,52 @@ import { useSession } from "@/lib/auth-client";
 import { api, type BrandProject, type Campaign, type Inquiry } from "@/lib/api";
 import { getSessionToken } from "@/lib/get-token";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChatPanel, type CampaignMeta } from "@/components/chat/ChatPanel";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+
+const CONTENT_TYPES = ["Lifestyle", "Beauty", "Skincare", "Fashion", "Wellness", "Food", "Fitness"];
+const LANGUAGES = ["English", "Mandarin", "Malay", "Tamil"];
+const GENDERS = ["Female", "Male", "Non-binary", "Any"];
+const VIBE_TAGS = ["Clean", "Bold", "Minimalist", "Warm", "Edgy", "Natural", "Playful", "Luxury", "Street", "Soft"];
+const FOLLOWER_OPTIONS = [
+  { label: "No minimum", value: "" },
+  { label: "1K+", value: "1000" },
+  { label: "5K+", value: "5000" },
+  { label: "10K+", value: "10000" },
+  { label: "50K+", value: "50000" },
+  { label: "100K+", value: "100000" },
+];
+
+function MultiToggle({ label, options, selected, onChange }: {
+  label: string; options: string[]; selected: string[]; onChange: (v: string[]) => void;
+}) {
+  function toggle(v: string) {
+    onChange(selected.includes(v) ? selected.filter(x => x !== v) : [...selected, v]);
+  }
+  return (
+    <div className="grid gap-1.5">
+      <Label className="text-sm">{label}</Label>
+      <div className="flex flex-wrap gap-2">
+        {options.map(o => (
+          <button key={o} type="button" onClick={() => toggle(o)}
+            className={cn(
+              "text-xs px-3 py-1 rounded-full border font-medium transition-all",
+              selected.includes(o)
+                ? "bg-[#0C0C0C] text-white border-[#0C0C0C]"
+                : "border-[#E0DDD9] text-[#6A6A6A] hover:border-[#0C0C0C] hover:text-[#1A1A1A]",
+            )}
+          >{o}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const HIRE_STATUS: Record<string, { label: string; color: string; dot: string }> = {
   active:    { label: "In progress",   color: "bg-blue-100 text-blue-800",   dot: "bg-blue-400" },
@@ -42,6 +84,7 @@ export default function BrandProjectDetailPage() {
   const [confirming, setConfirming] = useState<string | null>(null);
   const [respondingApp, setRespondingApp] = useState<string | null>(null);
   const [togglingOpen, setTogglingOpen] = useState(false);
+  const [showEditCriteria, setShowEditCriteria] = useState(false);
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
@@ -137,9 +180,9 @@ export default function BrandProjectDetailPage() {
             >
               {project.is_open ? "Open for applications" : "Closed"}
             </button>
-            <Link href="/catalog">
+            <Link href={`/catalog?campaign=${project.id}`}>
               <Button size="sm" className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]">
-                + Add Superstar
+                + Find Superstars
               </Button>
             </Link>
           </div>
@@ -158,6 +201,61 @@ export default function BrandProjectDetailPage() {
             )}
           </div>
         )}
+        {/* Talent criteria */}
+        {(() => {
+          const hasCriteria = (project.target_content_types?.length ?? 0) > 0
+            || (project.target_languages?.length ?? 0) > 0
+            || !!project.target_gender
+            || (project.target_vibe_tags?.length ?? 0) > 0
+            || !!project.target_min_followers
+            || !!project.target_age_min || !!project.target_age_max;
+          return (
+            <div className="mt-4 pt-4 border-t border-[#F0EDEA]">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-[#1A1A1A]">Talent criteria</p>
+                <button
+                  onClick={() => setShowEditCriteria(true)}
+                  className="text-xs text-[#9A9A9A] hover:text-[#1A1A1A] underline underline-offset-2"
+                >
+                  {hasCriteria ? "Edit" : "Set criteria"}
+                </button>
+              </div>
+              {hasCriteria ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {project.target_content_types?.map(t => (
+                    <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-[#FFF8EC] text-[#B8860B] border border-[#FFD200]/30 font-medium">{t}</span>
+                  ))}
+                  {project.target_languages?.map(l => (
+                    <span key={l} className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5F3F0] text-[#6A6A6A] font-medium">{l}</span>
+                  ))}
+                  {project.target_gender && project.target_gender !== "Any" && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5F3F0] text-[#6A6A6A] font-medium">{project.target_gender}</span>
+                  )}
+                  {(project.target_age_min || project.target_age_max) && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5F3F0] text-[#6A6A6A] font-medium">
+                      Age: {project.target_age_min ?? "any"}-{project.target_age_max ?? "any"}
+                    </span>
+                  )}
+                  {project.target_vibe_tags?.map(v => (
+                    <span key={v} className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5F3F0] text-[#6A6A6A] font-medium">{v}</span>
+                  ))}
+                  {project.target_min_followers && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5F3F0] text-[#6A6A6A] font-medium">
+                      {Number(project.target_min_followers) >= 1000
+                        ? `${(Number(project.target_min_followers) / 1000).toFixed(0)}K+ followers`
+                        : `${project.target_min_followers}+ followers`}
+                    </span>
+                  )}
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-medium">AI scoring active</span>
+                </div>
+              ) : (
+                <p className="text-xs text-[#9A9A9A]">
+                  No criteria set yet. Set criteria to enable AI-powered talent matching for this campaign.
+                </p>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Tab switcher */}
@@ -283,6 +381,17 @@ export default function BrandProjectDetailPage() {
             </div>
           )}
         </div>
+      )}
+
+      {showEditCriteria && project && (
+        <EditCriteriaDialog
+          project={project}
+          onClose={() => setShowEditCriteria(false)}
+          onSaved={(updated) => {
+            setProject(prev => prev ? { ...prev, ...updated } : prev);
+            setShowEditCriteria(false);
+          }}
+        />
       )}
     </div>
   );
@@ -453,6 +562,124 @@ function ApplicationCard({ application: app, responding, onAccept, onDecline }: 
         )}
       </div>
     </div>
+  );
+}
+
+function EditCriteriaDialog({ project, onClose, onSaved }: {
+  project: BrandProject;
+  onClose: () => void;
+  onSaved: (updated: Partial<BrandProject>) => void;
+}) {
+  const [criteria, setCriteria] = useState({
+    target_content_types: project.target_content_types ?? [],
+    target_languages: project.target_languages ?? [],
+    target_gender: project.target_gender ?? "",
+    target_age_min: project.target_age_min ? String(project.target_age_min) : "",
+    target_age_max: project.target_age_max ? String(project.target_age_max) : "",
+    target_vibe_tags: project.target_vibe_tags ?? [],
+    target_min_followers: project.target_min_followers ? String(project.target_min_followers) : "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function save() {
+    setLoading(true); setError("");
+    try {
+      const token = getSessionToken() || "";
+      const payload: Record<string, unknown> = {
+        target_content_types: criteria.target_content_types.length ? criteria.target_content_types : [],
+        target_languages: criteria.target_languages.length ? criteria.target_languages : [],
+        target_gender: (criteria.target_gender && criteria.target_gender !== "Any") ? criteria.target_gender : null,
+        target_age_min: criteria.target_age_min ? Number(criteria.target_age_min) : null,
+        target_age_max: criteria.target_age_max ? Number(criteria.target_age_max) : null,
+        target_vibe_tags: criteria.target_vibe_tags.length ? criteria.target_vibe_tags : [],
+        target_min_followers: criteria.target_min_followers ? Number(criteria.target_min_followers) : null,
+      };
+      const updated = await api.updateProject(project.id, payload, token);
+      onSaved(updated);
+    } catch (e: any) {
+      setError(e.message || "Failed to save criteria");
+    } finally { setLoading(false); }
+  }
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Talent criteria</DialogTitle>
+          <p className="text-xs text-[#9A9A9A] mt-1">
+            CASTD uses these to score and rank Superstars specifically for this campaign.
+          </p>
+        </DialogHeader>
+        <div className="flex flex-col gap-5 py-2">
+          <MultiToggle
+            label="Content type"
+            options={CONTENT_TYPES}
+            selected={criteria.target_content_types}
+            onChange={v => setCriteria(c => ({ ...c, target_content_types: v }))}
+          />
+          <MultiToggle
+            label="Languages"
+            options={LANGUAGES}
+            selected={criteria.target_languages}
+            onChange={v => setCriteria(c => ({ ...c, target_languages: v }))}
+          />
+          <div className="grid gap-1.5">
+            <Label className="text-sm">Gender preference</Label>
+            <div className="flex flex-wrap gap-2">
+              {GENDERS.map(g => (
+                <button key={g} type="button"
+                  onClick={() => setCriteria(c => ({ ...c, target_gender: c.target_gender === g ? "" : g }))}
+                  className={cn(
+                    "text-xs px-3 py-1 rounded-full border font-medium transition-all",
+                    criteria.target_gender === g
+                      ? "bg-[#0C0C0C] text-white border-[#0C0C0C]"
+                      : "border-[#E0DDD9] text-[#6A6A6A] hover:border-[#0C0C0C] hover:text-[#1A1A1A]",
+                  )}
+                >{g}</button>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-1">
+              <Label className="text-sm">Age min</Label>
+              <Input type="number" placeholder="e.g. 18" value={criteria.target_age_min}
+                onChange={e => setCriteria(c => ({ ...c, target_age_min: e.target.value }))} />
+            </div>
+            <div className="grid gap-1">
+              <Label className="text-sm">Age max</Label>
+              <Input type="number" placeholder="e.g. 35" value={criteria.target_age_max}
+                onChange={e => setCriteria(c => ({ ...c, target_age_max: e.target.value }))} />
+            </div>
+          </div>
+          <MultiToggle
+            label="Vibe / aesthetic"
+            options={VIBE_TAGS}
+            selected={criteria.target_vibe_tags}
+            onChange={v => setCriteria(c => ({ ...c, target_vibe_tags: v }))}
+          />
+          <div className="grid gap-1.5">
+            <Label className="text-sm">Minimum IG followers</Label>
+            <Select value={criteria.target_min_followers}
+              onValueChange={v => setCriteria(c => ({ ...c, target_min_followers: v ?? "" }))}>
+              <SelectTrigger><SelectValue placeholder="No minimum" /></SelectTrigger>
+              <SelectContent>
+                {FOLLOWER_OPTIONS.map(o => (
+                  <SelectItem key={o.label} value={o.value}>{o.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={save} disabled={loading} className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]">
+            {loading ? "Saving..." : "Save criteria"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

@@ -18,6 +18,7 @@ async def list_talents(
     vibe: str | None = Query(None),
     search: str | None = Query(None, description="Search by name or IG handle"),
     sort_by: str | None = Query(None, description="fit_score | name | followers"),
+    project_id: str | None = Query(None, description="Score against a specific campaign"),
     user: dict = Depends(get_current_user),
 ):
     pool = await get_pool()
@@ -55,39 +56,43 @@ async def list_talents(
         i += 1
 
     where = " AND ".join(conditions)
+    score_join = ""
+    score_col = "NULL::int AS fit_score"
 
-    brand_id_clause = ""
     if sort_by == "fit_score":
-        # Join scores for this brand if available
-        brand_id_clause = f"""
-            LEFT JOIN brand_fit_scores bfs
-              ON bfs.talent_id = t.id
-              AND bfs.brand_id = (SELECT id FROM brands WHERE user_id = ${i})
-        """
-        params.append(user["id"])
-        i += 1
-        order = "bfs.score DESC NULLS LAST"
+        if project_id:
+            # Campaign-level scores - most accurate, tied to specific criteria
+            score_join = f"""
+                LEFT JOIN campaign_fit_scores cfs
+                  ON cfs.talent_id = t.id AND cfs.project_id = ${i}
+            """
+            params.append(project_id)
+            i += 1
+            score_col = "cfs.score AS fit_score"
+        else:
+            # Fall back to brand-level scores
+            score_join = f"""
+                LEFT JOIN brand_fit_scores bfs
+                  ON bfs.talent_id = t.id
+                  AND bfs.brand_id = (SELECT id FROM brands WHERE user_id = ${i})
+            """
+            params.append(user["id"])
+            i += 1
+            score_col = "bfs.score AS fit_score"
+        order = "fit_score DESC NULLS LAST"
     elif sort_by == "followers":
         order = "t.ig_followers DESC"
     else:
         order = "t.name ASC"
 
     query = f"""
-        SELECT t.*, bfs.score AS fit_score
+        SELECT t.*, {score_col}
         FROM talents t
-        {brand_id_clause}
+        {score_join}
         WHERE {where}
         ORDER BY {order}
         LIMIT 100
     """
-    if not brand_id_clause:
-        query = f"""
-            SELECT t.*, NULL::int AS fit_score
-            FROM talents t
-            WHERE {where}
-            ORDER BY {order}
-            LIMIT 100
-        """
 
     async with pool.acquire() as conn:
         rows = await conn.fetch(query, *params)

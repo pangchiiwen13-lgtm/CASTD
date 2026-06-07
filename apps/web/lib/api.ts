@@ -127,6 +127,8 @@ export const api = {
     apiFetch<BrandProject>("/projects", { method: "POST", body: JSON.stringify(data), token }),
   getProject: (id: string, token: string) =>
     apiFetch<BrandProject & { hires: Campaign[]; applications: Inquiry[] }>(`/projects/${id}`, { token }),
+  updateProject: (id: string, data: Partial<BrandProject>, token: string) =>
+    apiFetch<BrandProject>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(data), token }),
   toggleProjectOpen: (id: string, token: string) =>
     apiFetch<BrandProject>(`/projects/${id}/toggle-open`, { method: "PATCH", token }),
 };
@@ -293,6 +295,14 @@ export interface BrandProject {
   is_open: boolean;
   created_at: string;
   updated_at: string;
+  // Talent criteria - who the brand is looking for
+  target_content_types?: string[];
+  target_languages?: string[];
+  target_gender?: string;
+  target_age_min?: number;
+  target_age_max?: number;
+  target_vibe_tags?: string[];
+  target_min_followers?: number;
   // Aggregated counts (from list endpoint)
   active_hires?: number;
   done_hires?: number;

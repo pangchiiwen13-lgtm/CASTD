@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
-import { api, type Talent, type Brand } from "@/lib/api";
+import { useRouter, useSearchParams } from "next/navigation";
+import { api, type Talent, type Brand, type BrandProject } from "@/lib/api";
 import { TalentCard } from "@/components/talent/TalentCard";
 import { FilterPanel, type Filters } from "@/components/catalog/FilterPanel";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,19 +14,34 @@ import { cn } from "@/lib/utils";
 export default function CatalogPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const campaignId = searchParams.get("campaign");
+
   const [talents, setTalents] = useState<Talent[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<Filters>({ content_type: "", language: "", gender: "", sort_by: "name", search: "" });
+  const [campaign, setCampaign] = useState<BrandProject | null>(null);
+  const [filters, setFilters] = useState<Filters>({
+    content_type: "", language: "", gender: "",
+    sort_by: campaignId ? "fit_score" : "name",
+    search: "",
+  });
   const [brandProfile, setBrandProfile] = useState<Brand | null | "loading">("loading");
 
-  // Redirect if not logged in; fetch shortlist + check brand profile once on login
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
     if (session) { fetchShortlist(); checkBrandProfile(); }
   }, [session, isPending]);
 
-  // Re-fetch talents whenever session or filters change
+  // Load campaign context if ?campaign= is set
+  useEffect(() => {
+    if (!campaignId || !session) return;
+    const token = getSessionToken() || "";
+    api.getProject(campaignId, token)
+      .then(p => setCampaign(p))
+      .catch(() => null);
+  }, [campaignId, session]);
+
   useEffect(() => {
     if (session) fetchTalents();
   }, [session, isPending, filters]);
@@ -41,7 +56,7 @@ export default function CatalogPage() {
       const brand = await api.getMyBrand(token);
       setBrandProfile(brand);
     } catch {
-      setBrandProfile(null); // 404 = no profile yet
+      setBrandProfile(null);
     }
   }
 
@@ -55,6 +70,8 @@ export default function CatalogPage() {
       if (filters.gender) params.gender = filters.gender;
       if (filters.sort_by) params.sort_by = filters.sort_by;
       if (filters.search) params.search = filters.search;
+      // Pass campaign context so scores are campaign-specific
+      if (campaignId && filters.sort_by === "fit_score") params.project_id = campaignId;
       setTalents(await api.getTalents(params, token));
     } finally { setLoading(false); }
   }
@@ -73,16 +90,51 @@ export default function CatalogPage() {
     else { await api.removeShortlist(talentId, token); setSavedIds(s => { const n = new Set(s); n.delete(talentId); return n; }); }
   }
 
-  const showProfileBanner = brandProfile === null;
+  const showProfileBanner = !campaignId && brandProfile === null;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
-      {/* Brand profile prompt */}
+
+      {/* Campaign context banner */}
+      {campaignId && (
+        <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-[#FFD200]/40 px-4 py-3 bg-[#FFFBEB] shadow-sm">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#FFD200] inline-block" />
+              <p className="text-sm font-semibold text-[#1A1A1A]">
+                {campaign ? `Matching for: ${campaign.name}` : "Loading campaign..."}
+              </p>
+            </div>
+            {campaign && (
+              <p className="text-xs text-[#9A9A9A] mt-0.5">
+                Talents are ranked by fit score for this specific campaign.
+                {campaign.target_content_types?.length
+                  ? ` Criteria: ${[
+                      ...(campaign.target_content_types ?? []),
+                      campaign.target_gender && campaign.target_gender !== "Any" ? campaign.target_gender : null,
+                      ...(campaign.target_languages ?? []),
+                    ].filter(Boolean).join(", ")}`
+                  : " No criteria set - scores use general brand profile."}
+              </p>
+            )}
+          </div>
+          <Link
+            href={`/campaigns/${campaignId}`}
+            className="shrink-0 text-xs text-[#9A9A9A] hover:text-[#1A1A1A] underline underline-offset-2"
+          >
+            Back to campaign
+          </Link>
+        </div>
+      )}
+
+      {/* Brand profile prompt (only when not in campaign context) */}
       {showProfileBanner && (
         <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-dashed border-[#FFD200]/60 px-4 py-3 bg-white shadow-sm">
           <div>
             <p className="text-sm font-medium">Set up your brand profile for AI-matched talent scores</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Tell us about your brand and we&apos;ll rank talents by how well they fit your campaigns.</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Tell us about your brand and we&apos;ll rank talents by how well they fit your campaigns.
+            </p>
           </div>
           <Link href="/settings" className={cn(buttonVariants({ size: "sm" }), "shrink-0 rounded-full bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]")}>
             Set up
