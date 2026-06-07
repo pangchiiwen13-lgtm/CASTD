@@ -1,8 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { motion, useInView, useMotionValue, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { api, type PublicReview } from "@/lib/api";
+import { BentoGrid, BentoCard } from "@/components/bento-grid";
 
 const TICKER_ITEMS = [
   "Beauty", "Skincare", "Lifestyle", "Fashion",
@@ -10,22 +12,25 @@ const TICKER_ITEMS = [
   "Product Demo", "Brand Story", "Testimonial", "OOTD",
 ];
 
-function useScrollReveal() {
+// Animated number counter using framer-motion
+function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
+  const motionVal = useMotionValue(0);
+  const spring = useSpring(motionVal, { stiffness: 60, damping: 20 });
+  const [display, setDisplay] = useState("0");
+
   useEffect(() => {
-    const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
-    const obs = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("visible");
-            obs.unobserve(e.target);
-          }
-        }),
-      { threshold: 0.08 }
-    );
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
+    if (inView) motionVal.set(value);
+  }, [inView, value, motionVal]);
+
+  useEffect(() => {
+    return spring.on("change", (v) => {
+      setDisplay(Math.round(v).toString());
+    });
+  }, [spring]);
+
+  return <span ref={ref}>{display}{suffix}</span>;
 }
 
 function Stars({ score }: { score: number }) {
@@ -40,8 +45,12 @@ function Stars({ score }: { score: number }) {
   );
 }
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
+
 export default function LandingPage() {
-  useScrollReveal();
   const [scrolled, setScrolled] = useState(false);
   const [stats, setStats] = useState<{ superstars: number; brands: number; completed_matches: number } | null>(null);
   const [reviews, setReviews] = useState<PublicReview[]>([]);
@@ -56,24 +65,6 @@ export default function LandingPage() {
     api.getPublicStats().then(setStats).catch(() => null);
     api.getPublicReviews().then(setReviews).catch(() => null);
   }, []);
-
-  const statCards = [
-    {
-      value: stats ? `${stats.superstars}+` : "...",
-      label: "Vetted Superstars",
-      sub: "beauty & lifestyle creators",
-    },
-    {
-      value: stats ? `${stats.brands}` : "...",
-      label: "Brands & Agencies",
-      sub: "registered on CASTD",
-    },
-    {
-      value: stats ? `${stats.completed_matches}` : "...",
-      label: "Completed Matches",
-      sub: "confirmed campaigns",
-    },
-  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-white overflow-x-hidden">
@@ -121,37 +112,46 @@ export default function LandingPage() {
             backgroundSize: "200px",
           }}
         />
+        {/* Yellow glow blob */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#FFD200] opacity-[0.05] rounded-full blur-[140px] pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl mx-auto">
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
             className="inline-flex items-center gap-2.5 mb-8 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-white/40 text-xs tracking-widest uppercase"
-            style={{ animation: "fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both" }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FFD200] shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FFD200] shrink-0 animate-pulse" />
             Beauty &amp; Lifestyle · Singapore
-          </div>
+          </motion.div>
 
-          <h1
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.08, ease: "easeOut" }}
             className="font-display text-6xl sm:text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-[0.92] mb-8"
-            style={{ animation: "fadeUp 0.9s 0.08s cubic-bezier(0.16,1,0.3,1) both" }}
           >
             Cast exactly
             <br />
             <span className="text-[#FFD200]">who you need.</span>
-          </h1>
+          </motion.h1>
 
-          <p
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.16, ease: "easeOut" }}
             className="text-white/45 text-lg md:text-xl max-w-lg mx-auto leading-relaxed mb-10"
-            style={{ animation: "fadeUp 0.9s 0.16s cubic-bezier(0.16,1,0.3,1) both" }}
           >
             Singapore's marketplace connecting beauty and lifestyle brands with
             vetted on-screen talent. Free to browse, pay only at confirmation.
-          </p>
+          </motion.p>
 
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.24, ease: "easeOut" }}
             className="flex flex-wrap gap-4 justify-center"
-            style={{ animation: "fadeUp 0.9s 0.24s cubic-bezier(0.16,1,0.3,1) both" }}
           >
             <Link
               href="/signup"
@@ -165,16 +165,18 @@ export default function LandingPage() {
             >
               Sign in
             </Link>
-          </div>
+          </motion.div>
         </div>
 
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.2 }}
           className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
-          style={{ animation: "fadeIn 1.2s 1.2s both" }}
         >
           <div className="w-px h-14 bg-gradient-to-b from-transparent via-white/20 to-white/10" />
           <span className="text-white/20 text-[10px] tracking-[0.2em] uppercase">Scroll</span>
-        </div>
+        </motion.div>
       </section>
 
       {/* MARQUEE TICKER */}
@@ -199,81 +201,124 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* LIVE STATS */}
+      {/* LIVE STATS - animated counters */}
       <section className="bg-white px-6 py-24">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-10 reveal" data-reveal="true">
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+            variants={fadeUp}
+            className="mb-10"
+          >
             <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">
               Live platform metrics
             </span>
             <h2 className="font-display text-3xl md:text-4xl font-extrabold text-[#0C0C0C] mt-3 tracking-tight">
               Growing every week.
             </h2>
-          </div>
+          </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#EBEBEB] border border-[#EBEBEB]">
-            {statCards.map((s, i) => (
-              <div
+            {[
+              { value: stats?.superstars ?? 0, suffix: "+", label: "Vetted Superstars", sub: "beauty & lifestyle creators" },
+              { value: stats?.brands ?? 0, suffix: "", label: "Brands & Agencies", sub: "registered on CASTD" },
+              { value: stats?.completed_matches ?? 0, suffix: "", label: "Completed Matches", sub: "confirmed campaigns" },
+            ].map((s, i) => (
+              <motion.div
                 key={i}
-                className="reveal bg-white px-10 py-12 hover:bg-[#F8F7F4] transition-colors duration-300"
-                data-reveal="true"
-                style={{ transitionDelay: `${i * 0.1}s` }}
+                initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+                variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.6, delay: i * 0.1 } } }}
+                className="bg-white px-10 py-12 hover:bg-[#F8F7F4] transition-colors duration-300"
               >
                 <div className="font-display text-5xl md:text-6xl font-extrabold text-[#0C0C0C] tracking-tight">
-                  {s.value}
+                  {stats ? <AnimatedNumber value={s.value} suffix={s.suffix} /> : "..."}
                 </div>
                 <div className="font-semibold text-[#0C0C0C] mt-4 mb-1 text-base">{s.label}</div>
                 <div className="text-sm text-[#7A7A7A]">{s.sub}</div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section className="bg-[#F8F7F4] border-y border-[#EBEBEB] px-6 py-24">
+      {/* HOW IT WORKS - Bento grid */}
+      <section className="bg-[#0C0C0C] px-6 py-24">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-16 reveal" data-reveal="true">
-            <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">Process</span>
-            <h2 className="font-display text-4xl md:text-5xl font-extrabold text-[#0C0C0C] mt-4 leading-[0.95] tracking-tight">
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+            variants={fadeUp}
+            className="mb-12"
+          >
+            <span className="text-[10px] text-[#FFD200]/60 tracking-[0.2em] uppercase font-semibold">Process</span>
+            <h2 className="font-display text-4xl md:text-5xl font-extrabold text-white mt-4 leading-[0.95] tracking-tight">
               Three steps.<br />Zero guesswork.
             </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-12 md:gap-8">
-            {[
-              {
-                n: "01", title: "Browse free",
-                desc: "Filter 27+ profiles by content type, language, vibe, and follower count. Every profile is visible. No paywalls, no credits.",
-              },
-              {
-                n: "02", title: "Shortlist & inquire",
-                desc: "Save your picks to a casting board. Submit a campaign brief with dates, deliverables, and budget. Still completely free.",
-              },
-              {
-                n: "03", title: "Confirm & go",
-                desc: "Found the right fit? Confirm the talent and pay the one-time contact fee. Platform handles everything after.",
-              },
-            ].map((s, i) => (
-              <div key={i} className="reveal" data-reveal="true" style={{ transitionDelay: `${0.1 + i * 0.12}s` }}>
-                <div className="font-display text-7xl font-extrabold text-[#E0E0E0] leading-none mb-6 select-none">{s.n}</div>
-                <div className="font-display text-xl font-bold text-[#0C0C0C] mb-3">{s.title}</div>
-                <div className="text-[#7A7A7A] text-sm leading-relaxed">{s.desc}</div>
+          </motion.div>
+
+          <BentoGrid className="border-white/8 bg-white/3">
+            {/* Step 01 - spans 4 cols */}
+            <BentoCard className="col-span-1 md:col-span-4 border-b border-r-0 md:border-r border-white/8 p-8 md:p-10">
+              <div className="font-display text-6xl font-extrabold text-[#FFD200]/20 leading-none mb-6 select-none">01</div>
+              <h3 className="text-xl font-bold text-white mb-3">Browse free</h3>
+              <p className="text-white/45 text-sm leading-relaxed max-w-xs">
+                Filter 27+ profiles by content type, language, vibe, and follower count. Every profile is visible. No paywalls, no credits.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-2">
+                {["Beauty Tutorial", "Lifestyle", "UGC", "GRWM", "Product Demo"].map(tag => (
+                  <span key={tag} className="text-[10px] bg-white/5 border border-white/10 text-white/40 px-2.5 py-1 rounded-full">{tag}</span>
+                ))}
               </div>
-            ))}
-          </div>
+            </BentoCard>
+
+            {/* Step 02 - spans 2 cols */}
+            <BentoCard className="col-span-1 md:col-span-2 border-b border-white/8 p-8 md:p-10">
+              <div className="font-display text-6xl font-extrabold text-[#FFD200]/20 leading-none mb-6 select-none">02</div>
+              <h3 className="text-xl font-bold text-white mb-3">Shortlist &amp; inquire</h3>
+              <p className="text-white/45 text-sm leading-relaxed">
+                Save picks to a casting board. Submit a campaign brief with dates, deliverables, budget. Still free.
+              </p>
+            </BentoCard>
+
+            {/* Step 03 - spans 3 cols */}
+            <BentoCard className="col-span-1 md:col-span-3 border-r-0 md:border-r border-white/8 p-8 md:p-10">
+              <div className="font-display text-6xl font-extrabold text-[#FFD200]/20 leading-none mb-6 select-none">03</div>
+              <h3 className="text-xl font-bold text-white mb-3">Confirm &amp; go</h3>
+              <p className="text-white/45 text-sm leading-relaxed">
+                Found the right fit? Confirm the talent and pay the one-time contact fee. Platform handles everything after.
+              </p>
+            </BentoCard>
+
+            {/* CTA card - spans 3 cols */}
+            <BentoCard className="col-span-1 md:col-span-3 p-8 md:p-10 flex items-center justify-between gap-4 flex-wrap bg-[#FFD200]/5">
+              <div>
+                <p className="font-bold text-white text-lg">Free to browse.</p>
+                <p className="text-white/40 text-sm">Pay only at confirmation.</p>
+              </div>
+              <Link href="/signup" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#FFD200] text-[#0C0C0C] font-semibold text-sm hover:bg-white transition-colors shrink-0">
+                Get started →
+              </Link>
+            </BentoCard>
+          </BentoGrid>
         </div>
       </section>
 
       {/* FOR BRANDS / FOR SUPERSTARS */}
       <section className="bg-white px-6 py-24">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-16 reveal" data-reveal="true">
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+            variants={fadeUp}
+            className="mb-16"
+          >
             <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">Who it's for</span>
             <h2 className="font-display text-4xl md:text-5xl font-extrabold text-[#0C0C0C] mt-4 leading-[0.95] tracking-tight">
               One platform.<br />Both sides.
             </h2>
-          </div>
+          </motion.div>
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="reveal bg-[#0C0C0C] rounded-2xl p-10 flex flex-col" data-reveal="true">
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+              variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0, transition: { duration: 0.6 } } }}
+              className="bg-[#0C0C0C] rounded-2xl p-10 flex flex-col"
+            >
               <span className="inline-block text-[#FFD200] text-[10px] tracking-[0.2em] uppercase font-semibold mb-8">
                 For Brands &amp; Agencies
               </span>
@@ -296,9 +341,13 @@ export default function LandingPage() {
               <Link href="/signup" className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#FFD200] text-[#0C0C0C] font-semibold text-sm hover:bg-white transition-colors">
                 Browse catalog →
               </Link>
-            </div>
+            </motion.div>
 
-            <div className="reveal bg-[#F8F7F4] border border-[#EBEBEB] rounded-2xl p-10 flex flex-col" data-reveal="true" style={{ transitionDelay: "0.12s" }}>
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+              variants={{ hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0, transition: { duration: 0.6, delay: 0.1 } } }}
+              className="bg-[#F8F7F4] border border-[#EBEBEB] rounded-2xl p-10 flex flex-col"
+            >
               <span className="inline-block text-[#7A7A7A] text-[10px] tracking-[0.2em] uppercase font-semibold mb-8">
                 For Superstars
               </span>
@@ -321,7 +370,7 @@ export default function LandingPage() {
               <Link href="/signup" className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0C0C0C] text-white font-semibold text-sm hover:bg-[#2A2A2A] transition-colors">
                 Join as Superstar →
               </Link>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -329,15 +378,23 @@ export default function LandingPage() {
       {/* REVIEWS */}
       <section className="bg-[#0C0C0C] px-6 py-24">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-16 reveal" data-reveal="true">
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+            variants={fadeUp}
+            className="mb-16"
+          >
             <span className="text-[10px] text-[#FFD200]/60 tracking-[0.2em] uppercase font-semibold">Reviews</span>
             <h2 className="font-display text-4xl md:text-5xl font-extrabold text-white mt-4 leading-[0.95] tracking-tight">
               What they're saying.
             </h2>
-          </div>
+          </motion.div>
 
           {reviews.length === 0 ? (
-            <div className="reveal border border-white/8 rounded-2xl p-12 text-center" data-reveal="true">
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true }}
+              variants={fadeUp}
+              className="border border-white/8 rounded-2xl p-12 text-center"
+            >
               <div className="flex justify-center gap-1 mb-4">
                 {[1,2,3,4,5].map(n => (
                   <span key={n} className="text-[#FFD200]" style={{ fontSize: 24 }}>★</span>
@@ -346,15 +403,15 @@ export default function LandingPage() {
               <p className="text-white/40 text-sm max-w-sm mx-auto">
                 Reviews from real campaigns will appear here as brands and Superstars complete their first collaborations.
               </p>
-            </div>
+            </motion.div>
           ) : (
             <div className="grid md:grid-cols-3 gap-4">
               {reviews.map((r, i) => (
-                <div
+                <motion.div
                   key={i}
-                  className="reveal border border-white/8 rounded-2xl p-6 flex flex-col gap-4 hover:border-white/16 transition-colors"
-                  data-reveal="true"
-                  style={{ transitionDelay: `${i * 0.07}s` }}
+                  initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+                  variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.07 } } }}
+                  className="border border-white/8 rounded-2xl p-6 flex flex-col gap-4 hover:border-white/16 transition-colors"
                 >
                   <Stars score={r.score} />
                   <p className="text-white/70 text-sm leading-relaxed flex-1">"{r.comment}"</p>
@@ -367,7 +424,7 @@ export default function LandingPage() {
                       {new Date(r.created_at).toLocaleDateString("en-SG", { month: "short", year: "numeric" })}
                     </span>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
@@ -376,7 +433,11 @@ export default function LandingPage() {
 
       {/* FINAL CTA */}
       <section className="bg-[#FFD200] px-6 py-28">
-        <div className="max-w-3xl mx-auto text-center reveal" data-reveal="true">
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+          variants={fadeUp}
+          className="max-w-3xl mx-auto text-center"
+        >
           <h2 className="font-display text-5xl md:text-6xl font-extrabold text-[#0C0C0C] tracking-tight leading-[0.93] mb-6">
             Your next campaign<br />starts here.
           </h2>
@@ -389,7 +450,7 @@ export default function LandingPage() {
           >
             Get started - it's free →
           </Link>
-        </div>
+        </motion.div>
       </section>
 
       {/* FOOTER */}
