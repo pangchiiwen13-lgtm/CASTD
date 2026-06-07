@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api, Talent } from "@/lib/api";
+import { AvailabilityCalendar } from "@/components/calendar/AvailabilityCalendar";
 import { getSessionToken } from "@/lib/get-token";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -312,6 +313,24 @@ export default function SuperstarProfilePage() {
           </div>
         </Section>
       </div>
+
+      {/* Availability calendar */}
+      {profile && (
+        <div className="mt-8">
+          <Section title="Availability Calendar">
+            <p className="text-xs text-muted-foreground mb-4">
+              Mark dates you are NOT available. Brands can see this before booking.
+              Red = unavailable, white = available.
+            </p>
+            <AvailabilityCalendar
+              talentId={profile.id}
+              blockedDates={[]}
+              editable={true}
+              token={getSessionToken() || ""}
+            />
+          </Section>
+        </div>
+      )}
 
       {/* Save button at bottom */}
       <div className="mt-10 flex items-center justify-between pt-6 border-t">

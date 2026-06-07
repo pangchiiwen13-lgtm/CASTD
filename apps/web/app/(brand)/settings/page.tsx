@@ -23,7 +23,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [form, setForm] = useState({ company_name: "", industry: "", campaign_type: "", aesthetic_tags: [] as string[] });
+  const [form, setForm] = useState({ company_name: "", industry: "", campaign_type: "", aesthetic_tags: [] as string[], uen: "" });
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
@@ -32,7 +32,7 @@ export default function SettingsPage() {
       try {
         const b = await api.getMyBrand(getSessionToken() || "");
         setBrand(b);
-        setForm({ company_name: b.company_name, industry: b.industry || "", campaign_type: b.campaign_type || "", aesthetic_tags: b.aesthetic_tags || [] });
+        setForm({ company_name: b.company_name, industry: b.industry || "", campaign_type: b.campaign_type || "", aesthetic_tags: b.aesthetic_tags || [], uen: b.uen || "" });
       } catch {}
       setLoading(false);
     })();
@@ -67,6 +67,34 @@ export default function SettingsPage() {
           <div className="grid gap-1">
             <Label>Company / brand name</Label>
             <Input value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} />
+          </div>
+          <div className="grid gap-1">
+            <Label className="flex items-center gap-2">
+              Singapore UEN *
+              {brand?.uen_status === "verified" && (
+                <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Verified</span>
+              )}
+              {brand?.uen_status === "pending_review" && (
+                <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Pending review</span>
+              )}
+              {brand?.uen_status === "rejected" && (
+                <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Rejected - contact support</span>
+              )}
+            </Label>
+            {brand?.uen_verified_name && (
+              <p className="text-xs text-green-700 font-medium">Verified as: {brand.uen_verified_name}</p>
+            )}
+            <Input
+              value={form.uen}
+              onChange={e => setForm(f => ({ ...f, uen: e.target.value.toUpperCase() }))}
+              placeholder="e.g. 202312345A"
+              maxLength={15}
+              disabled={brand?.uen_status === "verified"}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Required for brands transacting on CASTD. We verify against the IRAS GST registry.
+              Non-GST-registered entities will be manually reviewed.
+            </p>
           </div>
           <div className="grid gap-1">
             <Label>Industry</Label>

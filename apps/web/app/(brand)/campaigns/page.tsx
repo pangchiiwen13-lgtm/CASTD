@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { api, type Campaign } from "@/lib/api";
 import { getSessionToken } from "@/lib/get-token";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
@@ -153,7 +152,7 @@ function CampaignCard({ campaign: c, children }: { campaign: Campaign; children?
   const photo = c.photo_urls?.[0];
 
   return (
-    <div className="rounded-xl border px-5 py-4 hover:bg-muted/30 transition-colors">
+    <div className="rounded-xl border px-5 py-4 hover:bg-muted/30 transition-colors group relative">
       <div className="flex items-start gap-4">
         {/* Talent photo */}
         <div className="w-12 h-12 rounded-full overflow-hidden bg-[#0C0C0C] shrink-0 flex items-center justify-center">
@@ -177,9 +176,12 @@ function CampaignCard({ campaign: c, children }: { campaign: Campaign; children?
             <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{c.brief_text}</p>
           )}
         </div>
-        {c.status === "completed" && (
-          <span className="text-green-500 text-lg shrink-0">✓</span>
-        )}
+        <Link
+          href={`/campaigns/${c.id}`}
+          className="shrink-0 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+        >
+          {c.status === "completed" ? "View" : "Open chat"}
+        </Link>
       </div>
       {children}
     </div>

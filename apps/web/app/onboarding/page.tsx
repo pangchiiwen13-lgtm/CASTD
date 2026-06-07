@@ -34,7 +34,7 @@ export default function OnboardingPage() {
       }
     }
   }, []);
-  const [form, setForm] = useState({ company_name: "", industry: "", campaign_type: "", aesthetic_tags: [] as string[], brand_values: [] as string[] });
+  const [form, setForm] = useState({ company_name: "", uen: "", industry: "", campaign_type: "", aesthetic_tags: [] as string[], brand_values: [] as string[] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -118,6 +118,19 @@ export default function OnboardingPage() {
             <div className="grid gap-1">
               <Label>Company / brand name *</Label>
               <Input placeholder="e.g. Glow Republic" value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} />
+            </div>
+            <div className="grid gap-1">
+              <Label>Singapore UEN *</Label>
+              <Input
+                placeholder="e.g. 202312345A"
+                value={form.uen}
+                onChange={e => setForm(f => ({ ...f, uen: e.target.value.toUpperCase() }))}
+                maxLength={15}
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Your Unique Entity Number from ACRA. Required for all brand accounts.
+                We verify this against IRAS - non-GST-registered entities will be manually reviewed.
+              </p>
             </div>
             <div className="grid gap-1">
               <Label>Industry</Label>

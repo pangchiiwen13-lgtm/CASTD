@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import Link from "next/link";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   active:    { label: "In progress",  color: "bg-blue-100 text-blue-800" },
@@ -211,7 +212,12 @@ function CampaignCard({ campaign: c, children }: { campaign: Campaign; children?
             </p>
           )}
         </div>
-        {c.status === "completed" && <span className="text-green-500 text-lg shrink-0">✓</span>}
+        <Link
+          href={`/superstar/campaigns/${c.id}`}
+          className="shrink-0 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+        >
+          {c.status === "completed" ? "View" : "Open chat"}
+        </Link>
       </div>
       {children}
     </div>

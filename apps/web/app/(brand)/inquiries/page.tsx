@@ -27,7 +27,7 @@ const STATUS_META: Record<string, {
     label: "Confirmed",
     color: "bg-green-50 text-green-700 border-green-200",
     icon: "✅",
-    description: "You're confirmed with this Superstar. We'll be in touch with next steps shortly.",
+    description: "Booking confirmed! Head to Campaigns to chat with your Superstar and track delivery.",
   },
   closed: {
     label: "Closed",
@@ -186,8 +186,15 @@ export default function InquiriesPage() {
                       onClick={() => handleConfirm(inq.id)}
                       disabled={confirming === inq.id}
                     >
-                      {confirming === inq.id ? "Processing…" : "Confirm talent →"}
+                      {confirming === inq.id ? "Processing..." : "Confirm talent ->"}
                     </Button>
+                  )}
+                  {inq.status === "confirmed" && (
+                    <Link href="/campaigns">
+                      <Button size="sm" className="shrink-0 h-8 text-xs bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00] border-0">
+                        View Campaign ->
+                      </Button>
+                    </Link>
                   )}
                   {inq.status === "closed" && (
                     ratedIds.has(inq.id) ? (

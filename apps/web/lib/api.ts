@@ -88,6 +88,20 @@ export const api = {
   checkRating: (inquiry_id: string, token: string) =>
     apiFetch<{ has_rated: boolean; score?: number; comment?: string }>(`/ratings/check/${inquiry_id}`, { token }),
 
+  // Messages (chat)
+  getMessages: (campaignId: string, token: string) =>
+    apiFetch<ChatMessage[]>(`/messages/${campaignId}`, { token }),
+  sendMessage: (campaignId: string, body: string, token: string) =>
+    apiFetch<ChatMessage>(`/messages/${campaignId}`, { method: "POST", body: JSON.stringify({ body }), token }),
+
+  // Calendar
+  getBlockedDates: (talentId: string, token: string) =>
+    apiFetch<{ talent_id: string; blocked_dates: string[] }>(`/calendar/${talentId}`, { token }),
+  toggleBlockedDate: (talentId: string, date: string, token: string) =>
+    apiFetch<{ action: string; date: string }>(`/calendar/${talentId}/toggle`, {
+      method: "POST", body: JSON.stringify({ date }), token,
+    }),
+
   // Campaigns
   getBrandCampaigns: (token: string) => apiFetch<Campaign[]>("/campaigns/brand", { token }),
   getSuperstarCampaigns: (token: string) => apiFetch<Campaign[]>("/campaigns/superstar", { token }),
@@ -149,6 +163,9 @@ export interface Brand {
   target_audience: Record<string, string>;
   campaign_type?: string;
   plan_tier: string;
+  uen?: string;
+  uen_status?: "unverified" | "pending_review" | "verified" | "rejected";
+  uen_verified_name?: string;
 }
 
 export interface Notification {
@@ -219,6 +236,15 @@ export interface Inquiry {
   created_at: string;
 }
 
+
+export interface ChatMessage {
+  id: string;
+  campaign_id: string;
+  sender_user_id: string;
+  sender_type: "brand" | "superstar";
+  body: string;
+  created_at: string;
+}
 
 export interface Campaign {
   id: string;

@@ -1,9 +1,11 @@
+import asyncio
+import json
 from fastapi import APIRouter, Depends, HTTPException
 from uuid import UUID
 from database import get_pool
 from models.brand import Brand, BrandCreate, BrandUpdate
 from auth import get_current_user, get_admin_user
-import json
+from services.uen_validator import lookup_uen_iras, validate_uen_format
 
 router = APIRouter(prefix="/brands", tags=["brands"])
 
@@ -20,6 +22,18 @@ async def get_my_brand(user: dict = Depends(get_current_user)):
 
 @router.post("/me", response_model=Brand)
 async def create_brand(data: BrandCreate, user: dict = Depends(get_current_user)):
+    # Validate UEN if provided
+    uen_status = "unverified"
+    uen_verified_name = None
+    uen_clean = None
+    if data.uen:
+        uen_clean = data.uen.strip().upper()
+        if not validate_uen_format(uen_clean):
+            raise HTTPException(status_code=400, detail="Invalid UEN format. Please check your Singapore UEN.")
+        result = await lookup_uen_iras(uen_clean)
+        uen_status = result["status"]
+        uen_verified_name = result.get("name")
+
     pool = await get_pool()
     async with pool.acquire() as conn:
         existing = await conn.fetchrow("SELECT id FROM brands WHERE user_id = $1", user["id"])
@@ -28,20 +42,18 @@ async def create_brand(data: BrandCreate, user: dict = Depends(get_current_user)
         row = await conn.fetchrow(
             """
             INSERT INTO brands (user_id, email, company_name, industry, brand_values,
-              aesthetic_tags, target_audience, campaign_type)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+              aesthetic_tags, target_audience, campaign_type, uen, uen_status, uen_verified_name)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
             RETURNING *
             """,
             user["id"], user.get("email", ""), data.company_name, data.industry,
             data.brand_values, data.aesthetic_tags,
             json.dumps(data.target_audience), data.campaign_type,
+            uen_clean, uen_status, uen_verified_name,
         )
 
-    # Trigger AI scoring in background when brand profile is first created
     from services.ai_scoring import trigger_scoring_for_brand
-    import asyncio
     asyncio.create_task(trigger_scoring_for_brand(str(row["id"])))
-
     return _row_to_brand(row)
 
 
@@ -51,6 +63,16 @@ async def update_brand(data: BrandUpdate, user: dict = Depends(get_current_user)
     updates = {k: v for k, v in data.model_dump(exclude_none=True).items()}
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
+
+    # Handle UEN update + validation
+    if "uen" in updates and updates["uen"]:
+        uen_clean = updates["uen"].strip().upper()
+        if not validate_uen_format(uen_clean):
+            raise HTTPException(status_code=400, detail="Invalid UEN format. Please check your Singapore UEN.")
+        result = await lookup_uen_iras(uen_clean)
+        updates["uen"] = uen_clean
+        updates["uen_status"] = result["status"]
+        updates["uen_verified_name"] = result.get("name")
 
     if "target_audience" in updates:
         updates["target_audience"] = json.dumps(updates["target_audience"])
@@ -66,11 +88,8 @@ async def update_brand(data: BrandUpdate, user: dict = Depends(get_current_user)
     if not row:
         raise HTTPException(status_code=404, detail="Brand profile not found")
 
-    # Trigger AI scoring in background when brand profile changes
     from services.ai_scoring import trigger_scoring_for_brand
-    import asyncio
     asyncio.create_task(trigger_scoring_for_brand(str(row["id"])))
-
     return _row_to_brand(row)
 
 

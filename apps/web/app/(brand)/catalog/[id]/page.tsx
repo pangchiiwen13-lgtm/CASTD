@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InquiryDialog } from "@/components/talent/InquiryDialog";
+import { AvailabilityCalendar } from "@/components/calendar/AvailabilityCalendar";
 import { getSessionToken } from "@/lib/get-token";
 import Link from "next/link";
 
@@ -35,13 +36,20 @@ export default function TalentProfilePage() {
   const [loading, setLoading] = useState(true);
   const [showInquiry, setShowInquiry] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
     if (!session || !id) return;
     (async () => {
       setLoading(true);
-      try { setTalent(await api.getTalent(id, getSessionToken() || "")); }
+      const token = getSessionToken() || "";
+      try {
+        const t = await api.getTalent(id, token);
+        setTalent(t);
+        // Load availability calendar
+        api.getBlockedDates(id, token).then(r => setBlockedDates(r.blocked_dates)).catch(() => null);
+      }
       finally { setLoading(false); }
     })();
   }, [session, isPending, id]);
@@ -244,6 +252,18 @@ export default function TalentProfilePage() {
                 <video src={talent.intro_video_url} controls className="w-full rounded-xl max-h-72 bg-black" />
               </div>
             )}
+
+            {/* Availability calendar */}
+            <div>
+              <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-semibold mb-3">Availability</p>
+              <div className="rounded-xl bg-white p-4">
+                <AvailabilityCalendar
+                  talentId={talent.id}
+                  blockedDates={blockedDates}
+                  editable={false}
+                />
+              </div>
+            </div>
 
             {/* Mobile CTA */}
             <Button

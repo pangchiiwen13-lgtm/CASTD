@@ -15,6 +15,7 @@ class BrandProfile(BaseModel):
 
 class BrandCreate(BrandProfile):
     email: Optional[str] = None
+    uen: Optional[str] = None
 
 
 class BrandUpdate(BaseModel):
@@ -24,12 +25,16 @@ class BrandUpdate(BaseModel):
     aesthetic_tags: Optional[list[str]] = None
     target_audience: Optional[dict[str, Any]] = None
     campaign_type: Optional[str] = None
+    uen: Optional[str] = None
 
 
 class Brand(BrandProfile):
     id: UUID
     user_id: str
     plan_tier: str
+    uen: Optional[str] = None
+    uen_status: Optional[str] = None
+    uen_verified_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
