@@ -95,6 +95,55 @@ async def admin_list_brands(_: dict = Depends(get_admin_user)):
     return [dict(r) for r in rows]
 
 
+@router.post("/admin", status_code=201)
+async def admin_create_brand(data: BrandCreate, _: dict = Depends(get_admin_user)):
+    """Admin-only: create a brand record directly."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            INSERT INTO brands (user_id, email, company_name, industry, brand_values,
+              aesthetic_tags, target_audience, campaign_type)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+            RETURNING *
+            """,
+            "admin-created", data.email or "", data.company_name, data.industry,
+            data.brand_values, data.aesthetic_tags,
+            json.dumps(data.target_audience), data.campaign_type,
+        )
+    return dict(row)
+
+
+@router.patch("/admin/{brand_id}")
+async def admin_update_brand(brand_id: UUID, data: BrandUpdate, _: dict = Depends(get_admin_user)):
+    """Admin-only: update any brand."""
+    pool = await get_pool()
+    updates = {k: v for k, v in data.model_dump(exclude_none=True).items()}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    if "target_audience" in updates:
+        updates["target_audience"] = json.dumps(updates["target_audience"])
+    set_clause = ", ".join(f"{k} = ${i+2}" for i, k in enumerate(updates))
+    values = [str(brand_id)] + list(updates.values())
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            f"UPDATE brands SET {set_clause} WHERE id = $1 RETURNING *", *values
+        )
+    if not row:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    return dict(row)
+
+
+@router.delete("/admin/{brand_id}", status_code=204)
+async def admin_delete_brand(brand_id: UUID, _: dict = Depends(get_admin_user)):
+    """Admin-only: delete a brand."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        result = await conn.execute("DELETE FROM brands WHERE id = $1", str(brand_id))
+    if result == "DELETE 0":
+        raise HTTPException(status_code=404, detail="Brand not found")
+
+
 def _row_to_brand(row) -> Brand:
     d = dict(row)
     if isinstance(d.get("target_audience"), str):

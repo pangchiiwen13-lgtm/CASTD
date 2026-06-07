@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,10 +19,19 @@ type Role = "brand" | "superstar" | null;
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [role, setRole] = useState<Role>(null);
   // 0 = role selection, 1+ = brand steps
   const [step, setStep] = useState(0);
+
+  // If ?role=brand is passed (from signup page), skip role selection
+  useEffect(() => {
+    if (searchParams.get("role") === "brand") {
+      setRole("brand");
+      setStep(1);
+    }
+  }, [searchParams]);
   const [form, setForm] = useState({ company_name: "", industry: "", campaign_type: "", aesthetic_tags: [] as string[], brand_values: [] as string[] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

@@ -9,8 +9,11 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+type Role = "brand" | "superstar" | null;
+
 export default function SignupPage() {
   const router = useRouter();
+  const [role, setRole] = useState<Role>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +23,7 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!role) { setError("Please select how you want to use CASTD"); return; }
     if (password.length < 8) { setError("Password must be at least 8 characters"); return; }
     setLoading(true);
     setError("");
@@ -28,22 +32,45 @@ export default function SignupPage() {
       setError(result.error.message || "Sign-up failed");
       setLoading(false);
     } else {
-      router.push("/onboarding");
+      // Route directly to the right onboarding based on role selection
+      router.push(role === "superstar" ? "/onboarding/superstar" : "/onboarding?role=brand");
     }
   }
 
   async function handleGoogle() {
     setGoogleLoading(true);
     setError("");
+    // Google users still go through /portal -> /onboarding for role selection
     await signIn.social({ provider: "google", callbackURL: "/portal" });
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-white">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="text-2xl font-bold tracking-tight mb-1">CASTD</div>
-          <p className="text-muted-foreground text-sm">Create your account. Free to start.</p>
+          <p className="text-muted-foreground text-sm">Create your free account</p>
+        </div>
+
+        {/* Role selection */}
+        <div className="mb-6">
+          <p className="text-sm font-medium text-[#0C0C0C] mb-3 text-center">I want to join as a...</p>
+          <div className="grid grid-cols-2 gap-3">
+            <RoleCard
+              icon="🏢"
+              title="Brand / Agency"
+              desc="Find and book talent"
+              selected={role === "brand"}
+              onClick={() => setRole("brand")}
+            />
+            <RoleCard
+              icon="⭐"
+              title="Superstar"
+              desc="Get discovered and booked"
+              selected={role === "superstar"}
+              onClick={() => setRole("superstar")}
+            />
+          </div>
         </div>
 
         {/* Google */}
@@ -73,15 +100,17 @@ export default function SignupPage() {
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="Jane Smith" required />
           </div>
           <div className="grid gap-1">
-            <Label>Work email</Label>
-            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@yourbrand.com" required />
+            <Label>Email</Label>
+            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@example.com" required />
           </div>
           <div className="grid gap-1">
             <Label>Password</Label>
             <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 8 characters" required />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" disabled={loading}>{loading ? "Creating account..." : "Create account"}</Button>
+          <Button type="submit" disabled={loading || !role} className={cn(!role && "opacity-50")}>
+            {loading ? "Creating account..." : "Create account"}
+          </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-4">
@@ -90,6 +119,29 @@ export default function SignupPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+function RoleCard({ icon, title, desc, selected, onClick }: {
+  icon: string; title: string; desc: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "w-full text-left p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 text-center",
+        selected
+          ? "border-[#FFD200] bg-[#FFFBEB]"
+          : "border-[#EBEBEB] hover:border-[#FFD200]/50"
+      )}
+    >
+      <span className="text-2xl">{icon}</span>
+      <div>
+        <div className="font-semibold text-sm text-[#0C0C0C]">{title}</div>
+        <div className="text-[11px] text-muted-foreground mt-0.5">{desc}</div>
+      </div>
+    </button>
   );
 }
 

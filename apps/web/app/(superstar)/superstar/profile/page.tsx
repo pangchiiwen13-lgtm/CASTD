@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { PhotoUpload, MultiPhotoUpload } from "@/components/ui/photo-upload";
 
 const LANGUAGES = ["English", "Mandarin", "Malay", "Tamil", "Cantonese", "Korean", "Japanese", "Other"];
 const CONTENT_TYPES = ["UGC / Unboxing", "Product Demo", "Lifestyle & Vlog", "Beauty Tutorial", "Skincare Routine", "GRWM", "Brand Story", "Testimonial", "Food & Beverage", "Fashion & OOTD", "Fitness & Wellness"];
@@ -248,15 +249,32 @@ export default function SuperstarProfilePage() {
 
         {/* Portfolio */}
         <Section title="Portfolio">
-          <div className="space-y-4">
-            <Field label="Portfolio photo URLs (one per line)">
-              <Textarea value={form.photo_urls} onChange={e => set("photo_urls", e.target.value)}
-                placeholder={"https://...\nhttps://..."}
-                className="resize-none min-h-[100px] font-mono text-xs" />
+          <div className="space-y-6">
+            <Field label="Profile photo">
+              <PhotoUpload
+                value={form.photo_urls.split("\n").filter(Boolean)[0] || ""}
+                onChange={url => {
+                  const rest = form.photo_urls.split("\n").filter(Boolean).slice(1);
+                  set("photo_urls", [url, ...rest].join("\n"));
+                }}
+                label="Upload profile photo"
+                aspectRatio="portrait"
+                className="max-w-[180px]"
+              />
             </Field>
-            <Field label="Intro video URL (YouTube / Google Drive)">
+            <Field label="Portfolio photos (up to 5)">
+              <MultiPhotoUpload
+                values={form.photo_urls.split("\n").filter(Boolean).slice(1, 6)}
+                onChange={urls => {
+                  const main = form.photo_urls.split("\n").filter(Boolean)[0] || "";
+                  set("photo_urls", [main, ...urls].join("\n"));
+                }}
+                maxPhotos={5}
+              />
+            </Field>
+            <Field label="Intro video URL (YouTube / Vimeo)">
               <Input value={form.intro_video_url} onChange={e => set("intro_video_url", e.target.value)}
-                placeholder="https://youtube.com/..." />
+                placeholder="https://youtube.com/watch?v=..." />
             </Field>
           </div>
         </Section>

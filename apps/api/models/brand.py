@@ -14,7 +14,7 @@ class BrandProfile(BaseModel):
 
 
 class BrandCreate(BrandProfile):
-    pass
+    email: Optional[str] = None
 
 
 class BrandUpdate(BaseModel):
