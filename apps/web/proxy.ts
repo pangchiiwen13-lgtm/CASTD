@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Proxy is a passthrough - actual auth checks happen inside each page/layout.
 export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Protect all /admin routes except the login page itself
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+    const adminCookie = request.cookies.get("castd_admin")?.value;
+    const adminToken = process.env.ADMIN_TOKEN;
+
+    if (!adminCookie || !adminToken || adminCookie !== adminToken) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
