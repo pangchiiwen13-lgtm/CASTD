@@ -10,6 +10,23 @@ from services.uen_validator import lookup_uen_iras, validate_uen_format
 router = APIRouter(prefix="/brands", tags=["brands"])
 
 
+@router.get("/public/logos", response_model=list[dict])
+async def get_public_brand_logos():
+    """Public endpoint: return brand logos for the landing page slider."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT company_name, logo_url
+            FROM brands
+            WHERE logo_url IS NOT NULL AND logo_url != ''
+            ORDER BY created_at DESC
+            LIMIT 30
+            """
+        )
+    return [{"company_name": r["company_name"], "logo_url": r["logo_url"]} for r in rows]
+
+
 @router.get("/me", response_model=Brand)
 async def get_my_brand(user: dict = Depends(get_current_user)):
     pool = await get_pool()

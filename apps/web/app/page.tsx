@@ -4,6 +4,9 @@ import Link from "next/link";
 import { motion, useInView, useMotionValue, useSpring } from "framer-motion";
 import { api } from "@/lib/api";
 import { TestimonialsColumn } from "@/components/ui/testimonials-columns-1";
+import { Sparkles } from "@/components/ui/sparkles";
+import { InfiniteSlider } from "@/components/ui/infinite-slider";
+import { ProgressiveBlur } from "@/components/ui/progressive-blur";
 
 // AI-generated images (Higgsfield)
 const IMG_HERO = "https://d8j0ntlcm91z4.cloudfront.net/user_32n2a4gtmOz5g8tXtyqO6QX7OgX/hf_20260607_095342_91b706fa-8370-486e-a09e-0cc26b00b2c1.png";
@@ -125,9 +128,11 @@ const fadeUp = {
 
 export default function LandingPage() {
   const [stats, setStats] = useState<{ superstars: number; brands: number; completed_matches: number } | null>(null);
+  const [brandLogos, setBrandLogos] = useState<{ company_name: string; logo_url: string }[]>([]);
 
   useEffect(() => {
     api.getPublicStats().then(setStats).catch(() => null);
+    api.getPublicBrandLogos().then(setBrandLogos).catch(() => null);
   }, []);
 
   return (
@@ -329,6 +334,72 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* TRUSTED BY BRANDS */}
+      <section className="bg-[#1A1A1A] relative overflow-hidden">
+        {/* Logo slider */}
+        <div className="pt-16 pb-4 px-6">
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true }}
+            variants={fadeUp}
+            className="text-center mb-10"
+          >
+            <p className="text-xs font-bold text-[#FFD200]/70 uppercase tracking-[0.25em] mb-3">Trusted by</p>
+            <h2 className="font-display text-3xl md:text-4xl font-black text-white tracking-tight">
+              Singapore's best brands.
+            </h2>
+          </motion.div>
+
+          {brandLogos.length > 0 ? (
+            <div className="relative h-20 w-full max-w-4xl mx-auto">
+              <InfiniteSlider className="flex h-full w-full items-center" duration={35} gap={56}>
+                {brandLogos.map(({ company_name, logo_url }) => (
+                  <div key={company_name} className="h-12 w-32 flex items-center justify-center shrink-0">
+                    <img
+                      src={logo_url}
+                      alt={company_name}
+                      className="max-h-10 max-w-28 object-contain opacity-60 hover:opacity-100 transition-opacity filter brightness-0 invert"
+                      title={company_name}
+                    />
+                  </div>
+                ))}
+              </InfiniteSlider>
+              <ProgressiveBlur
+                className="pointer-events-none absolute top-0 left-0 h-full w-32"
+                direction="left"
+                blurIntensity={0.5}
+              />
+              <ProgressiveBlur
+                className="pointer-events-none absolute top-0 right-0 h-full w-32"
+                direction="right"
+                blurIntensity={0.5}
+              />
+            </div>
+          ) : (
+            <div className="text-center pb-2">
+              <p className="text-white/30 text-sm">
+                Brand logos appear here once brands complete their profile.
+              </p>
+              <Link href="/signup" className="inline-flex items-center gap-2 mt-3 text-xs text-[#FFD200]/70 hover:text-[#FFD200] transition-colors font-semibold">
+                Add your brand
+                <span>&#8594;</span>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Sparkles + curved divider */}
+        <div className="relative h-72 w-full overflow-hidden [mask-image:radial-gradient(50%_50%,white,transparent)]">
+          <div className="absolute inset-0 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_bottom_center,#FFD200,transparent_65%)] before:opacity-15" />
+          <div className="absolute -left-1/2 top-1/2 aspect-[1/0.7] z-10 w-[200%] rounded-[100%] border-t border-white/10 bg-[#FFF8EC]" />
+          <Sparkles
+            density={900}
+            speed={0.8}
+            color="#FFD200"
+            className="absolute inset-x-0 bottom-0 h-full w-full [mask-image:radial-gradient(50%_50%,white,transparent_85%)]"
+          />
         </div>
       </section>
 

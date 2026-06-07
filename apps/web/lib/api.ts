@@ -26,6 +26,8 @@ export const api = {
     apiFetch<{ superstars: number; brands: number; completed_matches: number }>("/public/stats"),
   getPublicReviews: () =>
     apiFetch<PublicReview[]>("/ratings/public"),
+  getPublicBrandLogos: () =>
+    apiFetch<{ company_name: string; logo_url: string }[]>("/brands/public/logos"),
 
 
   // Talents
@@ -188,6 +190,7 @@ export interface Brand {
   uen?: string;
   uen_status?: "unverified" | "pending_review" | "verified" | "rejected";
   uen_verified_name?: string;
+  logo_url?: string;
 }
 
 export interface Notification {

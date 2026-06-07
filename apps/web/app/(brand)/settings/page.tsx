@@ -22,7 +22,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [form, setForm] = useState({ company_name: "", industry: "", campaign_type: "", aesthetic_tags: [] as string[], uen: "" });
+  const [form, setForm] = useState({ company_name: "", industry: "", campaign_type: "", aesthetic_tags: [] as string[], uen: "", logo_url: "" });
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
@@ -31,7 +31,7 @@ export default function SettingsPage() {
       try {
         const b = await api.getMyBrand(getSessionToken() || "");
         setBrand(b);
-        setForm({ company_name: b.company_name, industry: b.industry || "", campaign_type: b.campaign_type || "", aesthetic_tags: b.aesthetic_tags || [], uen: b.uen || "" });
+        setForm({ company_name: b.company_name, industry: b.industry || "", campaign_type: b.campaign_type || "", aesthetic_tags: b.aesthetic_tags || [], uen: b.uen || "", logo_url: b.logo_url || "" });
       } catch {}
       setLoading(false);
     })();
@@ -129,6 +129,32 @@ export default function SettingsPage() {
                 className="cursor-pointer select-none rounded-full" onClick={() => toggleAesthetic(tag)}>{tag}</Badge>
             ))}
           </div>
+        </div>
+
+        <div className="grid gap-1.5">
+          <Label className="text-[#1A1A1A] font-medium flex items-center gap-2">
+            Brand logo
+            <span className="text-[10px] bg-[#FFF8EC] border border-[#FFD200]/30 text-[#B8860B] px-2 py-0.5 rounded-full font-semibold">
+              Featured on homepage
+            </span>
+          </Label>
+          <div className="flex items-center gap-3">
+            {form.logo_url && (
+              <div className="w-12 h-12 rounded-xl border border-[#F0EDEA] bg-white flex items-center justify-center overflow-hidden shrink-0">
+                <img src={form.logo_url} alt="Logo preview" className="w-full h-full object-contain p-1" />
+              </div>
+            )}
+            <Input
+              value={form.logo_url}
+              onChange={e => setForm(f => ({ ...f, logo_url: e.target.value }))}
+              placeholder="https://yoursite.com/logo.png"
+              className="rounded-xl"
+            />
+          </div>
+          <p className="text-[11px] text-[#9A9A9A]">
+            Paste a direct link to your logo (PNG or SVG, transparent background preferred).
+            Your logo will appear in the brand slider on the CASTD homepage.
+          </p>
         </div>
 
         <p className="text-xs text-[#9A9A9A]">Saving your profile triggers AI brand-fit scoring so the catalog shows your best matches first.</p>
