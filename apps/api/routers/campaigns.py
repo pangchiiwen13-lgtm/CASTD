@@ -1,0 +1,268 @@
+import asyncio
+from datetime import datetime, timedelta, timezone
+from fastapi import APIRouter, Depends, HTTPException
+from uuid import UUID
+from database import get_pool
+from models.campaign import Campaign, CampaignCreate, CampaignDeliver, CampaignStatusUpdate
+from auth import get_current_user, get_admin_user
+from routers.notifications import create_notification
+
+router = APIRouter(prefix="/campaigns", tags=["campaigns"])
+
+
+def _row_to_dict(row) -> dict:
+    d = dict(row)
+    if d.get("deliverable_urls") is None:
+        d["deliverable_urls"] = []
+    return d
+
+
+# ─── Brand: view their campaigns ─────────────────────────────────────────────
+
+@router.get("/brand", response_model=list[dict])
+async def list_brand_campaigns(user: dict = Depends(get_current_user)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        brand = await conn.fetchrow("SELECT id FROM brands WHERE user_id = $1", user["id"])
+        if not brand:
+            return []
+        rows = await conn.fetch(
+            """
+            SELECT c.*,
+                   t.name AS talent_name, t.ig_handle, t.photo_urls,
+                   b.company_name
+            FROM campaigns c
+            JOIN talents t ON t.id = c.talent_id
+            JOIN brands  b ON b.id = c.brand_id
+            WHERE c.brand_id = $1
+            ORDER BY c.created_at DESC
+            """,
+            brand["id"],
+        )
+    return [_row_to_dict(r) for r in rows]
+
+
+# ─── Superstar: view their campaigns ─────────────────────────────────────────
+
+@router.get("/superstar", response_model=list[dict])
+async def list_superstar_campaigns(user: dict = Depends(get_current_user)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        talent = await conn.fetchrow(
+            "SELECT id FROM talents WHERE user_id = $1", user["id"]
+        )
+        if not talent:
+            return []
+        rows = await conn.fetch(
+            """
+            SELECT c.*,
+                   t.name AS talent_name, t.ig_handle,
+                   b.company_name, b.industry
+            FROM campaigns c
+            JOIN talents t ON t.id = c.talent_id
+            JOIN brands  b ON b.id = c.brand_id
+            WHERE c.talent_id = $1
+            ORDER BY c.created_at DESC
+            """,
+            talent["id"],
+        )
+    return [_row_to_dict(r) for r in rows]
+
+
+# ─── Single campaign ──────────────────────────────────────────────────────────
+
+@router.get("/{campaign_id}", response_model=dict)
+async def get_campaign(campaign_id: UUID, user: dict = Depends(get_current_user)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT c.*,
+                   t.name AS talent_name, t.ig_handle, t.photo_urls, t.user_id AS talent_user_id,
+                   b.company_name, b.user_id AS brand_user_id
+            FROM campaigns c
+            JOIN talents t ON t.id = c.talent_id
+            JOIN brands  b ON b.id = c.brand_id
+            WHERE c.id = $1
+            """,
+            str(campaign_id),
+        )
+    if not row:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    d = _row_to_dict(row)
+    # Only allow brand or talent involved, or admin
+    if d["brand_user_id"] != user["id"] and d["talent_user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return d
+
+
+# ─── Admin: create campaign ───────────────────────────────────────────────────
+
+@router.post("", response_model=dict, status_code=201)
+async def create_campaign(data: CampaignCreate, _: dict = Depends(get_admin_user)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            INSERT INTO campaigns (inquiry_id, brand_id, talent_id, campaign_name,
+              campaign_type, brief_text, deliverables, shoot_date,
+              remuneration_type, amount_sgd)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+            RETURNING *
+            """,
+            str(data.inquiry_id) if data.inquiry_id else None,
+            str(data.brand_id), str(data.talent_id), data.campaign_name,
+            data.campaign_type, data.brief_text, data.deliverables,
+            data.shoot_date, data.remuneration_type, data.amount_sgd,
+        )
+    return _row_to_dict(row)
+
+
+# ─── Superstar: mark as delivered ────────────────────────────────────────────
+
+@router.patch("/{campaign_id}/deliver", response_model=dict)
+async def mark_delivered(
+    campaign_id: UUID,
+    data: CampaignDeliver,
+    user: dict = Depends(get_current_user),
+):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        campaign = await conn.fetchrow(
+            """
+            SELECT c.*, t.user_id AS talent_user_id, b.user_id AS brand_user_id,
+                   b.email AS brand_email, b.company_name, t.name AS talent_name
+            FROM campaigns c
+            JOIN talents t ON t.id = c.talent_id
+            JOIN brands  b ON b.id = c.brand_id
+            WHERE c.id = $1
+            """,
+            str(campaign_id),
+        )
+        if not campaign:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+        if campaign["talent_user_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail="Not your campaign")
+        if campaign["status"] != "active":
+            raise HTTPException(status_code=400, detail=f"Campaign is already {campaign['status']}")
+
+        now = datetime.now(timezone.utc)
+        auto_release = now + timedelta(days=14)
+
+        row = await conn.fetchrow(
+            """
+            UPDATE campaigns
+            SET status = 'delivered',
+                talent_delivered_at = $2,
+                auto_release_at = $3,
+                deliverable_urls = $4,
+                deliverable_note = $5,
+                updated_at = $2
+            WHERE id = $1
+            RETURNING *
+            """,
+            str(campaign_id), now, auto_release,
+            data.deliverable_urls, data.deliverable_note,
+        )
+
+    # Notify brand
+    async def _notify():
+        await create_notification(
+            user_id=campaign["brand_user_id"],
+            type_="campaign_delivered",
+            title=f"{campaign['talent_name']} has marked the work as delivered",
+            body=f'Please review and confirm delivery for "{campaign["campaign_name"]}". Payment auto-releases in 14 days.',
+            link="/campaigns",
+        )
+    asyncio.create_task(_notify())
+
+    return _row_to_dict(row)
+
+
+# ─── Brand: confirm delivery ──────────────────────────────────────────────────
+
+@router.patch("/{campaign_id}/confirm", response_model=dict)
+async def confirm_delivery(campaign_id: UUID, user: dict = Depends(get_current_user)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        campaign = await conn.fetchrow(
+            """
+            SELECT c.*, b.user_id AS brand_user_id, t.user_id AS talent_user_id,
+                   t.name AS talent_name, b.company_name
+            FROM campaigns c
+            JOIN brands  b ON b.id = c.brand_id
+            JOIN talents t ON t.id = c.talent_id
+            WHERE c.id = $1
+            """,
+            str(campaign_id),
+        )
+        if not campaign:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+        if campaign["brand_user_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail="Not your campaign")
+        if campaign["status"] != "delivered":
+            raise HTTPException(status_code=400, detail="Campaign must be in 'delivered' state to confirm")
+
+        now = datetime.now(timezone.utc)
+        row = await conn.fetchrow(
+            """
+            UPDATE campaigns
+            SET status = 'completed', brand_confirmed_at = $2, updated_at = $2
+            WHERE id = $1
+            RETURNING *
+            """,
+            str(campaign_id), now,
+        )
+
+    # Notify talent
+    async def _notify():
+        await create_notification(
+            user_id=campaign["talent_user_id"],
+            type_="campaign_completed",
+            title=f"{campaign['company_name']} confirmed your delivery!",
+            body=f'"{campaign["campaign_name"]}" is now complete. Your payment will be released shortly.',
+            link="/superstar/campaigns",
+        )
+    asyncio.create_task(_notify())
+
+    return _row_to_dict(row)
+
+
+# ─── Admin: list all + change status ─────────────────────────────────────────
+
+@router.get("/admin/all", response_model=list[dict])
+async def admin_list_campaigns(_: dict = Depends(get_admin_user)):
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT c.*,
+                   t.name AS talent_name, t.ig_handle,
+                   b.company_name
+            FROM campaigns c
+            JOIN talents t ON t.id = c.talent_id
+            JOIN brands  b ON b.id = c.brand_id
+            ORDER BY c.created_at DESC
+            """
+        )
+    return [_row_to_dict(r) for r in rows]
+
+
+@router.patch("/admin/{campaign_id}/status", response_model=dict)
+async def admin_update_status(
+    campaign_id: UUID,
+    data: CampaignStatusUpdate,
+    _: dict = Depends(get_admin_user),
+):
+    valid = {"active", "delivered", "completed", "cancelled"}
+    if data.status not in valid:
+        raise HTTPException(status_code=400, detail=f"Status must be one of {valid}")
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "UPDATE campaigns SET status=$1, updated_at=NOW() WHERE id=$2 RETURNING *",
+            data.status, str(campaign_id),
+        )
+    if not row:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    return _row_to_dict(row)

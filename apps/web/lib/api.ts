@@ -87,6 +87,15 @@ export const api = {
     apiFetch<{ ok: boolean }>("/ratings", { method: "POST", body: JSON.stringify(data), token }),
   checkRating: (inquiry_id: string, token: string) =>
     apiFetch<{ has_rated: boolean; score?: number; comment?: string }>(`/ratings/check/${inquiry_id}`, { token }),
+
+  // Campaigns
+  getBrandCampaigns: (token: string) => apiFetch<Campaign[]>("/campaigns/brand", { token }),
+  getSuperstarCampaigns: (token: string) => apiFetch<Campaign[]>("/campaigns/superstar", { token }),
+  getCampaign: (id: string, token: string) => apiFetch<Campaign>(`/campaigns/${id}`, { token }),
+  markDelivered: (id: string, data: { deliverable_urls: string[]; deliverable_note?: string }, token: string) =>
+    apiFetch<Campaign>(`/campaigns/${id}/deliver`, { method: "PATCH", body: JSON.stringify(data), token }),
+  confirmDelivery: (id: string, token: string) =>
+    apiFetch<Campaign>(`/campaigns/${id}/confirm`, { method: "PATCH", token }),
 };
 
 // Types
@@ -206,4 +215,33 @@ export interface Inquiry {
   preferred_dates?: string;
   status: string;
   created_at: string;
+}
+
+
+export interface Campaign {
+  id: string;
+  inquiry_id?: string;
+  brand_id: string;
+  talent_id: string;
+  campaign_name: string;
+  campaign_type?: string;
+  brief_text?: string;
+  deliverables?: string;
+  shoot_date?: string;
+  remuneration_type?: string;
+  amount_sgd?: number;
+  status: "active" | "delivered" | "completed" | "cancelled";
+  talent_delivered_at?: string;
+  deliverable_urls: string[];
+  deliverable_note?: string;
+  brand_confirmed_at?: string;
+  auto_release_at?: string;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  talent_name?: string;
+  ig_handle?: string;
+  photo_urls?: string[];
+  company_name?: string;
+  industry?: string;
 }

@@ -169,6 +169,42 @@ async def update_inquiry_status(
             )
 
     asyncio.create_task(_notify())
+
+    # Auto-create campaign when inquiry is confirmed (idempotent: skip if one exists)
+    if data.status == "confirmed":
+        async def _create_campaign():
+            try:
+                pool2 = await get_pool()
+                async with pool2.acquire() as conn2:
+                    # Don't create duplicate campaigns for the same inquiry
+                    existing = await conn2.fetchval(
+                        "SELECT id FROM campaigns WHERE inquiry_id = $1", str(inquiry_id)
+                    )
+                    if existing:
+                        return
+                    inq = await conn2.fetchrow(
+                        "SELECT * FROM inquiries WHERE id = $1", str(inquiry_id)
+                    )
+                    if not inq:
+                        return
+                    await conn2.execute(
+                        """
+                        INSERT INTO campaigns (inquiry_id, brand_id, talent_id,
+                          campaign_name, campaign_type, brief_text, shoot_date)
+                        VALUES ($1,$2,$3,$4,$5,$6,$7)
+                        """,
+                        str(inquiry_id),
+                        str(inq["brand_id"]),
+                        str(inq["talent_id"]),
+                        inq["campaign_name"],
+                        inq["campaign_type"],
+                        inq["brief_text"],
+                        inq["preferred_dates"],
+                    )
+            except Exception as e:
+                print(f"[campaigns] auto-create error: {e}")
+        asyncio.create_task(_create_campaign())
+
     return inquiry
 
 
