@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSessionToken } from "@/lib/get-token";
 import { RatingModal } from "@/components/RatingModal";
+import Link from "next/link";
 
 const STATUS_META: Record<string, {
   label: string; color: string; icon: string; description: string;
@@ -192,7 +193,7 @@ export default function InquiriesPage() {
                   {inq.status === "confirmed" && (
                     <Link href="/campaigns">
                       <Button size="sm" className="shrink-0 h-8 text-xs bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00] border-0">
-                        View Campaign ->
+                        View Campaign
                       </Button>
                     </Link>
                   )}
