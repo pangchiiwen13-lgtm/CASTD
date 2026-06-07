@@ -113,7 +113,7 @@ export default function AdminInquiriesPage() {
                 </span>
                 <Select
                   value={inq.status}
-                  onValueChange={(v) => updateStatus(inq.id, v)}
+                  onValueChange={(v) => v && updateStatus(inq.id, v)}
                   disabled={updating === inq.id}
                 >
                   <SelectTrigger className="h-7 w-28 text-xs">

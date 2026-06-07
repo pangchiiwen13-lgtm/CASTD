@@ -161,7 +161,7 @@ export default function SuperstarProfilePage() {
                 <Input type="number" value={form.age} onChange={e => set("age", e.target.value)} placeholder="24" />
               </Field>
               <Field label="Gender">
-                <Select value={form.gender} onValueChange={v => set("gender", v)}>
+                <Select value={form.gender} onValueChange={v => v && set("gender", v)}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>{GENDERS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
                 </Select>

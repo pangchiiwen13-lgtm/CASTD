@@ -154,7 +154,7 @@ export default function SuperstarOnboardingPage() {
               </div>
               <div className="grid gap-1">
                 <Label>Gender</Label>
-                <Select value={form.gender} onValueChange={v => set("gender", v)}>
+                <Select value={form.gender} onValueChange={v => v && set("gender", v)}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>{GENDERS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
                 </Select>
