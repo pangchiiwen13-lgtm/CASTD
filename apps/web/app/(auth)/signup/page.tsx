@@ -11,6 +11,12 @@ import { cn } from "@/lib/utils";
 
 type Role = "brand" | "superstar" | null;
 
+function storePortalIntent(role: Role) {
+  if (role && typeof window !== "undefined") {
+    localStorage.setItem("castd_portal_intent", role);
+  }
+}
+
 export default function SignupPage() {
   const router = useRouter();
   const [role, setRole] = useState<Role>(null);
@@ -27,20 +33,21 @@ export default function SignupPage() {
     if (password.length < 8) { setError("Password must be at least 8 characters"); return; }
     setLoading(true);
     setError("");
+    storePortalIntent(role);
     const result = await signUp.email({ email, password, name, callbackURL: "/portal" });
     if (result.error) {
       setError(result.error.message || "Sign-up failed");
       setLoading(false);
     } else {
-      // Route directly to the right onboarding based on role selection
       router.push(role === "superstar" ? "/onboarding/superstar" : "/onboarding?role=brand");
     }
   }
 
   async function handleGoogle() {
+    if (!role) { setError("Please select whether you are a Superstar or Brand first"); return; }
     setGoogleLoading(true);
     setError("");
-    // Google users still go through /portal -> /onboarding for role selection
+    storePortalIntent(role);
     await signIn.social({ provider: "google", callbackURL: "/portal" });
   }
 
@@ -52,23 +59,23 @@ export default function SignupPage() {
           <p className="text-muted-foreground text-sm">Create your free account</p>
         </div>
 
-        {/* Role selection */}
+        {/* Role selection - required */}
         <div className="mb-6">
           <p className="text-sm font-medium text-[#0C0C0C] mb-3 text-center">I want to join as a...</p>
           <div className="grid grid-cols-2 gap-3">
-            <RoleCard
-              icon="🏢"
-              title="Brand / Agency"
-              desc="Find and book talent"
-              selected={role === "brand"}
-              onClick={() => setRole("brand")}
-            />
             <RoleCard
               icon="⭐"
               title="Superstar"
               desc="Get discovered and booked"
               selected={role === "superstar"}
-              onClick={() => setRole("superstar")}
+              onClick={() => { setRole("superstar"); setError(""); }}
+            />
+            <RoleCard
+              icon="🏢"
+              title="Brand / Agency"
+              desc="Find and book talent"
+              selected={role === "brand"}
+              onClick={() => { setRole("brand"); setError(""); }}
             />
           </div>
         </div>
@@ -77,7 +84,7 @@ export default function SignupPage() {
         <Button
           type="button"
           variant="outline"
-          className="w-full flex items-center gap-2 mb-4"
+          className={cn("w-full flex items-center gap-2 mb-4", !role && "opacity-50 cursor-not-allowed")}
           onClick={handleGoogle}
           disabled={googleLoading}
         >

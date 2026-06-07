@@ -59,13 +59,23 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
     router.push("/");
   }
 
+  function switchToSuperstar() {
+    setMenuOpen(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("castd_portal_intent", "superstar");
+    }
+    router.push("/superstar/dashboard");
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <nav className="sticky top-0 bg-background z-10">
         <AdminPreviewBanner current="brand" />
       <div className="border-b px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href="/catalog" className="text-lg font-bold tracking-tight">CASTD</Link>
+          <Link href="/catalog" className="text-lg font-bold tracking-tight">
+            CASTD <span className="text-xs font-normal text-muted-foreground ml-1">Brand</span>
+          </Link>
           <div className="hidden md:flex gap-1">
             {NAV.map((n) => (
               <Link
@@ -104,6 +114,9 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
                 {email && <p className="text-xs text-muted-foreground truncate">{email}</p>}
               </div>
               {/* Links */}
+              <div className="px-3 py-1">
+                <span className="inline-block text-xs bg-[#FFD200] text-[#0C0C0C] font-semibold px-2 py-0.5 rounded-full">Brand</span>
+              </div>
               <Link
                 href="/settings"
                 className="block px-4 py-2 text-sm hover:bg-muted transition-colors"
@@ -121,9 +134,18 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
                   {n.label}
                 </Link>
               ))}
+              {/* Switch portal */}
+              <div className="border-t mt-1">
+                <button
+                  className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors"
+                  onClick={switchToSuperstar}
+                >
+                  ⭐ Switch to Superstar portal
+                </button>
+              </div>
               {/* Sign out */}
               <button
-                className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors border-t mt-1"
+                className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors border-t"
                 onClick={handleSignOut}
               >
                 Sign out

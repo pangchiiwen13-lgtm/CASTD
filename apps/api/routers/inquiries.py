@@ -46,12 +46,13 @@ async def create_inquiry(data: InquiryCreate, user: dict = Depends(get_current_u
         row = await conn.fetchrow(
             """
             INSERT INTO inquiries (brand_id, talent_id, campaign_name, campaign_type,
-              brief_text, budget_range, preferred_dates)
-            VALUES ($1,$2,$3,$4,$5,$6,$7)
+              brief_text, budget_range, preferred_dates, remuneration_type, product_description)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
             RETURNING *
             """,
             brand["id"], data.talent_id, data.campaign_name, data.campaign_type,
             data.brief_text, data.budget_range, data.preferred_dates,
+            data.remuneration_type or "product", data.product_description,
         )
 
     inquiry = Inquiry(**dict(row))

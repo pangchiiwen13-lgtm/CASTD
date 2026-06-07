@@ -11,6 +11,8 @@ class InquiryCreate(BaseModel):
     brief_text: Optional[str] = None
     budget_range: Optional[str] = None
     preferred_dates: Optional[str] = None
+    remuneration_type: Optional[str] = "product"   # "product" | "cash"
+    product_description: Optional[str] = None
 
 
 class InquiryStatusUpdate(BaseModel):
@@ -26,6 +28,8 @@ class Inquiry(BaseModel):
     brief_text: Optional[str]
     budget_range: Optional[str]
     preferred_dates: Optional[str]
+    remuneration_type: Optional[str]
+    product_description: Optional[str]
     status: str
     created_at: datetime
     updated_at: datetime

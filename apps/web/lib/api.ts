@@ -213,6 +213,8 @@ export interface Inquiry {
   brief_text?: string;
   budget_range?: string;
   preferred_dates?: string;
+  remuneration_type?: "product" | "cash";
+  product_description?: string;
   status: string;
   created_at: string;
 }

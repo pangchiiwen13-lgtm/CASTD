@@ -57,6 +57,14 @@ export default function SuperstarLayout({ children }: { children: React.ReactNod
     router.push("/");
   }
 
+  function switchToBrand() {
+    setMenuOpen(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("castd_portal_intent", "brand");
+    }
+    router.push("/dashboard");
+  }
+
   function isActive(href: string) {
     if (href === "/superstar/dashboard") return pathname === "/superstar/dashboard";
     return pathname?.startsWith(href);
@@ -114,8 +122,18 @@ export default function SuperstarLayout({ children }: { children: React.ReactNod
                     {n.label}
                   </Link>
                 ))}
+                {/* Switch portal */}
+                <div className="border-t mt-1">
+                  <button
+                    className="w-full text-left px-4 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors"
+                    onClick={switchToBrand}
+                  >
+                    🏢 Switch to Brand portal
+                  </button>
+                </div>
+                {/* Sign out */}
                 <button
-                  className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors border-t mt-1"
+                  className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors border-t"
                   onClick={handleSignOut}
                 >
                   Sign out
