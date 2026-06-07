@@ -193,8 +193,9 @@ async def update_inquiry_status(
                     await conn2.execute(
                         """
                         INSERT INTO campaigns (inquiry_id, brand_id, talent_id,
-                          campaign_name, campaign_type, brief_text, shoot_date, project_id)
-                        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+                          campaign_name, campaign_type, brief_text, shoot_date,
+                          remuneration_type, project_id)
+                        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
                         """,
                         str(inquiry_id),
                         str(inq["brand_id"]),
@@ -203,6 +204,7 @@ async def update_inquiry_status(
                         inq["campaign_type"],
                         inq["brief_text"],
                         inq["preferred_dates"],
+                        inq.get("remuneration_type") or "product",
                         str(inq["project_id"]) if inq.get("project_id") else None,
                     )
             except Exception as e:

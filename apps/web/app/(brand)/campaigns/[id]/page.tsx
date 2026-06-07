@@ -6,7 +6,7 @@ import { api, type BrandProject, type Campaign } from "@/lib/api";
 import { getSessionToken } from "@/lib/get-token";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChatPanel } from "@/components/chat/ChatPanel";
+import { ChatPanel, type CampaignMeta } from "@/components/chat/ChatPanel";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -168,6 +168,16 @@ export default function BrandProjectDetailPage() {
                           campaignId={hire.id}
                           myType="brand"
                           otherName={hire.talent_name || "Superstar"}
+                          campaign={{
+                            campaign_name: hire.campaign_name,
+                            status: hire.status,
+                            brief_text: hire.brief_text,
+                            deliverables: hire.deliverables,
+                            remuneration_type: hire.remuneration_type,
+                            amount_sgd: hire.amount_sgd,
+                            shoot_date: hire.shoot_date,
+                            talent_name: hire.talent_name,
+                          } as CampaignMeta}
                         />
                       </div>
                     </div>

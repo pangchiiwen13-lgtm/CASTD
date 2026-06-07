@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ChatPanel } from "@/components/chat/ChatPanel";
+import { ChatPanel, type CampaignMeta } from "@/components/chat/ChatPanel";
 import Link from "next/link";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -165,6 +165,16 @@ export default function SuperstarCampaignDetailPage() {
           campaignId={campaign.id}
           myType="superstar"
           otherName={campaign.company_name}
+          campaign={{
+            campaign_name: campaign.campaign_name,
+            status: campaign.status,
+            brief_text: campaign.brief_text,
+            deliverables: campaign.deliverables,
+            remuneration_type: campaign.remuneration_type,
+            amount_sgd: campaign.amount_sgd,
+            shoot_date: campaign.shoot_date,
+            company_name: campaign.company_name,
+          } as CampaignMeta}
         />
       </div>
 

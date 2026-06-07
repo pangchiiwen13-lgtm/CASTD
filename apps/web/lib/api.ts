@@ -241,7 +241,7 @@ export interface Inquiry {
   brief_text?: string;
   budget_range?: string;
   preferred_dates?: string;
-  remuneration_type?: "product" | "cash";
+  remuneration_type?: "product" | "cash" | "cash_hourly";
   product_description?: string;
   project_id?: string;
   status: string;

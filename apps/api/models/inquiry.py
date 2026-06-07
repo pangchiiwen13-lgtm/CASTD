@@ -11,7 +11,7 @@ class InquiryCreate(BaseModel):
     brief_text: Optional[str] = None
     budget_range: Optional[str] = None
     preferred_dates: Optional[str] = None
-    remuneration_type: Optional[str] = "product"   # "product" | "cash"
+    remuneration_type: Optional[str] = "product"   # "product" | "cash" | "cash_hourly"
     product_description: Optional[str] = None
     project_id: Optional[UUID] = None
 

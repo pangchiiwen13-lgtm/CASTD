@@ -7,7 +7,7 @@ import { api, type Talent } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { InquiryDialog } from "@/components/talent/InquiryDialog";
+import { AddToCampaignDialog } from "@/components/talent/AddToCampaignDialog";
 import { AvailabilityCalendar } from "@/components/calendar/AvailabilityCalendar";
 import { getSessionToken } from "@/lib/get-token";
 import type { AvailabilityRule } from "@/lib/api";
@@ -35,7 +35,7 @@ export default function TalentProfilePage() {
   const { id } = useParams<{ id: string }>();
   const [talent, setTalent] = useState<Talent | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showInquiry, setShowInquiry] = useState(false);
+  const [showAddTo, setShowAddTo] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
   const [availabilityRules, setAvailabilityRules] = useState<AvailabilityRule[]>([]);
@@ -131,9 +131,9 @@ export default function TalentProfilePage() {
             <Button
               size="lg"
               className="w-full bg-[#FFD200] text-[#0C0C0C] hover:bg-white font-bold rounded-xl h-12 text-sm"
-              onClick={() => setShowInquiry(true)}
+              onClick={() => setShowAddTo(true)}
             >
-              Send inquiry →
+              Add to campaign
             </Button>
           </motion.div>
 
@@ -274,15 +274,15 @@ export default function TalentProfilePage() {
             <Button
               size="lg"
               className="md:hidden w-full bg-[#FFD200] text-[#0C0C0C] hover:bg-white font-bold rounded-xl h-12"
-              onClick={() => setShowInquiry(true)}
+              onClick={() => setShowAddTo(true)}
             >
-              Send inquiry →
+              Add to campaign
             </Button>
           </motion.div>
         </div>
       </div>
 
-      {showInquiry && <InquiryDialog talent={talent} onClose={() => setShowInquiry(false)} />}
+      {showAddTo && <AddToCampaignDialog talent={talent} onClose={() => setShowAddTo(false)} />}
     </div>
   );
 }
