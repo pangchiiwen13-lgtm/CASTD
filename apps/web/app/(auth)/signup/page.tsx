@@ -9,8 +9,17 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+type Role = "brand" | "superstar" | null;
+
+function storePortalIntent(role: Role) {
+  if (role && typeof window !== "undefined") {
+    localStorage.setItem("castd_portal_intent", role);
+  }
+}
+
 export default function SignupPage() {
   const router = useRouter();
+  const [role, setRole] = useState<Role>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,37 +29,60 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!role) { setError("Please select how you want to use CASTD"); return; }
     if (password.length < 8) { setError("Password must be at least 8 characters"); return; }
     setLoading(true);
     setError("");
+    storePortalIntent(role);
     const result = await signUp.email({ email, password, name, callbackURL: "/portal" });
     if (result.error) {
       setError(result.error.message || "Sign-up failed");
       setLoading(false);
     } else {
-      router.push("/onboarding");
+      router.push(role === "superstar" ? "/onboarding/superstar" : "/onboarding?role=brand");
     }
   }
 
   async function handleGoogle() {
+    if (!role) { setError("Please select whether you are a Superstar or Brand first"); return; }
     setGoogleLoading(true);
     setError("");
+    storePortalIntent(role);
     await signIn.social({ provider: "google", callbackURL: "/portal" });
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#FFF8EC]">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="text-2xl font-bold tracking-tight mb-1">CASTD</div>
-          <p className="text-muted-foreground text-sm">Create your account. Free to start.</p>
+          <p className="text-muted-foreground text-sm">Create your free account</p>
+        </div>
+
+        {/* Role selection - required */}
+        <div className="mb-6">
+          <p className="text-sm font-medium text-[#0C0C0C] mb-3 text-center">I want to join as a...</p>
+          <div className="grid grid-cols-2 gap-3">
+            <RoleCard
+              title="Superstar"
+              desc="Get discovered and booked"
+              selected={role === "superstar"}
+              onClick={() => { setRole("superstar"); setError(""); }}
+            />
+            <RoleCard
+              title="Brand / Agency"
+              desc="Find and book talent"
+              selected={role === "brand"}
+              onClick={() => { setRole("brand"); setError(""); }}
+            />
+          </div>
         </div>
 
         {/* Google */}
         <Button
           type="button"
           variant="outline"
-          className="w-full flex items-center gap-2 mb-4"
+          className={cn("w-full flex items-center gap-2 mb-4", !role && "opacity-50 cursor-not-allowed")}
           onClick={handleGoogle}
           disabled={googleLoading}
         >
@@ -73,15 +105,17 @@ export default function SignupPage() {
             <Input value={name} onChange={e => setName(e.target.value)} placeholder="Jane Smith" required />
           </div>
           <div className="grid gap-1">
-            <Label>Work email</Label>
-            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@yourbrand.com" required />
+            <Label>Email</Label>
+            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="jane@example.com" required />
           </div>
           <div className="grid gap-1">
             <Label>Password</Label>
             <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 8 characters" required />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" disabled={loading}>{loading ? "Creating account..." : "Create account"}</Button>
+          <Button type="submit" disabled={loading || !role} className={cn(!role && "opacity-50")}>
+            {loading ? "Creating account..." : "Create account"}
+          </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-4">
@@ -90,6 +124,32 @@ export default function SignupPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+function RoleCard({ title, desc, selected, onClick }: {
+  title: string; desc: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "w-full text-left p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-1 text-center",
+        selected
+          ? "border-[#FFD200] bg-white shadow-md"
+          : "border-[#E8E4E0] bg-white hover:border-[#FFD200]/60 hover:shadow-sm",
+      )}
+    >
+      <div className={cn(
+        "w-8 h-8 rounded-xl mb-1 flex items-center justify-center transition-colors",
+        selected ? "bg-[#FFD200]" : "bg-[#F5F3F0]",
+      )}>
+        <span className={cn("w-3 h-3 rounded-full inline-block", selected ? "bg-[#0C0C0C]" : "bg-[#CCCCCC]")} />
+      </div>
+      <div className="font-semibold text-sm text-[#1A1A1A]">{title}</div>
+      <div className="text-[11px] text-[#9A9A9A] mt-0.5">{desc}</div>
+    </button>
   );
 }
 

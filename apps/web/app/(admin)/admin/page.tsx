@@ -14,6 +14,7 @@ interface Stats {
   brands: { total: number };
   inquiries: { total: number; open: number; confirmed: number };
   superstars_pending_approval: number;
+  campaigns_payment_held?: number;
 }
 
 export default function AdminDashboard() {
@@ -37,7 +38,7 @@ export default function AdminDashboard() {
   }, [session]);
 
   const hasPendingActions = stats && (
-    stats.superstars_pending_approval > 0 || (stats.inquiries?.open ?? 0) > 0
+    stats.superstars_pending_approval > 0 || (stats.inquiries?.open ?? 0) > 0 || (stats.campaigns_payment_held ?? 0) > 0
   );
 
   return (
@@ -84,12 +85,11 @@ export default function AdminDashboard() {
       {hasPendingActions && (
         <div className="rounded-xl border border-[#FFD200]/40 bg-[#FFFBEB] p-5 mb-8">
           <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
-            <span>⚡</span> Action required
+            <span className="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse" /> Action required
           </h2>
           <div className="space-y-2">
             {stats && stats.superstars_pending_approval > 0 && (
               <ActionItem
-                icon="⭐"
                 message={`${stats.superstars_pending_approval} Superstar${stats.superstars_pending_approval > 1 ? "s" : ""} waiting for profile approval`}
                 href="/admin/talents"
                 cta="Review now"
@@ -97,10 +97,16 @@ export default function AdminDashboard() {
             )}
             {stats && (stats.inquiries?.open ?? 0) > 0 && (
               <ActionItem
-                icon="📋"
                 message={`${stats.inquiries?.open} open inquiry${(stats.inquiries?.open ?? 0) > 1 ? "ies" : "y"} need to be reviewed`}
                 href="/admin/inquiries"
                 cta="View inquiries"
+              />
+            )}
+            {stats && (stats.campaigns_payment_held ?? 0) > 0 && (
+              <ActionItem
+                message={`${stats.campaigns_payment_held} campaign payment${(stats.campaigns_payment_held ?? 0) > 1 ? "s" : ""} held in escrow - ready to release`}
+                href="/admin/campaigns"
+                cta="Release payments"
               />
             )}
           </div>
@@ -111,28 +117,30 @@ export default function AdminDashboard() {
       <div className="grid sm:grid-cols-2 gap-4">
         <ManageCard
           title="Superstars"
-          icon="⭐"
           description={`${stats?.talents.published ?? "-"} live profiles. Add, edit, approve, or unpublish.`}
           href="/admin/talents"
           cta="Manage Superstars"
         />
         <ManageCard
           title="Brands"
-          icon="🏢"
           description={`${stats?.brands.total ?? "-"} registered brands. View profiles and activity.`}
           href="/admin/brands"
           cta="View Brands"
         />
         <ManageCard
           title="Inquiries"
-          icon="📋"
           description={`${stats?.inquiries?.total ?? "-"} total. Move inquiries through the pipeline.`}
           href="/admin/inquiries"
           cta="Manage Inquiries"
         />
         <ManageCard
+          title="Campaign Payments"
+          description={`Escrow payments held on behalf of brands. Release to talent after delivery confirmed.${stats?.campaigns_payment_held ? ` ${stats.campaigns_payment_held} held.` : ""}`}
+          href="/admin/campaigns"
+          cta="Manage Payments"
+        />
+        <ManageCard
           title="Platform Settings"
-          icon="⚙️"
           description="Configure email (Resend API key) and other platform settings."
           href="/admin/settings"
           cta="Open Settings"
@@ -142,7 +150,7 @@ export default function AdminDashboard() {
       {/* Portal preview */}
       <div className="mt-8 rounded-xl border-2 border-[#FFD200]/60 bg-[#FFFBEB] p-5">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-base">⚡</span>
+          <span className="w-2 h-2 rounded-full bg-[#FFD200] inline-block" />
           <h2 className="font-semibold text-sm">Preview portals</h2>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
@@ -154,7 +162,7 @@ export default function AdminDashboard() {
             size="sm"
             onClick={() => { enterPreviewMode("brand"); router.push("/dashboard"); }}
           >
-            🏢 Preview Brand Portal
+            Preview Brand Portal
           </Button>
           <Button
             variant="outline"
@@ -162,7 +170,7 @@ export default function AdminDashboard() {
             className="border-[#0C0C0C] text-[#0C0C0C] hover:bg-[#0C0C0C] hover:text-[#FFD200]"
             onClick={() => { enterPreviewMode("superstar"); router.push("/superstar/dashboard"); }}
           >
-            ⭐ Preview Superstar Portal
+            Preview Superstar Portal
           </Button>
         </div>
       </div>
@@ -182,13 +190,13 @@ function StatCard({ value, label, sub, color, urgent }: {
   );
 }
 
-function ActionItem({ icon, message, href, cta }: {
-  icon: string; message: string; href: string; cta: string;
+function ActionItem({ message, href, cta }: {
+  message: string; href: string; cta: string;
 }) {
   return (
     <div className="flex items-center justify-between gap-4 bg-white rounded-lg px-4 py-3 border">
       <p className="text-sm flex items-center gap-2">
-        <span>{icon}</span> {message}
+        <span className="w-2 h-2 rounded-full bg-amber-400 inline-block shrink-0" /> {message}
       </p>
       <Link href={href} className={cn(buttonVariants({ size: "sm" }), "shrink-0 h-8 text-xs bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00] border-0")}>
         {cta} →
@@ -197,13 +205,12 @@ function ActionItem({ icon, message, href, cta }: {
   );
 }
 
-function ManageCard({ title, icon, description, href, cta }: {
-  title: string; icon: string; description: string; href: string; cta: string;
+function ManageCard({ title, description, href, cta }: {
+  title: string; description: string; href: string; cta: string;
 }) {
   return (
     <div className="rounded-xl border p-5 flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <span className="text-xl">{icon}</span>
         <h3 className="font-semibold">{title}</h3>
       </div>
       <p className="text-sm text-muted-foreground flex-1">{description}</p>

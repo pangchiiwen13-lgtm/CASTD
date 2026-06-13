@@ -9,8 +9,17 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+type Portal = "superstar" | "brand" | null;
+
+function storePortalIntent(portal: Portal) {
+  if (portal && typeof window !== "undefined") {
+    localStorage.setItem("castd_portal_intent", portal);
+  }
+}
+
 export default function LoginPage() {
   const router = useRouter();
+  const [portal, setPortal] = useState<Portal>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,8 +28,10 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!portal) { setError("Please select how you want to sign in"); return; }
     setLoading(true);
     setError("");
+    storePortalIntent(portal);
     const result = await signIn.email({ email, password, callbackURL: "/portal" });
     if (result.error) {
       setError(result.error.message || "Invalid email or password");
@@ -31,25 +42,45 @@ export default function LoginPage() {
   }
 
   async function handleGoogle() {
+    if (!portal) { setError("Please select whether you are a Superstar or Brand first"); return; }
     setGoogleLoading(true);
     setError("");
+    storePortalIntent(portal);
     await signIn.social({ provider: "google", callbackURL: "/portal" });
-    // Google redirects away - no need to setGoogleLoading(false)
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#FFF8EC]">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="text-2xl font-bold tracking-tight mb-1">CASTD</div>
-          <p className="text-muted-foreground text-sm">Sign in to your account</p>
+          <div className="text-2xl font-bold tracking-tight mb-1 text-[#1A1A1A]">CASTD</div>
+          <p className="text-[#9A9A9A] text-sm">Sign in to your account</p>
+        </div>
+
+        {/* Portal selection - required */}
+        <div className="mb-6">
+          <p className="text-sm font-medium text-[#0C0C0C] mb-3 text-center">I am signing in as a...</p>
+          <div className="grid grid-cols-2 gap-3">
+            <PortalCard
+              title="Superstar"
+              desc="Talent portal"
+              selected={portal === "superstar"}
+              onClick={() => { setPortal("superstar"); setError(""); }}
+            />
+            <PortalCard
+              title="Brand"
+              desc="Brand portal"
+              selected={portal === "brand"}
+              onClick={() => { setPortal("brand"); setError(""); }}
+            />
+          </div>
         </div>
 
         {/* Google */}
         <Button
           type="button"
           variant="outline"
-          className="w-full flex items-center gap-2 mb-4"
+          className={cn("w-full flex items-center gap-2 mb-4", !portal && "opacity-50 cursor-not-allowed")}
           onClick={handleGoogle}
           disabled={googleLoading}
         >
@@ -69,14 +100,16 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid gap-1">
             <Label>Email</Label>
-            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@brand.com" required />
+            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required />
           </div>
           <div className="grid gap-1">
             <Label>Password</Label>
-            <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
+            <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" required />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</Button>
+          <Button type="submit" disabled={loading || !portal} className={cn(!portal && "opacity-50")}>
+            {loading ? "Signing in..." : "Sign in"}
+          </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-4">
@@ -85,6 +118,32 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+function PortalCard({ title, desc, selected, onClick }: {
+  title: string; desc: string; selected: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "w-full text-left p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 text-center items-center",
+        selected
+          ? "border-[#FFD200] bg-white shadow-md"
+          : "border-[#E8E4E0] bg-white hover:border-[#FFD200]/60 hover:shadow-sm",
+      )}
+    >
+      <div className={cn(
+        "w-8 h-8 rounded-xl mb-1 flex items-center justify-center transition-colors",
+        selected ? "bg-[#FFD200]" : "bg-[#F5F3F0]",
+      )}>
+        <span className={cn("w-3 h-3 rounded-full inline-block", selected ? "bg-[#0C0C0C]" : "bg-[#CCCCCC]")} />
+      </div>
+      <div className="font-semibold text-sm text-[#1A1A1A]">{title}</div>
+      <div className="text-[11px] text-[#9A9A9A]">{desc}</div>
+    </button>
   );
 }
 

@@ -57,7 +57,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         <button
           className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-          onClick={() => { clearSessionToken(); signOut().then(() => router.push("/")); }}
+          onClick={async () => {
+            clearSessionToken();
+            await fetch("/api/admin-auth", { method: "DELETE" });
+            signOut().then(() => router.push("/admin/login"));
+          }}
         >
           Sign out
         </button>

@@ -15,11 +15,11 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-const TYPE_ICON: Record<string, string> = {
-  inquiry_submitted: "📋",
-  inquiry_reviewing: "🔍",
-  inquiry_confirmed: "✅",
-  inquiry_closed: "🚫",
+const TYPE_DOT: Record<string, string> = {
+  inquiry_submitted: "bg-blue-400",
+  inquiry_reviewing: "bg-amber-400",
+  inquiry_confirmed: "bg-green-500",
+  inquiry_closed:    "bg-[#CCCCCC]",
 };
 
 export function NotificationBell() {
@@ -121,7 +121,9 @@ export function NotificationBell() {
               <div className="px-4 py-6 text-sm text-muted-foreground text-center">Loading...</div>
             ) : notifications.length === 0 ? (
               <div className="px-4 py-8 text-sm text-muted-foreground text-center">
-                <div className="text-2xl mb-2">🔔</div>
+                <div className="w-8 h-8 rounded-xl bg-[#F5F3F0] mx-auto mb-2 flex items-center justify-center">
+                  <span className="w-3 h-3 rounded-full border-2 border-[#CCCCCC] inline-block" />
+                </div>
                 No notifications yet
               </div>
             ) : (
@@ -130,11 +132,11 @@ export function NotificationBell() {
                   key={n.id}
                   onClick={() => handleClick(n)}
                   className={cn(
-                    "w-full text-left px-4 py-3 border-b last:border-b-0 hover:bg-muted/50 transition-colors flex gap-3",
-                    !n.is_read && "bg-[#FFFBEB]"
+                    "w-full text-left px-4 py-3 border-b last:border-b-0 hover:bg-[#FFF8EC] transition-colors flex gap-3",
+                    !n.is_read && "bg-[#FFFBEB]",
                   )}
                 >
-                  <span className="text-lg shrink-0 mt-0.5">{TYPE_ICON[n.type] || "📌"}</span>
+                  <span className={`w-2 h-2 rounded-full shrink-0 mt-2 inline-block ${TYPE_DOT[n.type] || "bg-[#9A9A9A]"}`} />
                   <div className="flex-1 min-w-0">
                     <div className={cn("text-sm leading-tight", !n.is_read && "font-semibold")}>{n.title}</div>
                     <div className="text-xs text-muted-foreground mt-0.5 leading-snug line-clamp-2">{n.body}</div>

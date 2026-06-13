@@ -1,8 +1,78 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { api, type PublicReview } from "@/lib/api";
+import { motion, useInView, useMotionValue, useSpring } from "framer-motion";
+import { api } from "@/lib/api";
+import { TestimonialsColumn } from "@/components/ui/testimonials-columns-1";
+import { Sparkles } from "@/components/ui/sparkles";
+import { InfiniteSlider } from "@/components/ui/infinite-slider";
+import { ProgressiveBlur } from "@/components/ui/progressive-blur";
+
+// AI-generated images (Higgsfield)
+const IMG_HERO = "https://d8j0ntlcm91z4.cloudfront.net/user_32n2a4gtmOz5g8tXtyqO6QX7OgX/hf_20260607_095342_91b706fa-8370-486e-a09e-0cc26b00b2c1.png";
+const IMG_TALENT = "https://d8j0ntlcm91z4.cloudfront.net/user_32n2a4gtmOz5g8tXtyqO6QX7OgX/hf_20260607_095344_2be01a69-1522-4ac3-acb3-1fed6bd7d278.png";
+const IMG_BRAND = "https://d8j0ntlcm91z4.cloudfront.net/user_32n2a4gtmOz5g8tXtyqO6QX7OgX/hf_20260607_095346_0d5d8219-6fe6-42fc-915d-a560158532a6.png";
+
+const ALL_TESTIMONIALS = [
+  {
+    text: "Found our campaign Superstar in under a day. The AI matching was spot on - exactly the aesthetic we needed for our skincare launch.",
+    image: "https://randomuser.me/api/portraits/women/44.jpg",
+    name: "Priya Tan",
+    role: "Marketing Manager, Glow Lab",
+  },
+  {
+    text: "As a creator, CASTD finally gave me a platform where brands come to me. Got booked for 3 campaigns in my first month.",
+    image: "https://randomuser.me/api/portraits/women/65.jpg",
+    name: "Siti Rahayu",
+    role: "Beauty Creator, 42K followers",
+  },
+  {
+    text: "We've tried other talent platforms but nothing came close. The vetting process means every Superstar is actually professional.",
+    image: "https://randomuser.me/api/portraits/men/32.jpg",
+    name: "Daniel Lim",
+    role: "Brand Director, Epoch Beauty",
+  },
+  {
+    text: "Managing campaigns used to be a mess of DMs and spreadsheets. CASTD keeps everything in one place.",
+    image: "https://randomuser.me/api/portraits/women/26.jpg",
+    name: "Cheryl Wong",
+    role: "Lifestyle Creator, 18K followers",
+  },
+  {
+    text: "The campaign criteria feature is genius. Set our target audience once and the AI surfaces Superstars who actually fit our brand.",
+    image: "https://randomuser.me/api/portraits/women/55.jpg",
+    name: "Amanda Koh",
+    role: "Head of Digital, Hera Beauty",
+  },
+  {
+    text: "Transparent pricing, no surprise fees. Confirmed our first Superstar within 48 hours of listing our campaign.",
+    image: "https://randomuser.me/api/portraits/men/41.jpg",
+    name: "Marcus Ng",
+    role: "Founder, Freshlab SG",
+  },
+  {
+    text: "CASTD understood that creators need structure too. The booking management and chat make every collab smooth.",
+    image: "https://randomuser.me/api/portraits/women/68.jpg",
+    name: "Nurul Aisyah",
+    role: "Lifestyle Creator, 29K followers",
+  },
+  {
+    text: "We now source all our UGC through CASTD. The quality of Superstars is consistently high and the fit scores are genuinely useful.",
+    image: "https://randomuser.me/api/portraits/women/22.jpg",
+    name: "Rachel Chua",
+    role: "Social Media Lead, Lumiere Co.",
+  },
+  {
+    text: "Went from zero brand deals to four confirmed campaigns in my second month. CASTD is the best move I made for my creator career.",
+    image: "https://randomuser.me/api/portraits/women/33.jpg",
+    name: "Jasmine Toh",
+    role: "Skincare Creator, 55K followers",
+  },
+];
+
+const COL1 = ALL_TESTIMONIALS.slice(0, 3);
+const COL2 = ALL_TESTIMONIALS.slice(3, 6);
+const COL3 = ALL_TESTIMONIALS.slice(6, 9);
 
 const TICKER_ITEMS = [
   "Beauty", "Skincare", "Lifestyle", "Fashion",
@@ -10,188 +80,218 @@ const TICKER_ITEMS = [
   "Product Demo", "Brand Story", "Testimonial", "OOTD",
 ];
 
-function useScrollReveal() {
-  useEffect(() => {
-    const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
-    const obs = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("visible");
-            obs.unobserve(e.target);
-          }
-        }),
-      { threshold: 0.08 }
-    );
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
+const STEPS = [
+  {
+    num: "01",
+    title: "Browse free",
+    body: "Search 27+ vetted creator profiles. Filter by content type, language, vibe, and audience size. No paywall, no credits.",
+    tags: ["Beauty Tutorial", "Lifestyle", "UGC", "GRWM"],
+  },
+  {
+    num: "02",
+    title: "Shortlist and inquire",
+    body: "Save picks to your casting board. Submit a campaign brief with dates, deliverables, and budget - still completely free.",
+    tags: ["Product launch", "Social media ad", "Brand video"],
+  },
+  {
+    num: "03",
+    title: "Confirm and go",
+    body: "Found the perfect fit? Confirm the Superstar. Our team handles everything after - campaign coordination included.",
+    tags: ["Managed process", "14-day delivery", "Chat included"],
+  },
+];
+
+const TALENT_BUBBLES = [
+  { initials: "AM", bg: "#FFD200", text: "#1A1A1A" },
+  { initials: "JW", bg: "#1A1A1A", text: "#FFD200" },
+  { initials: "TL", bg: "#F0E8D8", text: "#1A1A1A" },
+];
+
+function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-50px" });
+  const motionVal = useMotionValue(0);
+  const spring = useSpring(motionVal, { stiffness: 60, damping: 20 });
+  const [display, setDisplay] = useState("0");
+
+  useEffect(() => { if (inView) motionVal.set(value); }, [inView, value, motionVal]);
+  useEffect(() => spring.on("change", (v) => setDisplay(Math.round(v).toString())), [spring]);
+
+  return <span ref={ref}>{display}{suffix}</span>;
 }
 
-function Stars({ score }: { score: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((n) => (
-        <span key={n} className={n <= score ? "text-[#FFD200]" : "text-[#EBEBEB]"} style={{ fontSize: 14 }}>
-          ★
-        </span>
-      ))}
-    </div>
-  );
-}
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.65 } },
+};
 
 export default function LandingPage() {
-  useScrollReveal();
-  const [scrolled, setScrolled] = useState(false);
   const [stats, setStats] = useState<{ superstars: number; brands: number; completed_matches: number } | null>(null);
-  const [reviews, setReviews] = useState<PublicReview[]>([]);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 48);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const [brandLogos, setBrandLogos] = useState<{ company_name: string; logo_url: string }[]>([]);
 
   useEffect(() => {
     api.getPublicStats().then(setStats).catch(() => null);
-    api.getPublicReviews().then(setReviews).catch(() => null);
+    api.getPublicBrandLogos().then(setBrandLogos).catch(() => null);
   }, []);
 
-  const statCards = [
-    {
-      value: stats ? `${stats.superstars}+` : "...",
-      label: "Vetted Superstars",
-      sub: "beauty & lifestyle creators",
-    },
-    {
-      value: stats ? `${stats.brands}` : "...",
-      label: "Brands & Agencies",
-      sub: "registered on CASTD",
-    },
-    {
-      value: stats ? `${stats.completed_matches}` : "...",
-      label: "Completed Matches",
-      sub: "confirmed campaigns",
-    },
-  ];
-
   return (
-    <div className="flex flex-col min-h-screen bg-white overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-[#FFF8EC] overflow-x-hidden">
 
       {/* NAV */}
-      <nav
-        className={cn(
-          "fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 md:px-10 py-4 transition-all duration-300",
-          scrolled
-            ? "bg-white/95 backdrop-blur-md border-b border-[#EBEBEB] shadow-sm"
-            : "bg-transparent"
-        )}
-      >
-        <span className={cn(
-          "font-display text-xl font-extrabold tracking-tight transition-colors duration-300",
-          scrolled ? "text-[#0C0C0C]" : "text-white"
-        )}>
-          CASTD
-        </span>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/login"
-            className={cn(
-              "text-sm font-medium px-4 py-2 rounded-full transition-colors duration-200",
-              scrolled ? "text-[#0C0C0C] hover:bg-[#F8F7F4]" : "text-white/70 hover:text-white"
-            )}
-          >
-            Log in
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#F0E8D8]">
+        <div className="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
+          <Link href="/" className="font-display text-xl font-black tracking-tight text-[#1A1A1A]">
+            CASTD
           </Link>
-          <Link
-            href="/signup"
-            className="text-sm font-semibold px-5 py-2.5 rounded-full bg-[#FFD200] text-[#0C0C0C] hover:bg-white transition-colors duration-200"
-          >
-            Get started
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/login"
+              className="text-sm font-semibold px-4 py-2 text-[#6B6B6B] hover:text-[#1A1A1A] transition-colors">
+              Log in
+            </Link>
+            <Link href="/signup"
+              className="text-sm font-bold px-5 py-2.5 rounded-full bg-[#FFD200] text-[#1A1A1A] hover:bg-[#FFC000] transition-colors">
+              Get started
+            </Link>
+          </div>
         </div>
       </nav>
 
       {/* HERO */}
-      <section className="relative min-h-screen bg-[#0C0C0C] flex flex-col items-center justify-center px-6 text-center overflow-hidden">
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.035]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-            backgroundSize: "200px",
-          }}
-        />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#FFD200] opacity-[0.05] rounded-full blur-[140px] pointer-events-none" />
+      <section className="bg-[#FFF8EC] min-h-[92vh] flex items-center px-6 md:px-10 py-20 md:py-10">
+        <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <div
-            className="inline-flex items-center gap-2.5 mb-8 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-white/40 text-xs tracking-widest uppercase"
-            style={{ animation: "fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both" }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FFD200] shrink-0" />
-            Beauty &amp; Lifestyle · Singapore
+          {/* Left - text */}
+          <div className="order-2 md:order-1">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="inline-flex items-center gap-2.5 bg-white border border-[#F0E8D8] rounded-full px-4 py-2 mb-8 shadow-sm"
+            >
+              <span className="w-2 h-2 bg-[#FFD200] rounded-full animate-pulse shrink-0" />
+              <span className="text-xs font-semibold text-[#6B6B6B]">Singapore's beauty talent marketplace</span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.06 }}
+              className="font-display text-5xl sm:text-6xl md:text-5xl lg:text-7xl font-black text-[#1A1A1A] leading-[0.88] tracking-tight mb-7"
+            >
+              Cast your
+              <br />
+              <span style={{
+                backgroundImage: "linear-gradient(135deg, #FFD200 0%, #FFA800 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                perfect
+              </span>
+              <br />
+              Superstar.
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.12 }}
+              className="text-[#6B6B6B] text-lg leading-relaxed mb-10 max-w-md"
+            >
+              Connect with vetted beauty and lifestyle creators in Singapore.
+              Browse free, shortlist your favourites, and book with confidence.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.18 }}
+              className="flex flex-wrap gap-3 mb-10"
+            >
+              <Link href="/signup"
+                className="inline-flex items-center px-7 py-3.5 rounded-full bg-[#FFD200] text-[#1A1A1A] font-bold text-sm hover:bg-[#FFC000] transition-colors shadow-md shadow-[#FFD200]/30">
+                I'm a Brand
+              </Link>
+              <Link href="/signup"
+                className="inline-flex items-center px-7 py-3.5 rounded-full bg-[#1A1A1A] text-white font-bold text-sm hover:bg-[#333] transition-colors">
+                I'm a Superstar
+              </Link>
+            </motion.div>
+
+            {/* Proof chips */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.75, delay: 0.3 }}
+              className="flex flex-wrap gap-2"
+            >
+              {[
+                `${stats?.superstars ?? "27"}+ vetted Superstars`,
+                "Free to browse",
+                "Pay at confirmation",
+              ].map((chip) => (
+                <span key={chip}
+                  className="bg-white border border-[#F0E8D8] rounded-full px-4 py-1.5 text-xs font-semibold text-[#6B6B6B] flex items-center gap-2 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFD200] shrink-0" />
+                  {chip}
+                </span>
+              ))}
+            </motion.div>
           </div>
 
-          <h1
-            className="font-display text-6xl sm:text-7xl md:text-8xl font-extrabold text-white tracking-tight leading-[0.92] mb-8"
-            style={{ animation: "fadeUp 0.9s 0.08s cubic-bezier(0.16,1,0.3,1) both" }}
+          {/* Right - photo */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.9, delay: 0.1 }}
+            className="order-1 md:order-2 relative"
           >
-            Cast exactly
-            <br />
-            <span className="text-[#FFD200]">who you need.</span>
-          </h1>
+            <div className="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-[#1A1A1A]/15 aspect-[4/5]">
+              <img src={IMG_HERO} alt="Singapore lifestyle talent creators" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/30 via-transparent to-transparent" />
+            </div>
 
-          <p
-            className="text-white/45 text-lg md:text-xl max-w-lg mx-auto leading-relaxed mb-10"
-            style={{ animation: "fadeUp 0.9s 0.16s cubic-bezier(0.16,1,0.3,1) both" }}
-          >
-            Singapore's marketplace connecting beauty and lifestyle brands with
-            vetted on-screen talent. Free to browse, pay only at confirmation.
-          </p>
+            {/* Floating stat card */}
+            <div className="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-xl px-5 py-4 flex items-center gap-4 border border-[#F0E8D8]">
+              <div className="flex -space-x-2.5">
+                {TALENT_BUBBLES.map((b) => (
+                  <div key={b.initials}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold border-2 border-white"
+                    style={{ backgroundColor: b.bg, color: b.text }}>
+                    {b.initials}
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="text-[13px] font-bold text-[#1A1A1A]">
+                  {stats?.superstars ?? "27"}+ Superstars
+                </p>
+                <p className="text-[11px] text-[#6B6B6B]">ready to collab</p>
+              </div>
+            </div>
 
-          <div
-            className="flex flex-wrap gap-4 justify-center"
-            style={{ animation: "fadeUp 0.9s 0.24s cubic-bezier(0.16,1,0.3,1) both" }}
-          >
-            <Link
-              href="/signup"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#FFD200] text-[#0C0C0C] font-semibold text-sm hover:bg-white transition-colors duration-200"
-            >
-              Browse talent free →
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full border border-white/10 text-white/60 text-sm hover:border-white/25 hover:text-white transition-all duration-200"
-            >
-              Sign in
-            </Link>
-          </div>
-        </div>
+            {/* Floating vibe tag */}
+            <div className="absolute -top-4 -right-4 bg-[#FFD200] rounded-2xl shadow-lg px-5 py-3">
+              <p className="text-[12px] font-black text-[#1A1A1A]">Beauty</p>
+              <p className="text-[10px] text-[#1A1A1A]/60">Content creators</p>
+            </div>
 
-        <div
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
-          style={{ animation: "fadeIn 1.2s 1.2s both" }}
-        >
-          <div className="w-px h-14 bg-gradient-to-b from-transparent via-white/20 to-white/10" />
-          <span className="text-white/20 text-[10px] tracking-[0.2em] uppercase">Scroll</span>
+            <div className="absolute -z-10 -bottom-8 -right-8 w-40 h-40 rounded-full bg-[#FFD200]/20 blur-2xl" />
+          </motion.div>
         </div>
       </section>
 
       {/* MARQUEE TICKER */}
-      <div className="bg-[#FFD200] py-3.5 overflow-hidden select-none border-y border-[#0C0C0C]/8">
-        <div
-          className="flex whitespace-nowrap"
-          style={{ animation: "marqueeLeft 28s linear infinite" }}
-        >
+      <div className="bg-[#FFD200] py-3.5 overflow-hidden select-none border-y border-[#1A1A1A]/8">
+        <div className="flex whitespace-nowrap" style={{ animation: "marqueeLeft 28s linear infinite" }}>
           {[0, 1].map((copy) => (
             <div key={copy} className="flex shrink-0">
               {TICKER_ITEMS.map((item, i) => (
-                <span
-                  key={`${copy}-${i}`}
-                  className="inline-flex items-center gap-5 px-8 font-display font-bold text-[#0C0C0C] text-sm uppercase tracking-widest"
-                >
+                <span key={`${copy}-${i}`}
+                  className="inline-flex items-center gap-5 px-8 font-display font-black text-[#1A1A1A] text-sm uppercase tracking-widest">
                   {item}
-                  <span className="text-[#0C0C0C]/25 text-[10px]">✦</span>
+                  <span className="w-1 h-1 rounded-full bg-[#1A1A1A]/30 inline-block" />
                 </span>
               ))}
             </div>
@@ -199,209 +299,338 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* LIVE STATS */}
+      {/* STATS */}
       <section className="bg-white px-6 py-24">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-10 reveal" data-reveal="true">
-            <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">
-              Live platform metrics
-            </span>
-            <h2 className="font-display text-3xl md:text-4xl font-extrabold text-[#0C0C0C] mt-3 tracking-tight">
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+            variants={fadeUp}
+            className="text-center mb-16"
+          >
+            <p className="text-xs font-bold text-[#FFD200] uppercase tracking-[0.25em] mb-3">Live platform metrics</p>
+            <h2 className="font-display text-4xl md:text-5xl font-black text-[#1A1A1A] tracking-tight">
               Growing every week.
             </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#EBEBEB] border border-[#EBEBEB]">
-            {statCards.map((s, i) => (
-              <div
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { value: stats?.superstars ?? 0, suffix: "+", label: "Vetted Superstars", sub: "beauty and lifestyle creators" },
+              { value: stats?.brands ?? 0, suffix: "", label: "Brands and Agencies", sub: "registered on CASTD" },
+              { value: stats?.completed_matches ?? 0, suffix: "", label: "Completed Matches", sub: "confirmed campaigns" },
+            ].map((s, i) => (
+              <motion.div
                 key={i}
-                className="reveal bg-white px-10 py-12 hover:bg-[#F8F7F4] transition-colors duration-300"
-                data-reveal="true"
-                style={{ transitionDelay: `${i * 0.1}s` }}
+                initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+                variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.55, delay: i * 0.1 } } }}
+                className="bg-[#FFF8EC] rounded-3xl p-8 hover:shadow-md transition-shadow duration-300 border border-[#F0E8D8]"
               >
-                <div className="font-display text-5xl md:text-6xl font-extrabold text-[#0C0C0C] tracking-tight">
-                  {s.value}
+                <div className="w-8 h-1 rounded-full bg-[#FFD200] mb-6" />
+                <div className="font-display text-5xl font-black text-[#1A1A1A] tracking-tight mb-3">
+                  {stats ? <AnimatedNumber value={s.value} suffix={s.suffix} /> : "..."}
                 </div>
-                <div className="font-semibold text-[#0C0C0C] mt-4 mb-1 text-base">{s.label}</div>
-                <div className="text-sm text-[#7A7A7A]">{s.sub}</div>
-              </div>
+                <div className="font-bold text-[#1A1A1A] text-sm mb-1">{s.label}</div>
+                <div className="text-xs text-[#6B6B6B]">{s.sub}</div>
+              </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* TRUSTED BY BRANDS */}
+      <section className="bg-[#1A1A1A] relative overflow-hidden">
+        {/* Logo slider */}
+        <div className="pt-16 pb-4 px-6">
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true }}
+            variants={fadeUp}
+            className="text-center mb-10"
+          >
+            <p className="text-xs font-bold text-[#FFD200]/70 uppercase tracking-[0.25em] mb-3">Trusted by</p>
+            <h2 className="font-display text-3xl md:text-4xl font-black text-white tracking-tight">
+              Singapore's best brands.
+            </h2>
+          </motion.div>
+
+          {brandLogos.length > 0 ? (
+            <div className="relative h-20 w-full max-w-4xl mx-auto">
+              <InfiniteSlider className="flex h-full w-full items-center" duration={35} gap={56}>
+                {brandLogos.map(({ company_name, logo_url }) => (
+                  <div key={company_name} className="h-12 w-32 flex items-center justify-center shrink-0">
+                    <img
+                      src={logo_url}
+                      alt={company_name}
+                      className="max-h-10 max-w-28 object-contain opacity-60 hover:opacity-100 transition-opacity filter brightness-0 invert"
+                      title={company_name}
+                    />
+                  </div>
+                ))}
+              </InfiniteSlider>
+              <ProgressiveBlur
+                className="pointer-events-none absolute top-0 left-0 h-full w-32"
+                direction="left"
+                blurIntensity={0.5}
+              />
+              <ProgressiveBlur
+                className="pointer-events-none absolute top-0 right-0 h-full w-32"
+                direction="right"
+                blurIntensity={0.5}
+              />
+            </div>
+          ) : (
+            <div className="text-center pb-2">
+              <p className="text-white/30 text-sm">
+                Brand logos appear here once brands complete their profile.
+              </p>
+              <Link href="/signup" className="inline-flex items-center gap-2 mt-3 text-xs text-[#FFD200]/70 hover:text-[#FFD200] transition-colors font-semibold">
+                Add your brand
+                <span>&#8594;</span>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Sparkles + curved divider */}
+        <div className="relative h-72 w-full overflow-hidden [mask-image:radial-gradient(50%_50%,white,transparent)]">
+          <div className="absolute inset-0 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_bottom_center,#FFD200,transparent_65%)] before:opacity-15" />
+          <div className="absolute -left-1/2 top-1/2 aspect-[1/0.7] z-10 w-[200%] rounded-[100%] border-t border-white/10 bg-[#FFF8EC]" />
+          <Sparkles
+            density={900}
+            speed={0.8}
+            color="#FFD200"
+            className="absolute inset-x-0 bottom-0 h-full w-full [mask-image:radial-gradient(50%_50%,white,transparent_85%)]"
+          />
         </div>
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="bg-[#F8F7F4] border-y border-[#EBEBEB] px-6 py-24">
+      <section className="bg-[#FFF8EC] px-6 py-24">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-16 reveal" data-reveal="true">
-            <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">Process</span>
-            <h2 className="font-display text-4xl md:text-5xl font-extrabold text-[#0C0C0C] mt-4 leading-[0.95] tracking-tight">
-              Three steps.<br />Zero guesswork.
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+            variants={fadeUp}
+            className="text-center mb-16"
+          >
+            <p className="text-xs font-bold text-[#FFD200] uppercase tracking-[0.25em] mb-3">Process</p>
+            <h2 className="font-display text-4xl md:text-5xl font-black text-[#1A1A1A] tracking-tight">
+              Three steps.
+              <br />
+              Zero guesswork.
             </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-12 md:gap-8">
-            {[
-              {
-                n: "01", title: "Browse free",
-                desc: "Filter 27+ profiles by content type, language, vibe, and follower count. Every profile is visible. No paywalls, no credits.",
-              },
-              {
-                n: "02", title: "Shortlist & inquire",
-                desc: "Save your picks to a casting board. Submit a campaign brief with dates, deliverables, and budget. Still completely free.",
-              },
-              {
-                n: "03", title: "Confirm & go",
-                desc: "Found the right fit? Confirm the talent and pay the one-time contact fee. Platform handles everything after.",
-              },
-            ].map((s, i) => (
-              <div key={i} className="reveal" data-reveal="true" style={{ transitionDelay: `${0.1 + i * 0.12}s` }}>
-                <div className="font-display text-7xl font-extrabold text-[#E0E0E0] leading-none mb-6 select-none">{s.n}</div>
-                <div className="font-display text-xl font-bold text-[#0C0C0C] mb-3">{s.title}</div>
-                <div className="text-[#7A7A7A] text-sm leading-relaxed">{s.desc}</div>
-              </div>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-5">
+            {STEPS.map((step, i) => (
+              <motion.div
+                key={step.num}
+                initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+                variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.55, delay: i * 0.1 } } }}
+                className="bg-white rounded-3xl p-8 border border-[#F0E8D8] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div className="w-10 h-10 rounded-full bg-[#FFD200] flex items-center justify-center">
+                    <span className="font-black text-[#1A1A1A] text-sm">{step.num}</span>
+                  </div>
+                  <span className="font-display text-5xl font-black text-[#1A1A1A]/6 leading-none select-none">{step.num}</span>
+                </div>
+                <h3 className="font-display text-xl font-black text-[#1A1A1A] mb-3">{step.title}</h3>
+                <p className="text-sm text-[#6B6B6B] leading-relaxed flex-1 mb-6">{step.body}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {step.tags.map(tag => (
+                    <span key={tag} className="text-[10px] bg-[#FFF8EC] border border-[#F0E8D8] text-[#6B6B6B] px-2.5 py-1 rounded-full font-semibold">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
             ))}
           </div>
+
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true }}
+            variants={fadeUp}
+            className="mt-6 bg-[#1A1A1A] rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-5"
+          >
+            <div>
+              <p className="font-black text-white text-lg">Free to browse. Free to inquire.</p>
+              <p className="text-white/50 text-sm mt-1">Pay only when you've confirmed the perfect Superstar.</p>
+            </div>
+            <Link href="/signup"
+              className="shrink-0 inline-flex items-center px-7 py-3.5 rounded-full bg-[#FFD200] text-[#1A1A1A] font-bold text-sm hover:bg-[#FFC000] transition-colors">
+              Get started free
+            </Link>
+          </motion.div>
         </div>
       </section>
 
-      {/* FOR BRANDS / FOR SUPERSTARS */}
+      {/* WHO IT'S FOR */}
       <section className="bg-white px-6 py-24">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-16 reveal" data-reveal="true">
-            <span className="text-[10px] text-[#7A7A7A] tracking-[0.2em] uppercase font-semibold">Who it's for</span>
-            <h2 className="font-display text-4xl md:text-5xl font-extrabold text-[#0C0C0C] mt-4 leading-[0.95] tracking-tight">
-              One platform.<br />Both sides.
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+            variants={fadeUp}
+            className="text-center mb-16"
+          >
+            <p className="text-xs font-bold text-[#FFD200] uppercase tracking-[0.25em] mb-3">Who it's for</p>
+            <h2 className="font-display text-4xl md:text-5xl font-black text-[#1A1A1A] tracking-tight">
+              One platform.
+              <br />
+              Both sides.
             </h2>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="reveal bg-[#0C0C0C] rounded-2xl p-10 flex flex-col" data-reveal="true">
-              <span className="inline-block text-[#FFD200] text-[10px] tracking-[0.2em] uppercase font-semibold mb-8">
-                For Brands &amp; Agencies
-              </span>
-              <h3 className="font-display text-3xl font-extrabold text-white mb-6 leading-tight">
-                Find the right talent.<br />Faster.
-              </h3>
-              <ul className="space-y-4 mb-10 flex-1">
-                {[
-                  "Search vetted creator profiles",
-                  "Filter by language, vibe, content type",
-                  "Submit unlimited free inquiries",
-                  "AI-matched fit score per talent",
-                  "Confirm and secure. Pay only here.",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-white/55">
-                    <span className="mt-0.5 text-[#FFD200] shrink-0 text-[10px]">✦</span>{f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/signup" className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#FFD200] text-[#0C0C0C] font-semibold text-sm hover:bg-white transition-colors">
-                Browse catalog →
-              </Link>
-            </div>
+          </motion.div>
 
-            <div className="reveal bg-[#F8F7F4] border border-[#EBEBEB] rounded-2xl p-10 flex flex-col" data-reveal="true" style={{ transitionDelay: "0.12s" }}>
-              <span className="inline-block text-[#7A7A7A] text-[10px] tracking-[0.2em] uppercase font-semibold mb-8">
-                For Superstars
-              </span>
-              <h3 className="font-display text-3xl font-extrabold text-[#0C0C0C] mb-6 leading-tight">
-                Get discovered.<br />Get booked.
-              </h3>
-              <ul className="space-y-4 mb-10 flex-1">
-                {[
-                  "Build your free Superstar profile",
-                  "Get discovered by Singapore brands",
-                  "Set cash, product, or hybrid rates",
-                  "Manage bookings in one dashboard",
-                  "Build your collab portfolio",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-[#7A7A7A]">
-                    <span className="mt-0.5 text-[#0C0C0C] shrink-0 text-[10px]">✦</span>{f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/signup" className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0C0C0C] text-white font-semibold text-sm hover:bg-[#2A2A2A] transition-colors">
-                Join as Superstar →
-              </Link>
-            </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            {/* Brand card */}
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+              variants={{ hidden: { opacity: 0, x: -24 }, show: { opacity: 1, x: 0, transition: { duration: 0.6 } } }}
+              className="rounded-3xl overflow-hidden bg-[#1A1A1A] min-h-[520px] flex flex-col"
+            >
+              <div className="h-56 overflow-hidden relative">
+                <img src={IMG_BRAND} alt="Brand team" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#1A1A1A]" />
+              </div>
+              <div className="p-8 flex flex-col flex-1">
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#FFD200]" />
+                  <span className="text-[#FFD200] text-xs font-black uppercase tracking-[0.2em]">CASTD Brand</span>
+                </div>
+                <h3 className="font-display text-2xl font-black text-white mb-5 leading-tight">
+                  Find the right talent.
+                  <br />Faster.
+                </h3>
+                <ul className="space-y-3 mb-8 flex-1">
+                  {[
+                    "Search 27+ vetted creator profiles",
+                    "Filter by language, vibe, content type",
+                    "Submit unlimited free inquiries",
+                    "AI-matched fit score per talent",
+                    "Chat directly after confirmation",
+                  ].map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm text-white/60">
+                      <span className="w-1 h-1 rounded-full bg-[#FFD200] mt-2 shrink-0" />{f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/signup"
+                  className="self-start inline-flex items-center px-6 py-3 rounded-full bg-[#FFD200] text-[#1A1A1A] font-bold text-sm hover:bg-[#FFC000] transition-colors">
+                  Browse the catalog
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* Superstar card */}
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: "-40px" }}
+              variants={{ hidden: { opacity: 0, x: 24 }, show: { opacity: 1, x: 0, transition: { duration: 0.6, delay: 0.1 } } }}
+              className="rounded-3xl overflow-hidden bg-[#FFF8EC] border border-[#F0E8D8] min-h-[520px] flex flex-col"
+            >
+              <div className="h-56 overflow-hidden">
+                <img src={IMG_TALENT} alt="Superstar talent creator" className="w-full h-full object-cover object-top" />
+              </div>
+              <div className="p-8 flex flex-col flex-1">
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A]" />
+                  <span className="text-[#1A1A1A] text-xs font-black uppercase tracking-[0.2em]">CASTD Superstar</span>
+                </div>
+                <h3 className="font-display text-2xl font-black text-[#1A1A1A] mb-5 leading-tight">
+                  Get discovered.
+                  <br />Get booked.
+                </h3>
+                <ul className="space-y-3 mb-8 flex-1">
+                  {[
+                    "Build your free Superstar profile",
+                    "Get discovered by Singapore brands",
+                    "Set cash, product, or hybrid rates",
+                    "Manage bookings in one dashboard",
+                    "Build your collab portfolio",
+                  ].map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm text-[#6B6B6B]">
+                      <span className="w-1 h-1 rounded-full bg-[#1A1A1A] mt-2 shrink-0" />{f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/signup"
+                  className="self-start inline-flex items-center px-6 py-3 rounded-full bg-[#1A1A1A] text-white font-bold text-sm hover:bg-[#333] transition-colors">
+                  Join as Superstar
+                </Link>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* REVIEWS */}
-      <section className="bg-[#0C0C0C] px-6 py-24">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-16 reveal" data-reveal="true">
-            <span className="text-[10px] text-[#FFD200]/60 tracking-[0.2em] uppercase font-semibold">Reviews</span>
-            <h2 className="font-display text-4xl md:text-5xl font-extrabold text-white mt-4 leading-[0.95] tracking-tight">
+      {/* TESTIMONIALS */}
+      <section className="bg-white py-24 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6">
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+            variants={fadeUp}
+            className="text-center mb-14"
+          >
+            <div className="inline-flex items-center border border-[#F0E8D8] rounded-full px-4 py-1.5 mb-5">
+              <span className="text-xs font-semibold text-[#6B6B6B]">Testimonials</span>
+            </div>
+            <h2 className="font-display text-4xl md:text-5xl font-black text-[#1A1A1A] tracking-tight">
               What they're saying.
             </h2>
-          </div>
-
-          {reviews.length === 0 ? (
-            <div className="reveal border border-white/8 rounded-2xl p-12 text-center" data-reveal="true">
-              <div className="flex justify-center gap-1 mb-4">
-                {[1,2,3,4,5].map(n => (
-                  <span key={n} className="text-[#FFD200]" style={{ fontSize: 24 }}>★</span>
-                ))}
-              </div>
-              <p className="text-white/40 text-sm max-w-sm mx-auto">
-                Reviews from real campaigns will appear here as brands and Superstars complete their first collaborations.
-              </p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-4">
-              {reviews.map((r, i) => (
-                <div
-                  key={i}
-                  className="reveal border border-white/8 rounded-2xl p-6 flex flex-col gap-4 hover:border-white/16 transition-colors"
-                  data-reveal="true"
-                  style={{ transitionDelay: `${i * 0.07}s` }}
-                >
-                  <Stars score={r.score} />
-                  <p className="text-white/70 text-sm leading-relaxed flex-1">"{r.comment}"</p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white text-xs font-semibold">{r.ratee_name}</p>
-                      <p className="text-white/30 text-xs capitalize">{r.ratee_type}</p>
-                    </div>
-                    <span className="text-white/20 text-xs">
-                      {new Date(r.created_at).toLocaleDateString("en-SG", { month: "short", year: "numeric" })}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+            <p className="text-[#6B6B6B] mt-4 max-w-md mx-auto">
+              Brands and Superstars across Singapore trust CASTD to make every collaboration count.
+            </p>
+          </motion.div>
+        </div>
+        <div className="flex justify-center gap-5 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)] max-h-[720px] overflow-hidden px-6">
+          <TestimonialsColumn testimonials={COL1} duration={18} />
+          <TestimonialsColumn testimonials={COL2} className="hidden md:block" duration={23} />
+          <TestimonialsColumn testimonials={COL3} className="hidden lg:block" duration={20} />
         </div>
       </section>
 
       {/* FINAL CTA */}
       <section className="bg-[#FFD200] px-6 py-28">
-        <div className="max-w-3xl mx-auto text-center reveal" data-reveal="true">
-          <h2 className="font-display text-5xl md:text-6xl font-extrabold text-[#0C0C0C] tracking-tight leading-[0.93] mb-6">
-            Your next campaign<br />starts here.
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }}
+          variants={fadeUp}
+          className="max-w-3xl mx-auto text-center"
+        >
+          <div className="flex justify-center gap-2 mb-8">
+            {[1, 2, 3].map(n => (
+              <div key={n} className="w-2 h-2 rounded-full bg-[#1A1A1A]/20" />
+            ))}
+          </div>
+          <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-black text-[#1A1A1A] tracking-tight leading-[0.88] mb-7">
+            Your next campaign
+            <br />
+            starts here.
           </h2>
-          <p className="text-[#0C0C0C]/55 text-lg mb-10 max-w-md mx-auto leading-relaxed">
+          <p className="text-[#1A1A1A]/55 text-lg mb-10 max-w-md mx-auto leading-relaxed">
             Browse free. Inquire free. Pay only when you've found exactly who you need.
           </p>
-          <Link
-            href="/signup"
-            className="inline-flex items-center gap-2 px-10 py-4 rounded-full bg-[#0C0C0C] text-[#FFD200] font-semibold text-sm hover:bg-[#2A2A2A] transition-colors duration-200"
-          >
-            Get started - it's free →
-          </Link>
-        </div>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/signup"
+              className="inline-flex items-center px-10 py-4 rounded-full bg-[#1A1A1A] text-[#FFD200] font-bold text-sm hover:bg-[#333] transition-colors">
+              Get started - it's free
+            </Link>
+            <Link href="/login"
+              className="inline-flex items-center px-8 py-4 rounded-full border-2 border-[#1A1A1A]/20 text-[#1A1A1A]/70 font-bold text-sm hover:border-[#1A1A1A]/40 hover:text-[#1A1A1A] transition-colors">
+              Log in
+            </Link>
+          </div>
+        </motion.div>
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#0C0C0C] px-6 md:px-10 py-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-        <span className="font-display text-lg font-extrabold text-white tracking-tight">CASTD</span>
-        <div className="flex gap-8 text-sm text-white/25">
-          <Link href="/login" className="hover:text-white/60 transition-colors">Log in</Link>
-          <Link href="/signup" className="hover:text-white/60 transition-colors">Get started</Link>
+      <footer className="bg-[#1A1A1A] px-6 md:px-10 py-12">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <span className="font-display text-xl font-black text-white tracking-tight">CASTD</span>
+          <div className="flex gap-8 text-sm text-white/30">
+            <Link href="/login" className="hover:text-white/70 transition-colors">Log in</Link>
+            <Link href="/signup" className="hover:text-white/70 transition-colors">Sign up</Link>
+          </div>
+          <p className="text-white/20 text-xs tracking-wide">
+            {new Date().getFullYear()} CASTD. Singapore.
+          </p>
         </div>
-        <p className="text-white/20 text-xs tracking-wide">
-          © {new Date().getFullYear()} CASTD. Singapore.
-        </p>
       </footer>
     </div>
   );

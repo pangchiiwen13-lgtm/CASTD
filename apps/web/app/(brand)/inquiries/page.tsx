@@ -6,49 +6,35 @@ import { api, type Inquiry } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSessionToken } from "@/lib/get-token";
-import { RatingModal } from "@/components/RatingModal";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-const STATUS_META: Record<string, {
-  label: string; color: string; icon: string; description: string;
-}> = {
-  open: {
-    label: "Submitted",
-    color: "bg-blue-50 text-blue-700 border-blue-200",
-    icon: "📋",
-    description: "Your inquiry has been submitted. The CASTD team is reviewing it.",
-  },
-  reviewing: {
-    label: "Reviewing",
-    color: "bg-yellow-50 text-yellow-800 border-yellow-200",
-    icon: "🔍",
-    description: "We're reviewing your inquiry and matching you with the right Superstar. Confirm when you're ready to proceed.",
-  },
-  confirmed: {
-    label: "Confirmed",
-    color: "bg-green-50 text-green-700 border-green-200",
-    icon: "✅",
-    description: "You're confirmed with this Superstar. We'll be in touch with next steps shortly.",
-  },
-  closed: {
-    label: "Closed",
-    color: "bg-gray-50 text-gray-500 border-gray-200",
-    icon: "🚫",
-    description: "This inquiry has been closed.",
-  },
+const STATUS_META: Record<string, { label: string; color: string; dot: string; desc: string }> = {
+  pending:   { label: "Awaiting response", color: "bg-amber-50 text-amber-700 border-amber-200",  dot: "bg-amber-400",   desc: "Waiting for the Superstar to accept or decline." },
+  accepted:  { label: "Accepted",          color: "bg-green-50 text-green-700 border-green-200",  dot: "bg-green-500",   desc: "Offer accepted. Head to Campaigns to chat and track delivery." },
+  declined:  { label: "Declined",          color: "bg-[#F5F3F0] text-[#9A9A9A] border-[#E8E4E0]", dot: "bg-[#CCCCCC]", desc: "The Superstar has declined this offer." },
+  cancelled: { label: "Cancelled",         color: "bg-[#F5F3F0] text-[#9A9A9A] border-[#E8E4E0]", dot: "bg-[#CCCCCC]", desc: "This offer was cancelled." },
 };
 
-const TABS = ["All", "Active", "Confirmed", "Closed"] as const;
+const TABS = ["All", "Pending", "Accepted", "Closed"] as const;
 type Tab = typeof TABS[number];
+
+function fmtDate(s: string) {
+  return new Date(s).toLocaleDateString("en-SG", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function fmtCompensation(inq: Inquiry) {
+  if (inq.remuneration_type === "product") return inq.product_description ? `Product: ${inq.product_description.slice(0, 60)}` : "Product / Gifting";
+  if (inq.budget_range) return inq.budget_range;
+  return "Cash";
+}
 
 export default function InquiriesPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [confirming, setConfirming] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("All");
-  const [ratingTarget, setRatingTarget] = useState<Inquiry | null>(null);
-  const [ratedIds, setRatedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!isPending && !session) { router.push("/login"); return; }
@@ -58,170 +44,122 @@ export default function InquiriesPage() {
       .finally(() => setLoading(false));
   }, [session, isPending]);
 
-  // When a closed inquiry card is loaded, check quietly if already rated
-  async function checkIfRated(inq: Inquiry) {
-    if (inq.status !== "closed") return;
-    const token = getSessionToken();
-    if (!token) return;
-    try {
-      const result = await api.checkRating(inq.id, token);
-      if (result.has_rated) setRatedIds(s => new Set(s).add(inq.id));
-    } catch (_) {}
-  }
-
-  async function handleConfirm(inquiryId: string) {
-    setConfirming(inquiryId);
-    try {
-      const result = await api.createCheckout(inquiryId, getSessionToken() || "");
-      if (result.checkout_url) {
-        window.location.href = result.checkout_url;
-      } else if (result.confirmed) {
-        setInquiries(list => list.map(i => i.id === inquiryId ? { ...i, status: "confirmed" } : i));
-      }
-    } finally {
-      setConfirming(null);
-    }
-  }
-
-  const filtered = inquiries.filter(inq => {
+  const filtered = inquiries.filter(i => {
     if (tab === "All") return true;
-    if (tab === "Active") return ["open", "reviewing"].includes(inq.status);
-    if (tab === "Confirmed") return inq.status === "confirmed";
-    if (tab === "Closed") return inq.status === "closed";
+    if (tab === "Pending") return i.status === "pending";
+    if (tab === "Accepted") return i.status === "accepted";
+    if (tab === "Closed") return i.status === "declined" || i.status === "cancelled";
     return true;
   });
 
-  const activeCount = inquiries.filter(i => ["open", "reviewing"].includes(i.status)).length;
+  const pendingCount = inquiries.filter(i => i.status === "pending").length;
 
   return (
-    <>
-    <div className="max-w-3xl mx-auto px-6 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Inquiries</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Track your campaign submissions from browsing to confirmed booking.
-        </p>
+    <div className="max-w-4xl mx-auto px-6 py-10">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Sent Offers</h1>
+          <p className="text-sm text-[#9A9A9A] mt-1">Offers sent to Superstars. Accepted offers move to Campaigns.</p>
+        </div>
+        <Link href="/catalog">
+          <Button className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00] rounded-full">
+            Browse catalog
+          </Button>
+        </Link>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b">
+      {/* Tab switcher */}
+      <div className="flex gap-1 mb-6 bg-white border border-[#F0EDEA] p-1 rounded-xl shadow-sm w-fit">
         {TABS.map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`pb-2 px-1 text-sm font-medium border-b-2 transition-colors ${tab === t ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={cn(
+              "flex items-center gap-1.5 text-sm py-1.5 px-4 rounded-lg font-medium transition-all",
+              tab === t ? "bg-[#0C0C0C] text-white shadow-sm" : "text-[#9A9A9A] hover:text-[#1A1A1A]",
+            )}
+          >
             {t}
-            {t === "Active" && activeCount > 0 && (
-              <span className="ml-1.5 bg-[#FFD200] text-[#0C0C0C] text-xs font-bold px-1.5 py-0.5 rounded-full">
-                {activeCount}
-              </span>
+            {t === "Pending" && pendingCount > 0 && (
+              <span className={cn(
+                "text-[10px] min-w-[18px] h-[18px] px-1 rounded-full font-bold",
+                tab === t ? "bg-white/20 text-white" : "bg-amber-100 text-amber-700",
+              )}>{pendingCount}</span>
             )}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="flex flex-col gap-4">
-          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-36 rounded-xl" />)}
-        </div>
+        <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}</div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-4xl mb-3">📭</p>
-          <p className="font-medium">No {tab !== "All" ? tab.toLowerCase() + " " : ""}inquiries</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            {tab === "All"
-              ? "Browse the catalog and submit an inquiry to get started."
-              : "Try the All tab to see everything."}
-          </p>
-          {tab === "All" && (
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => router.push("/catalog")}
-            >
-              Browse catalog →
-            </Button>
+        <div className="rounded-2xl bg-white border border-[#F0EDEA] py-16 px-8 text-center shadow-sm">
+          <div className="w-10 h-10 rounded-2xl bg-[#F5F3F0] mx-auto mb-3 flex items-center justify-center">
+            <div className="w-4 h-4 rounded-full border-2 border-[#CCCCCC]" />
+          </div>
+          {tab === "All" ? (
+            <>
+              <h2 className="text-base font-semibold mb-2">No offers sent yet</h2>
+              <p className="text-sm text-[#9A9A9A] mb-5">Find a Superstar and send them an offer.</p>
+              <Link href="/catalog"><Button className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00] rounded-full">Browse catalog</Button></Link>
+            </>
+          ) : (
+            <p className="text-sm text-[#9A9A9A]">No {tab.toLowerCase()} offers.</p>
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {filtered.map(inq => {
-            const meta = STATUS_META[inq.status] || STATUS_META.open;
-            return (
-              <div key={inq.id} className="rounded-xl border overflow-hidden">
-                {/* Header */}
-                <div className="px-5 pt-5 pb-4 flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h3 className="font-semibold">{inq.campaign_name}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${meta.color}`}>
-                        {meta.icon} {meta.label}
-                      </span>
-                    </div>
-                    {inq.campaign_type && (
-                      <p className="text-sm text-muted-foreground">{inq.campaign_type}</p>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground shrink-0 mt-0.5">
-                    {new Date(inq.created_at).toLocaleDateString("en-SG", { day: "numeric", month: "short", year: "numeric" })}
-                  </p>
-                </div>
-
-                {/* Brief */}
-                {inq.brief_text && (
-                  <p className="px-5 pb-3 text-sm text-muted-foreground line-clamp-2">{inq.brief_text}</p>
-                )}
-
-                {/* Meta */}
-                <div className="px-5 pb-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
-                  {inq.budget_range && <span>💰 {inq.budget_range}</span>}
-                  {inq.preferred_dates && <span>📅 {inq.preferred_dates}</span>}
-                </div>
-
-                {/* Status description + action */}
-                <div className={`px-5 py-4 border-t flex items-center justify-between gap-4 ${meta.color}`}>
-                  <p className="text-xs">{meta.description}</p>
-                  {inq.status === "reviewing" && (
-                    <Button
-                      size="sm"
-                      className="shrink-0 h-8 text-xs bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00] border-0"
-                      onClick={() => handleConfirm(inq.id)}
-                      disabled={confirming === inq.id}
-                    >
-                      {confirming === inq.id ? "Processing…" : "Confirm talent →"}
-                    </Button>
-                  )}
-                  {inq.status === "closed" && (
-                    ratedIds.has(inq.id) ? (
-                      <span className="text-xs text-green-600 font-medium shrink-0">★ Rated</span>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="shrink-0 h-8 text-xs"
-                        onClick={() => { checkIfRated(inq); setRatingTarget(inq); }}
-                      >
-                        Leave a review
-                      </Button>
-                    )
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="space-y-3">
+          {filtered.map(inq => (
+            <InquiryCard key={inq.id} inquiry={inq} />
+          ))}
         </div>
       )}
     </div>
+  );
+}
 
-      {ratingTarget && (
-        <RatingModal
-          inquiryId={ratingTarget.id}
-          campaignName={ratingTarget.campaign_name}
-          onClose={() => setRatingTarget(null)}
-          onDone={() => {
-            setRatedIds(s => new Set(s).add(ratingTarget.id));
-            setRatingTarget(null);
-          }}
-        />
-      )}
-    </>
+function InquiryCard({ inquiry: i }: { inquiry: Inquiry }) {
+  const st = STATUS_META[i.status] || STATUS_META.pending;
+  const photo = i.photo_urls?.[0];
+
+  return (
+    <div className={cn(
+      "rounded-2xl bg-white shadow-sm overflow-hidden",
+      i.status === "pending" ? "border-2 border-amber-200" : "border border-[#F0EDEA]",
+    )}>
+      {i.status === "pending" && <div className="h-0.5 bg-[#FFD200]" />}
+      <div className="px-5 py-4">
+        <div className="flex items-start gap-4">
+          <div className="w-11 h-11 rounded-full overflow-hidden bg-[#0C0C0C] shrink-0 flex items-center justify-center">
+            {photo
+              ? <img src={photo} alt="" className="w-full h-full object-cover" />
+              : <span className="text-[#FFD200] font-bold text-xs">{i.talent_name?.slice(0, 2).toUpperCase()}</span>
+            }
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+              <span className="font-semibold text-sm text-[#1A1A1A]">{i.campaign_name}</span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${st.color}`}>{st.label}</span>
+            </div>
+            <p className="text-xs text-[#9A9A9A]">
+              to <span className="font-medium text-[#6A6A6A]">{i.talent_name}</span>
+              {i.ig_handle && <span> @{i.ig_handle}</span>}
+              <span> - {fmtDate(i.created_at)}</span>
+            </p>
+            <p className="text-xs text-[#9A9A9A] mt-1">{st.desc}</p>
+            <div className="flex flex-wrap gap-3 mt-2 text-xs text-[#6A6A6A]">
+              <span><span className="font-medium text-[#1A1A1A]">Offer:</span> {fmtCompensation(i)}</span>
+              {i.preferred_dates && <span><span className="font-medium text-[#1A1A1A]">Dates:</span> {i.preferred_dates}</span>}
+            </div>
+          </div>
+
+          {i.status === "accepted" && (
+            <Link href="/campaigns" className="shrink-0 text-xs text-[#9A9A9A] hover:text-[#1A1A1A] underline underline-offset-2">
+              View campaign
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

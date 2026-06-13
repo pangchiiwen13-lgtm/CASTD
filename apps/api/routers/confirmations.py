@@ -105,24 +105,38 @@ async def stripe_webhook(request: Request):
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
         meta = session.get("metadata", {})
-        inquiry_id = meta.get("inquiry_id")
-        brand_id = meta.get("brand_id")
-        talent_id = meta.get("talent_id")
+        payment_type = meta.get("type", "inquiry_contact")
 
         pool = await get_pool()
-        async with pool.acquire() as conn:
-            await conn.execute(
-                "UPDATE contact_confirmations SET paid_at = NOW() WHERE stripe_session_id = $1",
-                session["id"],
-            )
-            if inquiry_id:
-                await conn.execute(
-                    "UPDATE inquiries SET status = 'confirmed' WHERE id = $1",
-                    UUID(inquiry_id),
-                )
 
-        # Notify owner via Telegram
-        from services.notifications import notify_confirmation_paid
-        await notify_confirmation_paid(brand_id, talent_id, inquiry_id)
+        if payment_type == "campaign_escrow":
+            # Campaign escrow payment - mark as held
+            campaign_id = meta.get("campaign_id")
+            if campaign_id:
+                async with pool.acquire() as conn:
+                    await conn.execute(
+                        "UPDATE campaigns SET payment_status = 'held' WHERE id = $1",
+                        UUID(campaign_id),
+                    )
+        else:
+            # Legacy inquiry contact fee flow
+            inquiry_id = meta.get("inquiry_id")
+            brand_id = meta.get("brand_id")
+            talent_id = meta.get("talent_id")
+
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    "UPDATE contact_confirmations SET paid_at = NOW() WHERE stripe_session_id = $1",
+                    session["id"],
+                )
+                if inquiry_id:
+                    await conn.execute(
+                        "UPDATE inquiries SET status = 'confirmed' WHERE id = $1",
+                        UUID(inquiry_id),
+                    )
+
+            # Notify owner via Telegram
+            from services.notifications import notify_confirmation_paid
+            await notify_confirmation_paid(brand_id, talent_id, inquiry_id)
 
     return {"received": True}

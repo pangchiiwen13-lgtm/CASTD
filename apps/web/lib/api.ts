@@ -26,6 +26,8 @@ export const api = {
     apiFetch<{ superstars: number; brands: number; completed_matches: number }>("/public/stats"),
   getPublicReviews: () =>
     apiFetch<PublicReview[]>("/ratings/public"),
+  getPublicBrandLogos: () =>
+    apiFetch<{ company_name: string; logo_url: string }[]>("/brands/public/logos"),
 
 
   // Talents
@@ -50,10 +52,15 @@ export const api = {
   removeShortlist: (talentId: string, token: string) =>
     apiFetch<void>(`/shortlists/${talentId}`, { method: "DELETE", token }),
 
-  // Inquiries
+  // Inquiries (direct - no admin approval)
   getInquiries: (token: string) => apiFetch<Inquiry[]>("/inquiries", { token }),
+  getReceivedInquiries: (token: string) => apiFetch<Inquiry[]>("/inquiries/received", { token }),
   createInquiry: (data: Partial<Inquiry>, token: string) =>
     apiFetch<Inquiry>("/inquiries", { method: "POST", body: JSON.stringify(data), token }),
+  respondToInquiry: (id: string, action: "accept" | "decline", token: string) =>
+    apiFetch<Inquiry>(`/inquiries/${id}/respond`, { method: "POST", body: JSON.stringify({ action }), token }),
+  applyToProject: (projectId: string, note: string | undefined, token: string) =>
+    apiFetch<Inquiry>(`/inquiries/apply/${projectId}`, { method: "POST", body: JSON.stringify({ note }), token }),
 
   // Notifications
   getNotifications: (token: string) => apiFetch<Notification[]>("/notifications", { token }),
@@ -87,6 +94,54 @@ export const api = {
     apiFetch<{ ok: boolean }>("/ratings", { method: "POST", body: JSON.stringify(data), token }),
   checkRating: (inquiry_id: string, token: string) =>
     apiFetch<{ has_rated: boolean; score?: number; comment?: string }>(`/ratings/check/${inquiry_id}`, { token }),
+
+  // Messages (chat)
+  getMessages: (campaignId: string, token: string) =>
+    apiFetch<ChatMessage[]>(`/messages/${campaignId}`, { token }),
+  sendMessage: (campaignId: string, body: string, token: string) =>
+    apiFetch<ChatMessage>(`/messages/${campaignId}`, { method: "POST", body: JSON.stringify({ body }), token }),
+
+  // Calendar
+  getCalendar: (talentId: string, token: string) =>
+    apiFetch<{ talent_id: string; blocked_dates: string[]; availability_rules: AvailabilityRule[] }>(`/calendar/${talentId}`, { token }),
+  setSchedule: (talentId: string, rules: AvailabilityRule[], token: string) =>
+    apiFetch<{ ok: boolean; rules_saved: number }>(`/calendar/${talentId}/schedule`, {
+      method: "PUT", body: JSON.stringify({ rules }), token,
+    }),
+  toggleBlockedDate: (talentId: string, date: string, token: string) =>
+    apiFetch<{ action: string; date: string }>(`/calendar/${talentId}/toggle`, {
+      method: "POST", body: JSON.stringify({ date }), token,
+    }),
+
+  // Campaigns
+  getCompletedCount: (token: string) => apiFetch<{ count: number }>("/campaigns/completed-count", { token }),
+  getBrandCampaigns: (token: string) => apiFetch<Campaign[]>("/campaigns/brand", { token }),
+  getSuperstarCampaigns: (token: string) => apiFetch<Campaign[]>("/campaigns/superstar", { token }),
+  getCampaign: (id: string, token: string) => apiFetch<Campaign>(`/campaigns/${id}`, { token }),
+  markDelivered: (id: string, data: { deliverable_urls: string[]; deliverable_note?: string }, token: string) =>
+    apiFetch<Campaign>(`/campaigns/${id}/deliver`, { method: "PATCH", body: JSON.stringify(data), token }),
+  confirmDelivery: (id: string, token: string) =>
+    apiFetch<Campaign>(`/campaigns/${id}/confirm`, { method: "PATCH", token }),
+  payCampaignEscrow: (id: string, token: string) =>
+    apiFetch<{ checkout_url: string }>(`/campaigns/${id}/pay`, { method: "POST", token }),
+  releaseCampaignPayment: (id: string, token: string) =>
+    apiFetch<Campaign>(`/campaigns/${id}/release-payment`, { method: "PATCH", token }),
+
+  // Admin - campaigns
+  adminListCampaigns: (token: string) =>
+    apiFetch<Campaign[]>("/campaigns/admin/all", { token }),
+
+  // Brand Projects (campaign containers)
+  getBrandProjects: (token: string) => apiFetch<BrandProject[]>("/projects/brand", { token }),
+  getOpenProjects: (token: string) => apiFetch<(BrandProject & { company_name: string })[]>("/projects/open", { token }),
+  createProject: (data: Partial<BrandProject>, token: string) =>
+    apiFetch<BrandProject>("/projects", { method: "POST", body: JSON.stringify(data), token }),
+  getProject: (id: string, token: string) =>
+    apiFetch<BrandProject & { hires: Campaign[]; applications: Inquiry[] }>(`/projects/${id}`, { token }),
+  updateProject: (id: string, data: Partial<BrandProject>, token: string) =>
+    apiFetch<BrandProject>(`/projects/${id}`, { method: "PATCH", body: JSON.stringify(data), token }),
+  toggleProjectOpen: (id: string, token: string) =>
+    apiFetch<BrandProject>(`/projects/${id}/toggle-open`, { method: "PATCH", token }),
 };
 
 // Types
@@ -140,6 +195,10 @@ export interface Brand {
   target_audience: Record<string, string>;
   campaign_type?: string;
   plan_tier: string;
+  uen?: string;
+  uen_status?: "unverified" | "pending_review" | "verified" | "rejected";
+  uen_verified_name?: string;
+  logo_url?: string;
 }
 
 export interface Notification {
@@ -204,6 +263,92 @@ export interface Inquiry {
   brief_text?: string;
   budget_range?: string;
   preferred_dates?: string;
-  status: string;
+  remuneration_type?: "product" | "cash" | "cash_hourly";
+  product_description?: string;
+  amount_sgd?: number;
+  project_id?: string;
+  direction?: "brand_to_superstar" | "superstar_to_brand";
+  status: "pending" | "accepted" | "declined" | "cancelled";
+  initiator_user_id?: string;
+  responded_at?: string;
   created_at: string;
+  // Joined fields (from list endpoints)
+  talent_name?: string;
+  ig_handle?: string;
+  photo_urls?: string[];
+  company_name?: string;
+}
+
+
+export interface AvailabilityRule {
+  day_of_week: number;  // 0=Sun, 1=Mon ... 6=Sat
+  start_time: string;   // "HH:MM"
+  end_time: string;     // "HH:MM"
+}
+
+export interface ChatMessage {
+  id: string;
+  campaign_id: string;
+  sender_user_id: string;
+  sender_type: "brand" | "superstar";
+  body: string;
+  created_at: string;
+}
+
+export interface BrandProject {
+  id: string;
+  brand_id: string;
+  name: string;
+  campaign_type?: string;
+  brief_text?: string;
+  deliverables?: string;
+  shoot_date?: string;
+  budget_range?: string;
+  status: "active" | "archived";
+  is_open: boolean;
+  created_at: string;
+  updated_at: string;
+  // Talent criteria - who the brand is looking for
+  target_content_types?: string[];
+  target_languages?: string[];
+  target_gender?: string;
+  target_age_min?: number;
+  target_age_max?: number;
+  target_vibe_tags?: string[];
+  target_min_followers?: number;
+  // Aggregated counts (from list endpoint)
+  active_hires?: number;
+  done_hires?: number;
+  total_hires?: number;
+}
+
+export interface Campaign {
+  id: string;
+  inquiry_id?: string;
+  brand_id: string;
+  talent_id: string;
+  campaign_name: string;
+  campaign_type?: string;
+  brief_text?: string;
+  deliverables?: string;
+  shoot_date?: string;
+  remuneration_type?: string;
+  amount_sgd?: number;
+  status: "active" | "delivered" | "completed" | "cancelled";
+  talent_delivered_at?: string;
+  deliverable_urls: string[];
+  deliverable_note?: string;
+  brand_confirmed_at?: string;
+  auto_release_at?: string;
+  stripe_payment_intent_id?: string;
+  payment_status?: "not_required" | "pending" | "held" | "released" | "refunded";
+  payment_released_at?: string;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  talent_name?: string;
+  ig_handle?: string;
+  photo_urls?: string[];
+  company_name?: string;
+  industry?: string;
 }

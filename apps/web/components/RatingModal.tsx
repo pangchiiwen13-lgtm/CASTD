@@ -72,7 +72,13 @@ export function RatingModal({ inquiryId, campaignName, onClose, onDone }: Props)
               onMouseLeave={() => setHovered(0)}
               onClick={() => setScore(n)}
             >
-              ★
+              <span
+                className="w-8 h-8 inline-block transition-all"
+                style={{
+                  clipPath: "polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)",
+                  backgroundColor: n <= display ? "#FFD200" : "#EBEBEB",
+                }}
+              />
             </button>
           ))}
           {display > 0 && (

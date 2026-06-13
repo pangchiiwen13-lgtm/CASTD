@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from database import get_pool, close_pool
 from config import settings
 from auth import get_admin_user
-from routers import talents, brands, inquiries, shortlists, confirmations, notifications, admin_settings, superstar, ratings
+from routers import talents, brands, inquiries, shortlists, confirmations, notifications, admin_settings, superstar, ratings, campaigns, messages, calendar, projects
 
 
 @asynccontextmanager
@@ -33,6 +33,10 @@ app.include_router(notifications.router)
 app.include_router(admin_settings.router)
 app.include_router(superstar.router)
 app.include_router(ratings.router)
+app.include_router(campaigns.router)
+app.include_router(messages.router)
+app.include_router(calendar.router)
+app.include_router(projects.router)
 
 
 @app.get("/health")
@@ -72,9 +76,13 @@ async def admin_stats(_: dict = Depends(get_admin_user)):
         superstar_pending = await conn.fetchval(
             "SELECT COUNT(*) FROM talents WHERE profile_status = 'pending' AND is_published = FALSE AND user_id IS NOT NULL"
         )
+        campaigns_payment_held = await conn.fetchval(
+            "SELECT COUNT(*) FROM campaigns WHERE payment_status = 'held'"
+        )
     return {
         "talents": {"total": talent_total, "published": talent_published, "draft": talent_total - talent_published},
         "brands": {"total": brand_count},
         "inquiries": {"total": inquiry_total, "open": inquiry_open, "confirmed": inquiry_confirmed},
         "superstars_pending_approval": superstar_pending,
+        "campaigns_payment_held": campaigns_payment_held,
     }

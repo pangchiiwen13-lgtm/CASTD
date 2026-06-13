@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { api, Talent } from "@/lib/api";
+import { api, Talent, type AvailabilityRule } from "@/lib/api";
+import { AvailabilityCalendar } from "@/components/calendar/AvailabilityCalendar";
 import { getSessionToken } from "@/lib/get-token";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { PhotoUpload, MultiPhotoUpload } from "@/components/ui/photo-upload";
 
 const LANGUAGES = ["English", "Mandarin", "Malay", "Tamil", "Cantonese", "Korean", "Japanese", "Other"];
 const CONTENT_TYPES = ["UGC / Unboxing", "Product Demo", "Lifestyle & Vlog", "Beauty Tutorial", "Skincare Routine", "GRWM", "Brand Story", "Testimonial", "Food & Beverage", "Fashion & OOTD", "Fitness & Wellness"];
@@ -25,6 +27,7 @@ export default function SuperstarProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [calendarData, setCalendarData] = useState<{ blocked_dates: string[]; availability_rules: AvailabilityRule[] }>({ blocked_dates: [], availability_rules: [] });
 
   // Form state - mirrors editable fields
   const [form, setForm] = useState({
@@ -54,6 +57,10 @@ export default function SuperstarProfilePage() {
     api.getMySuperstarsProfile(token)
       .then(p => {
         setProfile(p);
+        // Load calendar data for this talent
+        api.getCalendar(p.id, token)
+          .then(c => setCalendarData(c))
+          .catch(() => null);
         setForm({
           name: p.name || "",
           age: p.age?.toString() || "",
@@ -133,14 +140,13 @@ export default function SuperstarProfilePage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold">My Profile</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {profile.is_published
-              ? "✅ Your profile is live"
-              : "⏳ Pending admin approval"}
+          <p className="text-sm text-[#9A9A9A] mt-1 flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full inline-block ${profile.is_published ? "bg-green-500" : "bg-amber-400"}`} />
+            {profile.is_published ? "Your profile is live" : "Pending admin approval"}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {saved && <span className="text-sm text-green-600 font-medium">Saved ✓</span>}
+          {saved && <span className="text-sm text-green-600 font-medium flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> Saved</span>}
           <Button onClick={handleSave} disabled={saving} className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]">
             {saving ? "Saving…" : "Save changes"}
           </Button>
@@ -161,7 +167,7 @@ export default function SuperstarProfilePage() {
                 <Input type="number" value={form.age} onChange={e => set("age", e.target.value)} placeholder="24" />
               </Field>
               <Field label="Gender">
-                <Select value={form.gender} onValueChange={v => set("gender", v)}>
+                <Select value={form.gender} onValueChange={v => v && set("gender", v)}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>{GENDERS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
                 </Select>
@@ -248,15 +254,32 @@ export default function SuperstarProfilePage() {
 
         {/* Portfolio */}
         <Section title="Portfolio">
-          <div className="space-y-4">
-            <Field label="Portfolio photo URLs (one per line)">
-              <Textarea value={form.photo_urls} onChange={e => set("photo_urls", e.target.value)}
-                placeholder={"https://...\nhttps://..."}
-                className="resize-none min-h-[100px] font-mono text-xs" />
+          <div className="space-y-6">
+            <Field label="Profile photo">
+              <PhotoUpload
+                value={form.photo_urls.split("\n").filter(Boolean)[0] || ""}
+                onChange={url => {
+                  const rest = form.photo_urls.split("\n").filter(Boolean).slice(1);
+                  set("photo_urls", [url, ...rest].join("\n"));
+                }}
+                label="Upload profile photo"
+                aspectRatio="portrait"
+                className="max-w-[180px]"
+              />
             </Field>
-            <Field label="Intro video URL (YouTube / Google Drive)">
+            <Field label="Portfolio photos (up to 5)">
+              <MultiPhotoUpload
+                values={form.photo_urls.split("\n").filter(Boolean).slice(1, 6)}
+                onChange={urls => {
+                  const main = form.photo_urls.split("\n").filter(Boolean)[0] || "";
+                  set("photo_urls", [main, ...urls].join("\n"));
+                }}
+                maxPhotos={5}
+              />
+            </Field>
+            <Field label="Intro video URL (YouTube / Vimeo)">
               <Input value={form.intro_video_url} onChange={e => set("intro_video_url", e.target.value)}
-                placeholder="https://youtube.com/..." />
+                placeholder="https://youtube.com/watch?v=..." />
             </Field>
           </div>
         </Section>
@@ -295,10 +318,29 @@ export default function SuperstarProfilePage() {
         </Section>
       </div>
 
+      {/* Availability calendar */}
+      {profile && (
+        <div className="mt-8">
+          <Section title="Availability Calendar">
+            <p className="text-xs text-muted-foreground mb-4">
+              Mark dates you are NOT available. Brands can see this before booking.
+              Red = unavailable, white = available.
+            </p>
+            <AvailabilityCalendar
+              talentId={profile.id}
+              blockedDates={calendarData.blocked_dates}
+              availabilityRules={calendarData.availability_rules}
+              editable={true}
+              token={getSessionToken() || ""}
+            />
+          </Section>
+        </div>
+      )}
+
       {/* Save button at bottom */}
       <div className="mt-10 flex items-center justify-between pt-6 border-t">
         {error && <p className="text-sm text-destructive">{error}</p>}
-        {saved && <span className="text-sm text-green-600 font-medium">Changes saved ✓</span>}
+        {saved && <span className="text-sm text-green-600 font-medium flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> Changes saved</span>}
         <Button onClick={handleSave} disabled={saving} className="ml-auto bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00]">
           {saving ? "Saving…" : "Save changes"}
         </Button>

@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { getSessionToken } from "@/lib/get-token";
+import { PhotoUpload, MultiPhotoUpload } from "@/components/ui/photo-upload";
 
 const LANGUAGES = ["English", "Mandarin", "Malay", "Tamil", "Cantonese", "Korean", "Japanese", "Other"];
 const CONTENT_TYPES = ["UGC / Unboxing", "Product Demo", "Lifestyle & Vlog", "Beauty Tutorial", "Skincare Routine", "GRWM", "Brand Story", "Testimonial", "Food & Beverage", "Fashion & OOTD", "Fitness & Wellness"];
@@ -154,7 +155,7 @@ export default function SuperstarOnboardingPage() {
               </div>
               <div className="grid gap-1">
                 <Label>Gender</Label>
-                <Select value={form.gender} onValueChange={v => set("gender", v)}>
+                <Select value={form.gender} onValueChange={v => v && set("gender", v)}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>{GENDERS.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
                 </Select>
@@ -264,12 +265,27 @@ export default function SuperstarOnboardingPage() {
               />
             </div>
             <div className="grid gap-1">
-              <Label>Portfolio photo URLs <span className="text-muted-foreground text-xs">(one per line, optional - add later in profile)</span></Label>
-              <Textarea
-                value={form.photo_urls}
-                onChange={e => set("photo_urls", e.target.value)}
-                placeholder={"https://...\nhttps://..."}
-                className="resize-none min-h-[80px] font-mono text-xs"
+              <Label>Profile photo</Label>
+              <PhotoUpload
+                value={form.photo_urls.split("\n").filter(Boolean)[0] || ""}
+                onChange={url => {
+                  const rest = form.photo_urls.split("\n").filter(Boolean).slice(1);
+                  set("photo_urls", [url, ...rest].join("\n"));
+                }}
+                label="Upload profile photo"
+                aspectRatio="portrait"
+                className="max-w-[160px]"
+              />
+            </div>
+            <div className="grid gap-1">
+              <Label>Portfolio photos <span className="text-muted-foreground text-xs">(up to 5)</span></Label>
+              <MultiPhotoUpload
+                values={form.photo_urls.split("\n").filter(Boolean).slice(1, 6)}
+                onChange={urls => {
+                  const main = form.photo_urls.split("\n").filter(Boolean)[0] || "";
+                  set("photo_urls", [main, ...urls].join("\n"));
+                }}
+                maxPhotos={5}
               />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}

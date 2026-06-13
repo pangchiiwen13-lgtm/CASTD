@@ -2,6 +2,13 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@layer base {
+  :root {
+    --gradient-color: #FFD200;
+    --sparkles-color: #FFD200;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
