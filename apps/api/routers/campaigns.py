@@ -1,4 +1,5 @@
 import asyncio
+import stripe
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from uuid import UUID
@@ -6,6 +7,7 @@ from database import get_pool
 from models.campaign import Campaign, CampaignCreate, CampaignDeliver, CampaignStatusUpdate
 from auth import get_current_user, get_admin_user
 from routers.notifications import create_notification
+from config import settings
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
@@ -245,6 +247,115 @@ async def confirm_delivery(campaign_id: UUID, user: dict = Depends(get_current_u
             type_="campaign_completed",
             title=f"{campaign['company_name']} confirmed your delivery!",
             body=f'"{campaign["campaign_name"]}" is now complete. Your payment will be released shortly.',
+            link="/superstar/campaigns",
+        )
+    asyncio.create_task(_notify())
+
+    return _row_to_dict(row)
+
+
+# ─── Brand: pay campaign escrow ──────────────────────────────────────────────
+
+@router.post("/{campaign_id}/pay", response_model=dict)
+async def pay_campaign_escrow(campaign_id: UUID, user: dict = Depends(get_current_user)):
+    """Brand pays the agreed campaign amount into escrow via Stripe Checkout."""
+    stripe.api_key = settings.stripe_secret_key
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        brand = await conn.fetchrow("SELECT id FROM brands WHERE user_id = $1", user["id"])
+        if not brand:
+            raise HTTPException(400, "Brand profile not found")
+
+        campaign = await conn.fetchrow(
+            """
+            SELECT c.*, t.name AS talent_name
+            FROM campaigns c
+            JOIN talents t ON t.id = c.talent_id
+            WHERE c.id = $1 AND c.brand_id = $2
+            """,
+            str(campaign_id), brand["id"],
+        )
+        if not campaign:
+            raise HTTPException(404, "Campaign not found")
+        if campaign["remuneration_type"] != "cash":
+            raise HTTPException(400, "This campaign does not require a cash payment")
+        if not campaign["amount_sgd"]:
+            raise HTTPException(400, "No amount set for this campaign")
+        if campaign["payment_status"] == "held":
+            raise HTTPException(400, "Payment has already been made")
+
+    amount_cents = int(float(campaign["amount_sgd"]) * 100)
+    base_url = settings.allowed_origins.split(",")[0].strip()
+
+    session = stripe.checkout.Session.create(
+        mode="payment",
+        line_items=[{
+            "price_data": {
+                "currency": "sgd",
+                "unit_amount": amount_cents,
+                "product_data": {
+                    "name": f"CASTD Escrow - {campaign['talent_name']}",
+                    "description": f"Campaign: {campaign['campaign_name']}. Funds held until delivery confirmed.",
+                },
+            },
+            "quantity": 1,
+        }],
+        metadata={
+            "type": "campaign_escrow",
+            "campaign_id": str(campaign_id),
+            "brand_id": str(brand["id"]),
+        },
+        success_url=f"{base_url}/campaigns/{campaign_id}?paid=1",
+        cancel_url=f"{base_url}/campaigns/{campaign_id}",
+    )
+
+    pool2 = await get_pool()
+    async with pool2.acquire() as conn2:
+        await conn2.execute(
+            "UPDATE campaigns SET stripe_payment_intent_id = $1, payment_status = 'pending' WHERE id = $2",
+            session.id, str(campaign_id),
+        )
+
+    return {"checkout_url": session.url}
+
+
+# ─── Admin: release held payment to talent ────────────────────────────────────
+
+@router.patch("/{campaign_id}/release-payment", response_model=dict)
+async def release_campaign_payment(campaign_id: UUID, _: dict = Depends(get_admin_user)):
+    """Admin releases the held escrow payment to the talent."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        campaign = await conn.fetchrow(
+            """
+            SELECT c.*, t.user_id AS talent_user_id, t.name AS talent_name,
+                   b.company_name
+            FROM campaigns c
+            JOIN talents t ON t.id = c.talent_id
+            JOIN brands  b ON b.id = c.brand_id
+            WHERE c.id = $1
+            """,
+            str(campaign_id),
+        )
+        if not campaign:
+            raise HTTPException(404, "Campaign not found")
+        if campaign["payment_status"] != "held":
+            raise HTTPException(400, f"Payment status is '{campaign['payment_status']}' - only 'held' payments can be released")
+
+        now = datetime.now(timezone.utc)
+        row = await conn.fetchrow(
+            "UPDATE campaigns SET payment_status='released', payment_released_at=$1 WHERE id=$2 RETURNING *",
+            now, str(campaign_id),
+        )
+
+    # Notify talent
+    async def _notify():
+        await create_notification(
+            user_id=campaign["talent_user_id"],
+            type_="payment_released",
+            title=f"Payment released for {campaign['campaign_name']}",
+            body=f"SGD {campaign['amount_sgd']} has been released by {campaign['company_name']}. Please check your bank/PayNow.",
             link="/superstar/campaigns",
         )
     asyncio.create_task(_notify())

@@ -44,6 +44,9 @@ class Campaign(BaseModel):
     deliverable_note: Optional[str] = None
     brand_confirmed_at: Optional[datetime] = None
     auto_release_at: Optional[datetime] = None
+    stripe_payment_intent_id: Optional[str] = None
+    payment_status: Optional[str] = None
+    payment_released_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 

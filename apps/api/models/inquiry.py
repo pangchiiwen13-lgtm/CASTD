@@ -13,6 +13,7 @@ class InquiryCreate(BaseModel):
     preferred_dates: Optional[str] = None
     remuneration_type: Optional[str] = "product"   # "product" | "cash" | "cash_hourly"
     product_description: Optional[str] = None
+    amount_sgd: Optional[float] = None             # cash amount agreed for the campaign
     project_id: Optional[UUID] = None
 
 

@@ -14,6 +14,7 @@ interface Stats {
   brands: { total: number };
   inquiries: { total: number; open: number; confirmed: number };
   superstars_pending_approval: number;
+  campaigns_payment_held?: number;
 }
 
 export default function AdminDashboard() {
@@ -37,7 +38,7 @@ export default function AdminDashboard() {
   }, [session]);
 
   const hasPendingActions = stats && (
-    stats.superstars_pending_approval > 0 || (stats.inquiries?.open ?? 0) > 0
+    stats.superstars_pending_approval > 0 || (stats.inquiries?.open ?? 0) > 0 || (stats.campaigns_payment_held ?? 0) > 0
   );
 
   return (
@@ -101,6 +102,13 @@ export default function AdminDashboard() {
                 cta="View inquiries"
               />
             )}
+            {stats && (stats.campaigns_payment_held ?? 0) > 0 && (
+              <ActionItem
+                message={`${stats.campaigns_payment_held} campaign payment${(stats.campaigns_payment_held ?? 0) > 1 ? "s" : ""} held in escrow - ready to release`}
+                href="/admin/campaigns"
+                cta="Release payments"
+              />
+            )}
           </div>
         </div>
       )}
@@ -124,6 +132,12 @@ export default function AdminDashboard() {
           description={`${stats?.inquiries?.total ?? "-"} total. Move inquiries through the pipeline.`}
           href="/admin/inquiries"
           cta="Manage Inquiries"
+        />
+        <ManageCard
+          title="Campaign Payments"
+          description={`Escrow payments held on behalf of brands. Release to talent after delivery confirmed.${stats?.campaigns_payment_held ? ` ${stats.campaigns_payment_held} held.` : ""}`}
+          href="/admin/campaigns"
+          cta="Manage Payments"
         />
         <ManageCard
           title="Platform Settings"

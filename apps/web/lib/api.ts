@@ -122,6 +122,14 @@ export const api = {
     apiFetch<Campaign>(`/campaigns/${id}/deliver`, { method: "PATCH", body: JSON.stringify(data), token }),
   confirmDelivery: (id: string, token: string) =>
     apiFetch<Campaign>(`/campaigns/${id}/confirm`, { method: "PATCH", token }),
+  payCampaignEscrow: (id: string, token: string) =>
+    apiFetch<{ checkout_url: string }>(`/campaigns/${id}/pay`, { method: "POST", token }),
+  releaseCampaignPayment: (id: string, token: string) =>
+    apiFetch<Campaign>(`/campaigns/${id}/release-payment`, { method: "PATCH", token }),
+
+  // Admin - campaigns
+  adminListCampaigns: (token: string) =>
+    apiFetch<Campaign[]>("/campaigns/admin/all", { token }),
 
   // Brand Projects (campaign containers)
   getBrandProjects: (token: string) => apiFetch<BrandProject[]>("/projects/brand", { token }),
@@ -257,6 +265,7 @@ export interface Inquiry {
   preferred_dates?: string;
   remuneration_type?: "product" | "cash" | "cash_hourly";
   product_description?: string;
+  amount_sgd?: number;
   project_id?: string;
   direction?: "brand_to_superstar" | "superstar_to_brand";
   status: "pending" | "accepted" | "declined" | "cancelled";
@@ -331,6 +340,9 @@ export interface Campaign {
   deliverable_note?: string;
   brand_confirmed_at?: string;
   auto_release_at?: string;
+  stripe_payment_intent_id?: string;
+  payment_status?: "not_required" | "pending" | "held" | "released" | "refunded";
+  payment_released_at?: string;
   created_at: string;
   updated_at: string;
   // Joined fields

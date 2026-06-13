@@ -42,12 +42,19 @@ def _make_campaign_coro(inquiry_id: str):
                 inq = await conn2.fetchrow("SELECT * FROM inquiries WHERE id = $1", inquiry_id)
                 if not inq:
                     return
+                rem_type = inq.get("remuneration_type") or "product"
+                amount = inq.get("amount_sgd")
+                # Set payment_status based on remuneration type
+                if rem_type == "cash" and amount:
+                    pay_status = "pending"
+                else:
+                    pay_status = "not_required"
                 await conn2.execute(
                     """
                     INSERT INTO campaigns (inquiry_id, brand_id, talent_id,
                       campaign_name, campaign_type, brief_text, shoot_date,
-                      remuneration_type, project_id)
-                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+                      remuneration_type, amount_sgd, payment_status, project_id)
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
                     """,
                     inquiry_id,
                     str(inq["brand_id"]),
@@ -56,7 +63,9 @@ def _make_campaign_coro(inquiry_id: str):
                     inq["campaign_type"],
                     inq["brief_text"],
                     inq["preferred_dates"],
-                    inq.get("remuneration_type") or "product",
+                    rem_type,
+                    amount,
+                    pay_status,
                     str(inq["project_id"]) if inq.get("project_id") else None,
                 )
         except Exception as e:
@@ -84,13 +93,14 @@ async def create_inquiry(data: InquiryCreate, user: dict = Depends(get_current_u
             """
             INSERT INTO inquiries (brand_id, talent_id, campaign_name, campaign_type,
               brief_text, budget_range, preferred_dates, remuneration_type, product_description,
-              project_id, direction, status, initiator_user_id)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'brand_to_superstar','pending',$11)
+              amount_sgd, project_id, direction, status, initiator_user_id)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'brand_to_superstar','pending',$12)
             RETURNING *
             """,
             brand["id"], data.talent_id, data.campaign_name, data.campaign_type,
             data.brief_text, data.budget_range, data.preferred_dates,
             data.remuneration_type or "product", data.product_description,
+            data.amount_sgd,
             str(data.project_id) if data.project_id else None,
             user["id"],
         )

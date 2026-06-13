@@ -101,6 +101,7 @@ export function AddToCampaignDialog({ talent, onClose }: Props) {
         campaign_name: campaignName,
         remuneration_type: remuType,
         product_description: remuType === "product" ? productDesc : undefined,
+        amount_sgd: (remuType === "cash" || remuType === "cash_hourly") && amount ? parseFloat(amount) : undefined,
         budget_range: budgetRange || undefined,
         // Prepend deliverables to brief so it flows into campaign
         brief_text: [deliverables ? `Deliverables: ${deliverables}` : "", brief]

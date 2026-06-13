@@ -76,9 +76,13 @@ async def admin_stats(_: dict = Depends(get_admin_user)):
         superstar_pending = await conn.fetchval(
             "SELECT COUNT(*) FROM talents WHERE profile_status = 'pending' AND is_published = FALSE AND user_id IS NOT NULL"
         )
+        campaigns_payment_held = await conn.fetchval(
+            "SELECT COUNT(*) FROM campaigns WHERE payment_status = 'held'"
+        )
     return {
         "talents": {"total": talent_total, "published": talent_published, "draft": talent_total - talent_published},
         "brands": {"total": brand_count},
         "inquiries": {"total": inquiry_total, "open": inquiry_open, "confirmed": inquiry_confirmed},
         "superstars_pending_approval": superstar_pending,
+        "campaigns_payment_held": campaigns_payment_held,
     }

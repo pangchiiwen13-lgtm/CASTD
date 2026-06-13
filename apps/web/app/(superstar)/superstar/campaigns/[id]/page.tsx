@@ -161,6 +161,30 @@ export default function SuperstarCampaignDetailPage() {
           </div>
         )}
 
+        {/* Escrow payment status */}
+        {campaign.remuneration_type === "cash" && campaign.amount_sgd && campaign.payment_status && campaign.payment_status !== "not_required" && (
+          <div className="mt-5 pt-5 border-t">
+            {campaign.payment_status === "pending" && (
+              <div className="flex items-center gap-2 text-amber-600">
+                <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
+                <span className="text-sm">Payment pending - brand has not paid yet</span>
+              </div>
+            )}
+            {campaign.payment_status === "held" && (
+              <div className="flex items-center gap-2 text-emerald-700">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                <span className="text-sm font-medium">SGD {campaign.amount_sgd} held in escrow - payment will be released after brand confirms delivery</span>
+              </div>
+            )}
+            {campaign.payment_status === "released" && (
+              <div className="flex items-center gap-2 text-blue-700">
+                <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                <span className="text-sm font-medium">SGD {campaign.amount_sgd} payment released{campaign.payment_released_at ? ` on ${fmtDate(campaign.payment_released_at)}` : ""}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         {campaign.status === "completed" && (
           <div className="mt-5 pt-5 border-t flex items-center gap-2 text-green-600">
             <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">ok</span>

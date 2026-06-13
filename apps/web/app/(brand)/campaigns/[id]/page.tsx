@@ -84,6 +84,7 @@ export default function BrandProjectDetailPage() {
   const [openChat, setOpenChat] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [respondingApp, setRespondingApp] = useState<string | null>(null);
+  const [payingEscrow, setPayingEscrow] = useState<string | null>(null);
   const [togglingOpen, setTogglingOpen] = useState(false);
   const [showEditCriteria, setShowEditCriteria] = useState(false);
   const [testimonialCampaign, setTestimonialCampaign] = useState<{ inquiryId: string; name: string } | null>(null);
@@ -129,6 +130,16 @@ export default function BrandProjectDetailPage() {
       setProject(updated as ProjectWithHires);
     } catch { /* ignore */ }
     setRespondingApp(null);
+  }
+
+  async function handlePayEscrow(campaignId: string) {
+    setPayingEscrow(campaignId);
+    try {
+      const token = getSessionToken() || "";
+      const { checkout_url } = await api.payCampaignEscrow(campaignId, token);
+      window.location.href = checkout_url;
+    } catch { /* ignore */ }
+    setPayingEscrow(null);
   }
 
   async function handleToggleOpen() {
@@ -304,6 +315,12 @@ export default function BrandProjectDetailPage() {
                     hire={hire}
                     onConfirm={hire.status === "delivered" ? () => handleConfirm(hire.id) : undefined}
                     confirming={confirming === hire.id}
+                    onPayEscrow={
+                      hire.remuneration_type === "cash" && hire.amount_sgd && hire.payment_status === "pending"
+                        ? () => handlePayEscrow(hire.id)
+                        : undefined
+                    }
+                    payingEscrow={payingEscrow === hire.id}
                     showChat
                     chatOpen={openChat === hire.id}
                     onToggleChat={() => setOpenChat(openChat === hire.id ? null : hire.id)}
@@ -437,10 +454,12 @@ function TabBtn({ active, onClick, count, children }: {
   );
 }
 
-function HireCard({ hire, onConfirm, confirming, showChat, chatOpen, onToggleChat }: {
+function HireCard({ hire, onConfirm, confirming, onPayEscrow, payingEscrow, showChat, chatOpen, onToggleChat }: {
   hire: Campaign;
   onConfirm?: () => void;
   confirming?: boolean;
+  onPayEscrow?: () => void;
+  payingEscrow?: boolean;
   showChat?: boolean;
   chatOpen?: boolean;
   onToggleChat?: () => void;
@@ -462,8 +481,36 @@ function HireCard({ hire, onConfirm, confirming, showChat, chatOpen, onToggleCha
             <span className="font-semibold text-sm text-[#1A1A1A]">{hire.talent_name}</span>
             {hire.ig_handle && <span className="text-xs text-[#9A9A9A]">@{hire.ig_handle}</span>}
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${st.color}`}>{st.label}</span>
+            {hire.payment_status === "held" && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium border border-emerald-200">
+                SGD {hire.amount_sgd} held in escrow
+              </span>
+            )}
+            {hire.payment_status === "released" && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium border border-blue-200">
+                Payment released
+              </span>
+            )}
           </div>
           {hire.shoot_date && <p className="text-xs text-[#9A9A9A] mt-0.5">Shoot: {hire.shoot_date}</p>}
+
+          {/* Escrow payment prompt */}
+          {onPayEscrow && (
+            <div className="mt-3 p-3 rounded-xl bg-[#FFF8EC] border border-[#FFD200]/40">
+              <p className="text-xs text-[#1A1A1A] font-medium mb-1">Secure this project with escrow</p>
+              <p className="text-xs text-[#9A9A9A] mb-2">
+                Pay SGD {hire.amount_sgd} now. Funds are held safely until you confirm delivery of the final MP4.
+              </p>
+              <Button
+                size="sm"
+                className="bg-[#FFD200] text-[#0C0C0C] hover:bg-[#e6bd00] rounded-full"
+                disabled={payingEscrow}
+                onClick={onPayEscrow}
+              >
+                {payingEscrow ? "Redirecting..." : `Pay SGD ${hire.amount_sgd} to escrow`}
+              </Button>
+            </div>
+          )}
 
           {/* Delivered state */}
           {hire.status === "delivered" && (
