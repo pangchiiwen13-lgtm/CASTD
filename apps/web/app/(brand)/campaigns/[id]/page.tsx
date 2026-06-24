@@ -673,7 +673,7 @@ function EditCriteriaDialog({ project, onClose, onSaved }: {
         <DialogHeader>
           <DialogTitle>Talent criteria</DialogTitle>
           <p className="text-xs text-[#9A9A9A] mt-1">
-            CASTD uses these to score and rank Superstars specifically for this campaign.
+            Northstar uses these to score and rank Superstars specifically for this campaign.
           </p>
         </DialogHeader>
         <div className="flex flex-col gap-5 py-2">

@@ -73,7 +73,7 @@ export default function BrandLayout({ children }: { children: React.ReactNode })
         <div className="border-b border-[#F0EDEA] px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/catalog" className="text-lg font-bold tracking-tight text-[#1A1A1A]">
-              CASTD <span className="text-xs font-normal text-[#9A9A9A] ml-1">Brand</span>
+              Northstar <span className="text-xs font-normal text-[#9A9A9A] ml-1">Brand</span>
             </Link>
             <div className="hidden md:flex gap-1">
               {NAV.map((n) => (

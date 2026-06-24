@@ -72,9 +72,9 @@ export default function OnboardingPage() {
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-[#FFF8EC]">
       <div className="w-full max-w-md">
         <div className="mb-8">
-          <div className="text-2xl font-bold mb-1">CASTD</div>
+          <div className="text-2xl font-bold mb-1">Northstar</div>
           {step === 0 ? (
-            <p className="text-muted-foreground text-sm">How do you want to use CASTD?</p>
+            <p className="text-muted-foreground text-sm">How do you want to use Northstar?</p>
           ) : (
             <>
               <p className="text-muted-foreground text-sm">Tell us about your brand to get AI-matched talent recommendations.</p>

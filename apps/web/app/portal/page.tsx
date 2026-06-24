@@ -70,7 +70,7 @@ export default function PortalPage() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <div className="text-xl font-bold mb-2">CASTD</div>
+        <div className="text-xl font-bold mb-2">Northstar</div>
         <p className="text-muted-foreground text-sm">Loading your account...</p>
       </div>
     </div>

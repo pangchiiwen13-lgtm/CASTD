@@ -53,7 +53,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#FFF8EC]">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="text-2xl font-bold tracking-tight mb-1 text-[#1A1A1A]">CASTD</div>
+          <div className="text-2xl font-bold tracking-tight mb-1 text-[#1A1A1A]">Northstar</div>
           <p className="text-[#9A9A9A] text-sm">Sign in to your account</p>
         </div>
 

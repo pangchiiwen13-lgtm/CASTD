@@ -29,7 +29,7 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!role) { setError("Please select how you want to use CASTD"); return; }
+    if (!role) { setError("Please select how you want to use Northstar"); return; }
     if (password.length < 8) { setError("Password must be at least 8 characters"); return; }
     setLoading(true);
     setError("");
@@ -55,7 +55,7 @@ export default function SignupPage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-[#FFF8EC]">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="text-2xl font-bold tracking-tight mb-1">CASTD</div>
+          <div className="text-2xl font-bold tracking-tight mb-1">Northstar</div>
           <p className="text-muted-foreground text-sm">Create your free account</p>
         </div>
 

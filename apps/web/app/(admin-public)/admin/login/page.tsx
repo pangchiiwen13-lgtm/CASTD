@@ -39,7 +39,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#0C0C0C]">
       <div className="w-full max-w-xs px-6">
         <div className="text-center mb-10">
-          <div className="text-2xl font-bold text-white tracking-tight mb-1">CASTD</div>
+          <div className="text-2xl font-bold text-white tracking-tight mb-1">Northstar</div>
           <p className="text-sm text-[#666]">Admin access</p>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

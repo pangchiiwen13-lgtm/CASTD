@@ -180,7 +180,7 @@ export function InquiryDialog({ talent, onClose }: Props) {
 
           {error && <p className="text-sm text-destructive">{error}</p>}
           <p className="text-xs text-muted-foreground">
-            Submitting an inquiry is free. A CASTD team member will review and confirm the booking.
+            Submitting an inquiry is free. A Northstar team member will review and confirm the booking.
           </p>
         </div>
         <DialogFooter>

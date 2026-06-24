@@ -53,7 +53,7 @@ export default function BrandDashboardPage() {
       {/* Welcome */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-[#1A1A1A]">Hey, {companyName}</h1>
-        <p className="text-[#9A9A9A] text-sm mt-1">Here's a snapshot of your activity on CASTD.</p>
+        <p className="text-[#9A9A9A] text-sm mt-1">Here's a snapshot of your activity on Northstar.</p>
       </div>
 
       {/* No brand profile banner */}

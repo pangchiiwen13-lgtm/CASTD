@@ -130,7 +130,7 @@ export default function SuperstarOnboardingPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8">
-          <div className="text-2xl font-bold mb-1">CASTD</div>
+          <div className="text-2xl font-bold mb-1">Northstar</div>
           <p className="text-muted-foreground text-sm">Set up your Superstar profile. Brands will use this to discover and book you.</p>
           <div className="flex gap-1 mt-4">
             {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
@@ -339,7 +339,7 @@ export default function SuperstarOnboardingPage() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground text-center">
-              Your profile will be reviewed by the CASTD team before going live. You'll receive an email when approved.
+              Your profile will be reviewed by the Northstar team before going live. You'll receive an email when approved.
             </p>
           </div>
         )}

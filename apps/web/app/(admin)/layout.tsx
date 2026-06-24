@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen flex flex-col">
       <nav className="border-b px-6 py-3 flex items-center justify-between sticky top-0 bg-background z-10">
         <div className="flex items-center gap-6">
-          <span className="text-lg font-bold tracking-tight">CASTD Admin</span>
+          <span className="text-lg font-bold tracking-tight">Northstar Admin</span>
           <div className="flex gap-1">
             {NAV.map((n) => (
               <Link

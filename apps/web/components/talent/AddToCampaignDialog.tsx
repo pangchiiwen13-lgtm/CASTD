@@ -294,7 +294,7 @@ export function AddToCampaignDialog({ talent, onClose }: Props) {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
             <p className="text-xs text-muted-foreground">
-              Offers are reviewed by the CASTD team before the Superstar is notified. Chat unlocks once confirmed.
+              Offers are reviewed by the Northstar team before the Superstar is notified. Chat unlocks once confirmed.
             </p>
           </div>
         )}

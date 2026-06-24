@@ -19,8 +19,8 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "CASTD - Find Your On-Screen Talent",
-  description: "Discover and book vetted beauty & lifestyle on-screen talent for your brand videos.",
+  title: "Northstar - Find Your On-Screen Talent",
+  description: "Northstar Collective's casting platform. Discover and book vetted beauty & lifestyle on-screen talent for your brand videos.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

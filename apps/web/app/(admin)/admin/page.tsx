@@ -45,7 +45,7 @@ export default function AdminDashboard() {
     <div className="max-w-5xl mx-auto px-6 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">CASTD platform overview.</p>
+        <p className="text-sm text-muted-foreground mt-1">Northstar platform overview.</p>
       </div>
 
       {/* Stats grid */}

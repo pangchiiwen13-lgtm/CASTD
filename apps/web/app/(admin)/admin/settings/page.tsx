@@ -61,7 +61,7 @@ export default function AdminSettingsPage() {
         <CardHeader>
           <CardTitle>Email - Resend</CardTitle>
           <CardDescription>
-            CASTD uses <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline">Resend</a> to send
+            Northstar uses <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline">Resend</a> to send
             transactional emails to brands and talents. Free tier: 3,000 emails/month.
             Get your API key from <a href="https://resend.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline">resend.com/api-keys</a>.
           </CardDescription>

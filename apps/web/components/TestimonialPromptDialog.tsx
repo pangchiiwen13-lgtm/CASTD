@@ -62,7 +62,7 @@ export function TestimonialPromptDialog({ inquiryId, campaignName, onClose }: Pr
                 <span className="text-[#1A1A1A] font-black text-xl">ok</span>
               </div>
               <p className="text-sm text-[#6B6B6B]">
-                Your review helps brands and creators discover CASTD. It may appear on our homepage.
+                Your review helps brands and creators discover Northstar. It may appear on our homepage.
               </p>
             </div>
             <DialogFooter>
@@ -78,7 +78,7 @@ export function TestimonialPromptDialog({ inquiryId, campaignName, onClose }: Pr
               </div>
               <DialogTitle>You're on a roll!</DialogTitle>
               <p className="text-sm text-[#6B6B6B] mt-1">
-                Tell us about your experience with <span className="font-semibold text-[#1A1A1A]">{campaignName}</span>. Your review may appear on the CASTD homepage.
+                Tell us about your experience with <span className="font-semibold text-[#1A1A1A]">{campaignName}</span>. Your review may appear on the Northstar homepage.
               </p>
             </DialogHeader>
 
@@ -114,7 +114,7 @@ export function TestimonialPromptDialog({ inquiryId, campaignName, onClose }: Pr
                 <Textarea
                   value={comment}
                   onChange={e => setComment(e.target.value)}
-                  placeholder="What did you love about working with CASTD? Any standout moments from this campaign..."
+                  placeholder="What did you love about working with Northstar? Any standout moments from this campaign..."
                   rows={4}
                   className="resize-none"
                 />

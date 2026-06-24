@@ -21,7 +21,7 @@ const ALL_TESTIMONIALS = [
     role: "Marketing Manager, Glow Lab",
   },
   {
-    text: "As a creator, CASTD finally gave me a platform where brands come to me. Got booked for 3 campaigns in my first month.",
+    text: "As a creator, Northstar finally gave me a platform where brands come to me. Got booked for 3 campaigns in my first month.",
     image: "https://randomuser.me/api/portraits/women/65.jpg",
     name: "Siti Rahayu",
     role: "Beauty Creator, 42K followers",
@@ -33,7 +33,7 @@ const ALL_TESTIMONIALS = [
     role: "Brand Director, Epoch Beauty",
   },
   {
-    text: "Managing campaigns used to be a mess of DMs and spreadsheets. CASTD keeps everything in one place.",
+    text: "Managing campaigns used to be a mess of DMs and spreadsheets. Northstar keeps everything in one place.",
     image: "https://randomuser.me/api/portraits/women/26.jpg",
     name: "Cheryl Wong",
     role: "Lifestyle Creator, 18K followers",
@@ -51,19 +51,19 @@ const ALL_TESTIMONIALS = [
     role: "Founder, Freshlab SG",
   },
   {
-    text: "CASTD understood that creators need structure too. The booking management and chat make every collab smooth.",
+    text: "Northstar understood that creators need structure too. The booking management and chat make every collab smooth.",
     image: "https://randomuser.me/api/portraits/women/68.jpg",
     name: "Nurul Aisyah",
     role: "Lifestyle Creator, 29K followers",
   },
   {
-    text: "We now source all our UGC through CASTD. The quality of Superstars is consistently high and the fit scores are genuinely useful.",
+    text: "We now source all our UGC through Northstar. The quality of Superstars is consistently high and the fit scores are genuinely useful.",
     image: "https://randomuser.me/api/portraits/women/22.jpg",
     name: "Rachel Chua",
     role: "Social Media Lead, Lumiere Co.",
   },
   {
-    text: "Went from zero brand deals to four confirmed campaigns in my second month. CASTD is the best move I made for my creator career.",
+    text: "Went from zero brand deals to four confirmed campaigns in my second month. Northstar is the best move I made for my creator career.",
     image: "https://randomuser.me/api/portraits/women/33.jpg",
     name: "Jasmine Toh",
     role: "Skincare Creator, 55K followers",
@@ -142,7 +142,7 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#F0E8D8]">
         <div className="max-w-6xl mx-auto px-6 md:px-10 py-4 flex items-center justify-between">
           <Link href="/" className="font-display text-xl font-black tracking-tight text-[#1A1A1A]">
-            CASTD
+            Northstar
           </Link>
           <div className="flex items-center gap-2">
             <Link href="/login"
@@ -316,7 +316,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               { value: stats?.superstars ?? 0, suffix: "+", label: "Vetted Superstars", sub: "beauty and lifestyle creators" },
-              { value: stats?.brands ?? 0, suffix: "", label: "Brands and Agencies", sub: "registered on CASTD" },
+              { value: stats?.brands ?? 0, suffix: "", label: "Brands and Agencies", sub: "registered on Northstar" },
               { value: stats?.completed_matches ?? 0, suffix: "", label: "Completed Matches", sub: "confirmed campaigns" },
             ].map((s, i) => (
               <motion.div
@@ -493,7 +493,7 @@ export default function LandingPage() {
               <div className="p-8 flex flex-col flex-1">
                 <div className="flex items-center gap-2 mb-5">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#FFD200]" />
-                  <span className="text-[#FFD200] text-xs font-black uppercase tracking-[0.2em]">CASTD Brand</span>
+                  <span className="text-[#FFD200] text-xs font-black uppercase tracking-[0.2em]">Northstar Brand</span>
                 </div>
                 <h3 className="font-display text-2xl font-black text-white mb-5 leading-tight">
                   Find the right talent.
@@ -531,7 +531,7 @@ export default function LandingPage() {
               <div className="p-8 flex flex-col flex-1">
                 <div className="flex items-center gap-2 mb-5">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A]" />
-                  <span className="text-[#1A1A1A] text-xs font-black uppercase tracking-[0.2em]">CASTD Superstar</span>
+                  <span className="text-[#1A1A1A] text-xs font-black uppercase tracking-[0.2em]">Northstar Superstar</span>
                 </div>
                 <h3 className="font-display text-2xl font-black text-[#1A1A1A] mb-5 leading-tight">
                   Get discovered.
@@ -575,7 +575,7 @@ export default function LandingPage() {
               What they're saying.
             </h2>
             <p className="text-[#6B6B6B] mt-4 max-w-md mx-auto">
-              Brands and Superstars across Singapore trust CASTD to make every collaboration count.
+              Brands and Superstars across Singapore trust Northstar to make every collaboration count.
             </p>
           </motion.div>
         </div>
@@ -622,13 +622,13 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className="bg-[#1A1A1A] px-6 md:px-10 py-12">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <span className="font-display text-xl font-black text-white tracking-tight">CASTD</span>
+          <span className="font-display text-xl font-black text-white tracking-tight">Northstar</span>
           <div className="flex gap-8 text-sm text-white/30">
             <Link href="/login" className="hover:text-white/70 transition-colors">Log in</Link>
             <Link href="/signup" className="hover:text-white/70 transition-colors">Sign up</Link>
           </div>
           <p className="text-white/20 text-xs tracking-wide">
-            {new Date().getFullYear()} CASTD. Singapore.
+            {new Date().getFullYear()} Northstar Collective. Singapore.
           </p>
         </div>
       </footer>

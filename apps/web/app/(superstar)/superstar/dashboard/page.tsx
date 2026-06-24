@@ -26,7 +26,7 @@ function ProfileStatusBanner({ profile }: { profile: Talent }) {
       <div>
         <p className="font-semibold text-sm text-[#1A1A1A]">Your profile is under review</p>
         <p className="text-sm text-[#9A9A9A] mt-0.5">
-          The CASTD team will review your profile and approve it within 1-2 business days.
+          The Northstar team will review your profile and approve it within 1-2 business days.
           You'll receive an email once you're live.
         </p>
         <Link href="/superstar/profile">

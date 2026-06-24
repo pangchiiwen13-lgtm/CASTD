@@ -342,7 +342,7 @@ function CreateCampaignDialog({ onClose, onCreated }: {
         ) : (
           <div className="flex flex-col gap-5 py-2">
             <p className="text-xs text-[#9A9A9A]">
-              Tell us who you're looking for. CASTD uses this to score and rank Superstars in your catalog.
+              Tell us who you're looking for. Northstar uses this to score and rank Superstars in your catalog.
             </p>
             <MultiToggle
               label="Content type"

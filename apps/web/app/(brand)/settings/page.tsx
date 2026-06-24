@@ -100,7 +100,7 @@ export default function SettingsPage() {
             className="rounded-xl"
           />
           <p className="text-[11px] text-[#9A9A9A]">
-            Required for brands transacting on CASTD. We verify against the IRAS GST registry.
+            Required for brands transacting on Northstar. We verify against the IRAS GST registry.
             Non-GST-registered entities will be manually reviewed.
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function SettingsPage() {
           </div>
           <p className="text-[11px] text-[#9A9A9A]">
             Paste a direct link to your logo (PNG or SVG, transparent background preferred).
-            Your logo will appear in the brand slider on the CASTD homepage.
+            Your logo will appear in the brand slider on the Northstar homepage.
           </p>
         </div>
 
