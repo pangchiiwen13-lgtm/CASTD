@@ -1,5 +1,5 @@
 """
-Run CASTD SQL migrations against Neon PostgreSQL.
+Run Northstar SQL migrations against Neon PostgreSQL.
 Usage: python scripts/run_migrations.py
 """
 import asyncio

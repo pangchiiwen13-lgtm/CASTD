@@ -1,5 +1,5 @@
 """
-One-time import from FillOut form submissions into CASTD PostgreSQL (Neon).
+One-time import from FillOut form submissions into Northstar PostgreSQL (Neon).
 
 FillOut API: GET https://api.fillout.com/v1/api/forms/3jhguC1BD9us/submissions
 Auth: Bearer sk_prod_...

@@ -1,4 +1,4 @@
--- Performance indexes for CASTD
+-- Performance indexes for Northstar
 
 -- Talents: filter queries
 CREATE INDEX idx_talents_published ON talents(is_published);

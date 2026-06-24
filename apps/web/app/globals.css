@@ -69,7 +69,7 @@
 }
 
 :root {
-  /* CASTD Brand Colors */
+  /* Northstar Brand Colors */
   /* #FFD200 → oklch approx */
   --primary: oklch(0.892 0.187 96.6);
   /* #0C0C0C → ink black on yellow buttons */

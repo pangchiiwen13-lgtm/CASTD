@@ -1,4 +1,4 @@
--- CASTD talent marketplace schema
+-- Northstar talent marketplace schema
 -- Run via Neon console SQL editor
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

@@ -5,7 +5,7 @@ API key is read from platform_settings table first, then env var fallback.
 import httpx
 from database import get_pool
 
-FROM_ADDRESS = "CASTD <noreply@castd.sg>"
+FROM_ADDRESS = "Northstar <noreply@castd.sg>"
 
 
 async def _get_resend_key() -> str:
@@ -65,15 +65,15 @@ def _base(title: str, body_html: str) -> str:
       <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #EBEBEB;">
         <!-- Header -->
         <tr><td style="background:#FFD200;padding:20px 32px;">
-          <span style="font-size:20px;font-weight:800;color:#0C0C0C;letter-spacing:-0.03em;">CASTD</span>
+          <span style="font-size:20px;font-weight:800;color:#0C0C0C;letter-spacing:-0.03em;">Northstar</span>
         </td></tr>
         <!-- Body -->
         <tr><td style="padding:32px;">
           {body_html}
           <hr style="border:none;border-top:1px solid #EBEBEB;margin:32px 0;">
           <p style="font-size:12px;color:#7A7A7A;margin:0;">
-            CASTD · Singapore's talent marketplace for beauty &amp; lifestyle brands.<br>
-            You're receiving this because you have an account on CASTD.
+            Northstar Collective · Singapore's talent agency for beauty &amp; lifestyle brands.<br>
+            You're receiving this because you have an account on Northstar.
           </p>
         </td></tr>
       </table>
@@ -117,7 +117,7 @@ async def email_brand_inquiry_received(to: str, brand_name: str, talent_name: st
         f'{_pill("Campaign", campaign_name)}'
         f'{_pill("Talent", talent_name)}'
         f'</table>' +
-        _p("We'll review it and get back to you shortly. You can track the status in your CASTD dashboard.") +
+        _p("We'll review it and get back to you shortly. You can track the status in your Northstar dashboard.") +
         _btn("View my inquiries", "https://castd.sg/inquiries")
     )
     await send_email(to, subject, _base(subject, body))
@@ -163,7 +163,7 @@ async def email_talent_inquiry_received(to: str, talent_name: str, brand_name: s
          f'<p style="margin:0 0 4px;font-size:12px;color:#7A7A7A;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Brief</p>'
          f'<p style="margin:0;font-size:14px;color:#333333;line-height:1.6;">{brief_snippet}</p>'
          f'</div>' if brief_snippet else "") +
-        _p("If this project moves forward, CASTD will be in touch with next steps. No action needed from you right now.")
+        _p("If this project moves forward, Northstar will be in touch with next steps. No action needed from you right now.")
     )
     await send_email(to, subject, _base(subject, body))
 
@@ -182,6 +182,6 @@ async def email_talent_confirmed(to: str, talent_name: str, brand_name: str, cam
          f'<p style="margin:0 0 4px;font-size:12px;color:#7A7A7A;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Campaign brief</p>'
          f'<p style="margin:0;font-size:14px;color:#333333;line-height:1.6;">{brief_snippet}</p>'
          f'</div>' if brief_snippet else "") +
-        _p("CASTD will reach out to coordinate the details. Get ready!")
+        _p("Northstar will reach out to coordinate the details. Get ready!")
     )
     await send_email(to, subject, _base(subject, body))

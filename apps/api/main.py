@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     await close_pool()
 
 
-app = FastAPI(title="CASTD API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Northstar API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,7 +41,7 @@ app.include_router(projects.router)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "castd-api"}
+    return {"status": "ok", "service": "northstar-api"}
 
 
 @app.get("/public/stats")

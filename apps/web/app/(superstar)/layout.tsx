@@ -61,7 +61,7 @@ export default function SuperstarLayout({ children }: { children: React.ReactNod
   function switchToBrand() {
     setMenuOpen(false);
     if (typeof window !== "undefined") {
-      localStorage.setItem("castd_portal_intent", "brand");
+      localStorage.setItem("northstar_portal_intent", "brand");
     }
     router.push("/dashboard");
   }

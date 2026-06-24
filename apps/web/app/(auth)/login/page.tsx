@@ -13,7 +13,7 @@ type Portal = "superstar" | "brand" | null;
 
 function storePortalIntent(portal: Portal) {
   if (portal && typeof window !== "undefined") {
-    localStorage.setItem("castd_portal_intent", portal);
+    localStorage.setItem("northstar_portal_intent", portal);
   }
 }
 

@@ -295,7 +295,7 @@ async def pay_campaign_escrow(campaign_id: UUID, user: dict = Depends(get_curren
                 "currency": "sgd",
                 "unit_amount": amount_cents,
                 "product_data": {
-                    "name": f"CASTD Escrow - {campaign['talent_name']}",
+                    "name": f"Northstar Escrow - {campaign['talent_name']}",
                     "description": f"Campaign: {campaign['campaign_name']}. Funds held until delivery confirmed.",
                 },
             },

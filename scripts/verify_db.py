@@ -13,7 +13,7 @@ async def main():
         ORDER BY table_name
     """)
 
-    print(f"Tables in CASTD database ({len(tables)} found):\n")
+    print(f"Tables in Northstar database ({len(tables)} found):\n")
     for t in tables:
         cols = await conn.fetch("""
             SELECT column_name, data_type, is_nullable

@@ -1,4 +1,4 @@
-# CASTD Brand System
+﻿# Northstar Brand System
 
 **Version 1.0 — June 2026**
 
@@ -6,12 +6,12 @@
 
 ## 01 — Brand Concept
 
-**CASTD** is a B2B talent casting marketplace for beauty and lifestyle brands in Singapore. The name merges "cast" (to cast talent, to cast a spotlight) with the stripped-down, digital shorthand of dropping a vowel — punchy, modern, remembered on first read.
+**Northstar Collective** is a B2B talent casting marketplace for beauty and lifestyle brands in Singapore. The name merges "cast" (to cast talent, to cast a spotlight) with the stripped-down, digital shorthand of dropping a vowel — punchy, modern, remembered on first read.
 
 ### Brand Idea
 > *The spotlight is on.*
 
-CASTD puts the right talent in front of the right brand — fast, confidently, beautifully. Every surface of the product should feel like a well-lit stage: the talent is the hero, the platform is the stage manager.
+Northstar puts the right talent in front of the right brand — fast, confidently, beautifully. Every surface of the product should feel like a well-lit stage: the talent is the hero, the platform is the stage manager.
 
 ### Brand Character
 | Trait | Expression |
@@ -33,11 +33,11 @@ The palette is built on **high contrast and restraint**. Three core colors do al
 
 | Token | Name | Hex | Usage |
 |-------|------|-----|-------|
-| `--color-primary` | CASTD Yellow | `#FFD200` | CTAs, highlights, active states, logo mark |
+| `--color-primary` | Northstar Yellow | `#FFD200` | CTAs, highlights, active states, logo mark |
 | `--color-ink` | Ink Black | `#0C0C0C` | Primary text, hero backgrounds, headers |
 | `--color-white` | Pure White | `#FFFFFF` | Page backgrounds, card surfaces, negative space |
 
-**CASTD Yellow `#FFD200`** — a rich, full-saturation yellow. Warm enough to feel premium, bright enough to command attention. Reference: sits slightly deeper than Scoot's `#FFE500`, which prevents it from reading as neon on screen. On a black background it glows; on white it reads clean.
+**Northstar Yellow `#FFD200`** — a rich, full-saturation yellow. Warm enough to feel premium, bright enough to command attention. Reference: sits slightly deeper than Scoot's `#FFE500`, which prevents it from reading as neon on screen. On a black background it glows; on white it reads clean.
 
 ### Secondary / UI Neutrals
 
@@ -137,7 +137,7 @@ Two fonts. One for impact, one for reading. Do not introduce a third.
 4. **Negative tracking on display type.** Apply `letter-spacing: -0.02em` on H1+. Syne's letterforms read loose at large sizes without it.
 5. **Positive tracking on small labels.** Apply `letter-spacing: +0.04em` on Labels (12px) to improve legibility at small size.
 6. **Minimum rendered body size is 14px.** Talent profiles, inquiry forms, data tables — nothing smaller.
-7. **Brand name is always CASTD** — all caps, no exceptions, no lowercase version.
+7. **Brand name is always Northstar** — all caps, no exceptions, no lowercase version.
 8. **Do not set body text in medium (500) weight.** Use Regular (400) for body, SemiBold (600) for emphasis. Medium weight at body sizes creates visual muddiness.
 
 ---
@@ -179,10 +179,10 @@ const syne = Syne({
 ## 04 — Logo & Wordmark
 
 ### Wordmark
-The CASTD wordmark is set in **Syne ExtraBold (800)** with slight negative letter-spacing. The logotype treatment:
+The Northstar wordmark is set in **Syne ExtraBold (800)** with slight negative letter-spacing. The logotype treatment:
 
 ```
-CASTD
+Northstar
 ```
 
 - Primary: Ink Black on White / Yellow on Ink Black
@@ -192,7 +192,7 @@ CASTD
 1. **Minimum size: 80px wide** — below this the letterforms compress unreadably.
 2. **Clear space: 0.5× the wordmark height on all sides.**
 3. **Approved color combos:**
-   - CASTD Yellow `#FFD200` on Ink Black `#0C0C0C` — hero/dark usage
+   - Northstar Yellow `#FFD200` on Ink Black `#0C0C0C` — hero/dark usage
    - Ink Black `#0C0C0C` on White `#FFFFFF` — default usage
    - White `#FFFFFF` on Ink Black `#0C0C0C` — secondary dark usage
 4. **Never:** stretch, rotate, drop shadow, outline, place on yellow background, or colorize individual letters.
@@ -325,9 +325,9 @@ No bounces, no springs, no entrance animations on body copy. Animation is for st
 | Pricing | "SGD 80 per confirmed talent" | "Competitive fees based on engagement tier" |
 | Error | "Couldn't save your profile. Try again." | "An error has occurred. Please contact support." |
 
-### CASTD is always:
-- Spelled in full caps: **CASTD**
-- Not "Castd", "castd", or "C.A.S.T.D"
+### Northstar is always:
+- Spelled in full caps: **Northstar Collective**
+- Not "northstar" or "NORTHSTAR"
 
 ---
 
@@ -347,7 +347,7 @@ No bounces, no springs, no entrance animations on body copy. Animation is for st
 ## 12 — Tailwind Config Tokens
 
 ```js
-// tailwind.config.js — CASTD design tokens
+// tailwind.config.js — Northstar design tokens
 const { fontFamily } = require('tailwindcss/defaultTheme')
 
 module.exports = {
@@ -371,7 +371,7 @@ module.exports = {
         display: ['var(--font-syne)', 'Syne', ...fontFamily.sans],
       },
       fontSize: {
-        // Matches the CASTD type scale exactly
+        // Matches the Northstar type scale exactly
         'display-xl': ['4.5rem',  { lineHeight: '1.0',  letterSpacing: '-0.02em', fontWeight: '800' }],
         'h1':         ['3rem',    { lineHeight: '1.05', letterSpacing: '-0.02em', fontWeight: '800' }],
         'h2':         ['2.25rem', { lineHeight: '1.1',  letterSpacing: '-0.01em', fontWeight: '700' }],
@@ -417,4 +417,4 @@ h1, h2, h3 {
 
 ---
 
-*CASTD Brand System v1.0 — internal reference. Update version number on any structural change.*
+*Northstar Brand System v1.0 — internal reference. Update version number on any structural change.*

@@ -1,7 +1,7 @@
 "use client";
 
 const SESSION_COOKIE = "better-auth.session_token";
-const LS_KEY = "castd_session_token";
+const LS_KEY = "northstar_session_token";
 
 /**
  * Read the Better Auth session token.

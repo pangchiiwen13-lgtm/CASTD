@@ -64,7 +64,7 @@ async def create_checkout_session(inquiry_id: UUID, user: dict = Depends(get_cur
                 "currency": "sgd",
                 "unit_amount": settings.stripe_contact_fee_sgd,
                 "product_data": {
-                    "name": f"CASTD - Talent Contact: {inquiry['talent_name']}",
+                    "name": f"Northstar - Talent Contact: {inquiry['talent_name']}",
                     "description": f"Campaign: {inquiry['campaign_name']}",
                 },
             },

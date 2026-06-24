@@ -8,7 +8,7 @@ import { getSessionToken } from "@/lib/get-token";
 /**
  * Smart role router. After login/signup, users land here.
  *
- * Reads castd_portal_intent from localStorage (set by login/signup page
+ * Reads northstar_portal_intent from localStorage (set by login/signup page
  * before the Google OAuth redirect) to decide which portal to enter.
  *
  * Intent "brand"     -> /onboarding?role=brand (new) or /dashboard (existing)
@@ -31,14 +31,14 @@ export default function PortalPage() {
 
     // Read which portal the user intended to enter
     const intent = typeof window !== "undefined"
-      ? (localStorage.getItem("castd_portal_intent") as "brand" | "superstar" | null)
+      ? (localStorage.getItem("northstar_portal_intent") as "brand" | "superstar" | null)
       : null;
 
     api.checkRegistration(token)
       .then((result) => {
         // Clear intent after reading so it doesn't interfere with future logins
         if (typeof window !== "undefined") {
-          localStorage.removeItem("castd_portal_intent");
+          localStorage.removeItem("northstar_portal_intent");
         }
 
         if (intent === "brand") {

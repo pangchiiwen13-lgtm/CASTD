@@ -13,7 +13,7 @@ type Role = "brand" | "superstar" | null;
 
 function storePortalIntent(role: Role) {
   if (role && typeof window !== "undefined") {
-    localStorage.setItem("castd_portal_intent", role);
+    localStorage.setItem("northstar_portal_intent", role);
   }
 }
 

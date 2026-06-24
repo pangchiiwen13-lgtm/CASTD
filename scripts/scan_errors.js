@@ -1,5 +1,5 @@
 /**
- * CASTD error scanner — visits all key pages and reports:
+ * Northstar error scanner — visits all key pages and reports:
  *  - Console errors / warnings
  *  - Failed network requests
  *  - React runtime errors (error boundaries)
@@ -103,7 +103,7 @@ async function scanPage(page, url, description) {
 
 async function main() {
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("  CASTD Error Scanner");
+  console.log("  Northstar Error Scanner");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
   // Check API is up

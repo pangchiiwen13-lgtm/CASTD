@@ -1,5 +1,5 @@
 """
-Auth verification for CASTD FastAPI backend.
+Auth verification for Northstar FastAPI backend.
 Verifies Better Auth sessions by querying the session table directly in the
 shared Neon PostgreSQL database - no HTTP call to an external auth service needed.
 

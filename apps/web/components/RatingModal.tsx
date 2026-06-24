@@ -25,7 +25,7 @@ export function RatingModal({ inquiryId, campaignName, onClose, onDone }: Props)
     setSubmitting(true);
     setError("");
     const token = (typeof window !== "undefined"
-      ? (window as any).__castd_session_token
+      ? (window as any).__northstar_session_token
       : null) || getSessionToken() || "";
     try {
       await api.submitRating(

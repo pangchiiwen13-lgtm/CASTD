@@ -13,7 +13,7 @@ interface Props {
   onClose: () => void;
 }
 
-const STORAGE_KEY = "castd_testimonial_done";
+const STORAGE_KEY = "northstar_testimonial_done";
 
 export function markTestimonialDone() {
   if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, "1");

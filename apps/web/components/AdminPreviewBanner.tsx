@@ -7,16 +7,16 @@ export type PreviewMode = "brand" | "superstar";
 // ── helpers (call from admin dashboard buttons) ──────────────────────────────
 
 export function enterPreviewMode(mode: PreviewMode) {
-  localStorage.setItem("castd_admin_preview", mode);
+  localStorage.setItem("northstar_admin_preview", mode);
 }
 
 export function exitPreviewMode() {
-  localStorage.removeItem("castd_admin_preview");
+  localStorage.removeItem("northstar_admin_preview");
 }
 
 export function getPreviewMode(): PreviewMode | null {
   if (typeof window === "undefined") return null;
-  const v = localStorage.getItem("castd_admin_preview");
+  const v = localStorage.getItem("northstar_admin_preview");
   return v === "brand" || v === "superstar" ? v : null;
 }
 

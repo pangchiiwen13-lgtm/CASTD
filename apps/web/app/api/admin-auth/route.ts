@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   }
 
   const response = NextResponse.json({ ok: true });
-  response.cookies.set("castd_admin", token, {
+  response.cookies.set("northstar_admin", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/",
@@ -25,6 +25,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   const response = NextResponse.json({ ok: true });
-  response.cookies.delete("castd_admin");
+  response.cookies.delete("northstar_admin");
   return response;
 }

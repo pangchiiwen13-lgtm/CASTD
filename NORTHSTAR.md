@@ -1,17 +1,17 @@
-# CASTD — Product Documentation
+﻿# Northstar Collective — Product Documentation
 
 **Version 1.3 — June 2026**
 **Status: Active development**
 
 ---
 
-## What is CASTD?
+## What is Northstar Collective?
 
-CASTD is a B2B talent casting marketplace for beauty and lifestyle brands in Singapore.
+Northstar Collective is a B2B talent casting marketplace for beauty and lifestyle brands in Singapore.
 
 Brands and agencies discover, evaluate, and book **Superstars** (on-screen video talent) for their campaigns. Superstars can also browse live brand campaigns and apply for ones they want to be part of.
 
-> The platform manages the full lifecycle — from discovery to payment — so neither side has to chase the other. The Grab analogy: the brand knows where they want to go, the Superstar knows where to pick up. CASTD handles everything in between.
+> The platform manages the full lifecycle — from discovery to payment — so neither side has to chase the other. The Grab analogy: the brand knows where they want to go, the Superstar knows where to pick up. Northstar Collective handles everything in between.
 
 **Target market:** Beauty/lifestyle brands, marketing agencies, and corporates in Singapore.
 **Talent niche at launch:** On-screen video talent (UGC, product demos, brand videos, social content).
@@ -42,10 +42,10 @@ If brand does not commit in 72h → match expires → Superstar freed → brand 
 [FORMAL COMMITMENT]
 Brand confirms commitment on platform
 Brand specifies remuneration type: Cash / Product+Service / Hybrid
-  - Cash: Brand deposits amount into escrow on CASTD (via Stripe)
+  - Cash: Brand deposits amount into escrow on Northstar Collective (via Stripe)
   - Product/Service: Brand declares what will be sent/provided (logged on platform)
   - Hybrid: Partial deposit + product declaration
-Brand pays CASTD contact fee (SGD 80–120) OR subscription covers it
+Brand pays Northstar Collective contact fee (SGD 80–120) OR subscription covers it
 Superstar's contact details revealed to brand
         ↓
 [OPTIONAL SCREENING CALL]
@@ -80,13 +80,13 @@ Brand can re-book the same Superstar in one click
 
 Superstars can be compensated in three ways. This is agreed upon at the commitment stage and logged on the platform.
 
-| Type | How it works on CASTD |
+| Type | How it works on Northstar Collective |
 |------|-----------------------|
-| **Cash** | Brand deposits full fee into CASTD escrow via Stripe. Released to Superstar after brand approves deliverables. CASTD takes platform fee from escrow before release. |
+| **Cash** | Brand deposits full fee into Northstar Collective escrow via Stripe. Released to Superstar after brand approves deliverables. Northstar Collective takes platform fee from escrow before release. |
 | **Product / Service exchange** | Brand declares what product or service will be provided (product name, estimated value, delivery method). Superstar confirms receipt on platform after receiving. No cash escrow. |
 | **Hybrid** | Partial cash (escrowed) + product/service declaration. Most common for beauty campaigns — e.g., SGD 300 + full product set. |
 
-**Why escrow matters:** Neither side has to trust the other on payment. Brand knows the money is safe until work is approved. Superstar knows the money is locked in and will be released upon approval. This is the single biggest reason to stay on CASTD instead of transacting directly.
+**Why escrow matters:** Neither side has to trust the other on payment. Brand knows the money is safe until work is approved. Superstar knows the money is locked in and will be released upon approval. This is the single biggest reason to stay on Northstar Collective instead of transacting directly.
 
 ---
 
@@ -112,7 +112,7 @@ This creates urgency. It also protects Superstars from being held in limbo indef
 
 ## Optional Screening Call
 
-After commitment is made (not before — this protects against brands using CASTD just to get contact info):
+After commitment is made (not before — this protects against brands using Northstar Collective just to get contact info):
 
 - Either the Brand or Superstar can initiate a screening call request on the platform
 - Platform sends both sides a scheduling link (Google Meet)
@@ -124,18 +124,18 @@ After commitment is made (not before — this protects against brands using CAST
 
 ---
 
-## Platform Stickiness — Why Stay on CASTD?
+## Platform Stickiness — Why Stay on Northstar Collective?
 
-The risk: once a brand and Superstar meet, they may go direct for future work, cutting out CASTD. These features make staying on CASTD more valuable than going around it.
+The risk: once a brand and Superstar meet, they may go direct for future work, cutting out Northstar Collective. These features make staying on Northstar Collective more valuable than going around it.
 
 ### For Superstars
 | Feature | Value |
 |---------|-------|
-| **Payment protection** | CASTD holds escrow. Superstar is guaranteed payment upon approval. No more chasing brands for money. |
-| **Dispute protection** | If a brand ghosts after work is submitted, CASTD mediates and releases payment. Going direct = no protection. |
-| **Portfolio auto-build** | Every completed campaign on CASTD is added to their public profile automatically. Credibility compounds. |
+| **Payment protection** | Northstar Collective holds escrow. Superstar is guaranteed payment upon approval. No more chasing brands for money. |
+| **Dispute protection** | If a brand ghosts after work is submitted, Northstar Collective mediates and releases payment. Going direct = no protection. |
+| **Portfolio auto-build** | Every completed campaign on Northstar Collective is added to their public profile automatically. Credibility compounds. |
 | **Star rating & reviews** | Completed work builds a verified reputation. Future brands see "14 campaigns, 4.9★". Off-platform work doesn't count. |
-| **Discovery by new brands** | Being on CASTD means new brands can find them. Going direct means only working with people they already know. |
+| **Discovery by new brands** | Being on Northstar Collective means new brands can find them. Going direct means only working with people they already know. |
 
 ### For Brands
 | Feature | Value |
@@ -144,17 +144,17 @@ The risk: once a brand and Superstar meet, they may go direct for future work, c
 | **Deliverable management** | All submissions, revisions, and approvals in one place. No messy email chains. |
 | **Contract on record** | Platform logs the campaign brief, remuneration terms, and both parties' commitments. |
 | **Re-booking in one click** | Brand can re-book the same Superstar instantly — no need to re-negotiate from scratch. |
-| **Invoice + receipt** | CASTD issues a proper invoice for every booking. Useful for company expense claims. |
-| **New talent discovery** | The catalog grows. Brands who go direct can only work with one person. Staying on CASTD means access to the full roster. |
+| **Invoice + receipt** | Northstar Collective issues a proper invoice for every booking. Useful for company expense claims. |
+| **New talent discovery** | The catalog grows. Brands who go direct can only work with one person. Staying on Northstar Collective means access to the full roster. |
 
 ### Platform fee structure (why it still makes sense)
-CASTD takes a small platform fee from the escrow release (suggested: 10–15% of cash value, capped). This is worth it for the escrow protection, deliverable management, and dispute resolution. Going direct saves the fee but loses all of the above.
+Northstar Collective takes a small platform fee from the escrow release (suggested: 10–15% of cash value, capped). This is worth it for the escrow protection, deliverable management, and dispute resolution. Going direct saves the fee but loses all of the above.
 
 ---
 
 ## Three Portals
 
-CASTD has three distinct interfaces sharing one database.
+Northstar Collective has three distinct interfaces sharing one database.
 
 ---
 
@@ -350,7 +350,7 @@ Completed campaigns appear on the Superstar's public profile as a portfolio entr
 │                                                     │
 │  Deliverables: 3 videos approved                    │
 │  Total paid: SGD 450 (released 12 Dec)             │
-│  CASTD invoice: #INV-2026-0042  [Download]          │
+│  Northstar Collective invoice: #INV-2026-0042  [Download]          │
 │                                                     │
 │  [Rate [Name]]  [Re-book [Name]]  [View files]      │
 └─────────────────────────────────────────────────────┘
@@ -397,7 +397,7 @@ Completed campaigns appear on the Superstar's public profile as a portfolio entr
 | Backend | Python FastAPI |
 | Database | Neon (serverless PostgreSQL) |
 | Auth | Better Auth v1.7.0-beta.4 (self-hosted in Next.js API routes) |
-| Email | Resend (`noreply@castd.sg`) |
+| Email | Resend (`noreply@Northstar Collective.sg`) |
 | Payments | Stripe Checkout (contact fee + escrow) + Stripe Billing ($15/month sub) |
 | File storage | Cloudflare R2 or Supabase Storage (for deliverable uploads) |
 | AI scoring | DeepSeek (`deepseek-chat`) |
@@ -413,7 +413,7 @@ Completed campaigns appear on the Superstar's public profile as a portfolio entr
 
 ### Email (Resend)
 - API key in `platform_settings` DB (editable via `/admin/settings`)
-- From: `CASTD <noreply@castd.sg>`
+- From: `Northstar Collective <noreply@Northstar Collective.sg>`
 
 ### Notifications
 - `notifications` table: user_id, title, message, link, is_read, created_at
@@ -543,8 +543,8 @@ CREATE TABLE screening_calls (
 ## File Structure
 
 ```
-castd/
-├── CASTD.md                        ← this file (product documentation)
+Northstar Collective/
+├── Northstar Collective.md                        ← this file (product documentation)
 ├── BRAND_SYSTEM.md                 ← visual identity
 │
 ├── apps/
@@ -679,7 +679,7 @@ castd/
 **Priority 8 — Deployment**
 - Vercel (web), Railway (api)
 - Set all env vars in dashboards
-- Custom domain: castd.sg
+- Custom domain: Northstar Collective.sg
 
 ---
 
@@ -726,4 +726,4 @@ STRIPE_PRICE_ID_MONTHLY=
 
 ---
 
-*CASTD Product Documentation v1.3 — update this file whenever the product direction changes.*
+*Northstar Collective Product Documentation v1.3 — update this file whenever the product direction changes.*
